@@ -92,9 +92,10 @@
   function readColors() {
     var t = function (n, fb) { return U.rgb(U.token(n) || fb); };
     return {
-      accent: t('--accent', '#a3481e'), accentText: t('--accent-text', '#954119'),
-      acid: t('--acid', '#f5c9a3'), band: t('--band', '#f8e6d4'), surface: t('--surface', '#f1ece4'),
-      paper: t('--paper', '#fcfbf8'), text: t('--text', '#1d1a16'), line: t('--line', '#e5ded3')
+      accent: t('--clay', '#d97757'), accentText: t('--accent-text', '#a5502f'),
+      acid: t('--manilla', '#ebdbbc'), band: t('--band', '#f0eee6'), surface: t('--surface', '#f0efe6'),
+      kraft: t('--kraft', '#d4a27f'), white: t('--modal-bg', '#ffffff'),
+      paper: t('--paper', '#faf9f5'), text: t('--text', '#141413'), line: t('--line', '#e7e6e1')
     };
   }
 
@@ -675,7 +676,7 @@
 
     function drawField(cam, RD) {
       var R = cam.R;
-      ctx.fillStyle = U.css(C.acid);                          /* campo pastel (estilo minimalista) */
+      ctx.fillStyle = U.css(C.acid);                          /* campo manilla (paleta de ilustração estilo Claude.ai) */
       ctx.fillRect(RD.x, RD.y, RD.w, RD.h);
       /* grade do campo: passo do mundo 44 px, câmera mais lenta (zg); as mesmas
          colunas e linhas de pixel da cena de fundo (continuam além da janela) */
@@ -787,7 +788,7 @@
     function drawCard(c, t) {
       var on = t - sim.nodeFlash[c.i] < 1.1;
       var mirror = c.side === 'left';
-      ctx.fillStyle = U.css(c.dre || on ? C.band : C.paper);
+      ctx.fillStyle = U.css(c.dre ? C.kraft : (on ? C.white : C.paper));
       rectW(c.x, c.y, c.w, c.h);
       ctx.fillStyle = U.css(on ? C.accent : C.line);
       var sx = mirror ? c.x + c.padX * 0.8 : c.x + c.w - c.status - c.padX * 0.8;

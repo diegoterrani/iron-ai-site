@@ -1,36 +1,36 @@
 /* IRON AI — generated from tokens.json */
 :root, [data-theme="light"] {
-  --ink: #1d1a16;
-  --deep: #f4efe8;
-  --paper: #fcfbf8;
-  --deep-2: #f8f4ee;
-  --soft: #f7f4ef;
-  --form-bg: #faf7f2;
+  --ink: #141413;
+  --deep: #f0eee6;
+  --paper: #faf9f5;
+  --deep-2: #f5f4ee;
+  --soft: #f5f4ed;
+  --form-bg: #f5f4ee;
   --modal-bg: #ffffff;
-  --surface: #f1ece4;
-  --band: #f8e6d4;
+  --surface: #f0efe6;
+  --band: #f0eee6;
   --button-dark-bg: #ffffff;
-  --surface-2: #ebe4da;
-  --icon-bg: #fcefe3;
-  --footer-bg: #f2ede6;
-  --line: #e5ded3;
-  --line-soft: #a3481e2e;
-  --hairline: #1d1a161f;
-  --field-line: #968c80;
-  --icon-border: #f0d3bb;
-  --button-dark-border: #968c80;
-  --text: #1d1a16;
-  --nav-text: #423b34;
-  --muted: #554d45;
-  --subtle: #6b6259;
-  --acid: #f5c9a3;
-  --acid-hover: #efb68a;
-  --accent: #a3481e;
-  --accent-text: #954119;
-  --link: #8f3e17;
-  --live: #c8692f;
-  --icon-ink: #954119;
-  --focus: #a3481e;
+  --surface-2: #e8e6dc;
+  --icon-bg: #f0efe6;
+  --footer-bg: #f0efe6;
+  --line: #e7e6e1;
+  --line-soft: #d977572e;
+  --hairline: #1f1e1d26;
+  --field-line: #8f8d86;
+  --icon-border: #e7e6e1;
+  --button-dark-border: #8f8d86;
+  --text: #141413;
+  --nav-text: #3d3d3a;
+  --muted: #3d3d3a;
+  --subtle: #6b6a65;
+  --acid: #ebdbbc;
+  --acid-hover: #e3cda4;
+  --accent: #c6613f;
+  --accent-text: #a5502f;
+  --link: #a5502f;
+  --live: #d97757;
+  --icon-ink: #a5502f;
+  --focus: #c6613f;
   --danger: #b42330;
   --field-error: #b42330;
   --risk-red: #c03b3b;
@@ -47,8 +47,16 @@
   --green-accent: #166534;
   --neutral-bg: #f8fafc;
   --neutral-accent: #0f172a;
-  --shadow-modal: 0 35px 100px #1d1a1629;
-  --shadow-live: 0 0 0 5px #c8692f2e;
+  /* rodada 27 (decisão do cliente): linguagem visual próxima à do Claude.ai */
+  --cta-bg: #141413;
+  --cta-hover: #3d3d3a;
+  --cta-text: #faf9f5;
+  --clay: #d97757;
+  --kraft: #d4a27f;
+  --manilla: #ebdbbc;
+  --oat: #e3dacc;
+  --shadow-modal: 0 35px 100px #14141329;
+  --shadow-live: 0 0 0 5px #d977572e;
 }
 :root {
   --space-1: 8px;
@@ -66,6 +74,7 @@
   --radius-none: 0;
   --radius-full: 50%;
   --font-sans: "Manrope", system-ui, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 .hero { font-family: var(--font-sans); font-size: 92px; line-height: 0.99; font-weight: 600; letter-spacing: -0.055em; }

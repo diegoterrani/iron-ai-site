@@ -34,11 +34,13 @@
   var stage = document.querySelector('[data-zoom-stage]');
   var canvas = document.querySelector('[data-zoom-canvas]');
   var casos = document.querySelector('[data-casos]');
+  var casosInner = casos ? casos.querySelector('.layer__inner') : null;
   var ctx = canvas ? canvas.getContext('2d') : null;
 
   /* cores (tokens) */
   var C = {};
-  ['paper', 'soft', 'surface', 'band', 'acid', 'icon-bg', 'accent', 'accent-text', 'line', 'text'].forEach(function (n) {
+  ['paper', 'soft', 'surface', 'band', 'acid', 'icon-bg', 'accent', 'accent-text', 'line', 'text',
+   'clay', 'kraft', 'manilla', 'oat', 'modal-bg'].forEach(function (n) {
     C[n] = U.css(U.rgb(U.token('--' + n) || '#000000'));
   });
 
@@ -191,15 +193,16 @@
          bordas e o visual ficam em pixel inteiro, sem cor intermediária) */
       var cut = Math.round(M.Wc * (1 - sc) / 2), w = M.Wc - 2 * cut;
       var v = 2 - arrive[i];                                /* visual: 2x ao entrar, 1x ao assentar */
-      /* coberto (só a borda de 24 px à vista): o campo do visual passa de acid a band,
-         um degrau de token, para a borda não repetir a cor do cartão da frente */
-      var covered = depth >= 0.98;
+      /* coberto (só a borda de 24 px à vista): o campo do visual desce um degrau de
+         valor por cartão por cima (manilla -> kraft -> clay), para as bordas não
+         repetirem a cor do cartão da frente */
+      var covered = depth >= 1.98 ? 2 : (depth >= 0.98 ? 1 : 0);
       var key = ty + '|' + w + '|' + v.toFixed(4) + '|' + covered;
       if (stackState[i] === key) continue;
       stackState[i] = key;
       cards[i].style.transform = ty ? 'translateY(' + ty + 'px)' : '';
       cards[i].style.width = cut ? w + 'px' : '';
-      if (covered) cards[i].setAttribute('data-covered', ''); else cards[i].removeAttribute('data-covered');
+      if (covered) cards[i].setAttribute('data-covered', String(covered)); else cards[i].removeAttribute('data-covered');
       if (svgs[i]) zoomBox(svgs[i], v);
     }
   }
@@ -236,12 +239,12 @@
       hx = hy = 0.17;
       var gxm = gx / 2, rowW = 0.33, sideW = 0.22, sx = hx + gx, ry = hy + gy;
       PANELS = [
-        { kind: 'hotel', e: 5, label: 'Hotelaria', S: 4.6, nat: [-gxm - rowW, -gxm, top, -ry], anchor: [-gxm, -ry], push: 'y-', chip: 'br' },
-        { kind: 'restaurante', e: 1.1, label: 'Restaurantes', S: 5.2, nat: [gxm, gxm + rowW, top, -ry], anchor: [gxm, -ry], push: 'y-', chip: 'bl' },
-        { kind: 'areas', e: 4.5, label: '11 áreas', S: 6, nat: [-sx - sideW, -sx, -hy, hy], anchor: [-sx, 0], push: 'x-', clipY: true, chip: 'tr' },
-        { kind: 'dre', e: 2.0, label: 'DRE', S: 7, nat: [sx, sx + sideW, -hy, hy], anchor: [sx, 0], push: 'x+', clipY: true, chip: 'tl' },
-        { kind: 'ondas', e: 6, label: 'Ondas', S: 8, nat: [-gxm - rowW, -gxm, ry, bot], anchor: [-gxm, ry], push: 'y+', chip: 'tr' },
-        { kind: 'seguranca', e: 1.4, label: 'Segurança', S: 9, nat: [gxm, gxm + rowW, ry, bot], anchor: [gxm, ry], push: 'y+', chip: 'tl' }
+        { kind: 'hotel', field: 'kraft', e: 5, label: 'Hotelaria', S: 4.6, nat: [-gxm - rowW, -gxm, top, -ry], anchor: [-gxm, -ry], push: 'y-', chip: 'br' },
+        { kind: 'restaurante', field: 'oat', e: 1.1, label: 'Restaurantes', S: 5.2, nat: [gxm, gxm + rowW, top, -ry], anchor: [gxm, -ry], push: 'y-', chip: 'bl' },
+        { kind: 'areas', field: 'manilla', e: 4.5, label: '11 áreas', S: 6, nat: [-sx - sideW, -sx, -hy, hy], anchor: [-sx, 0], push: 'x-', clipY: true, chip: 'tr' },
+        { kind: 'igaming', field: 'kraft', e: 2.0, label: 'iGaming', S: 7, nat: [sx, sx + sideW, -hy, hy], anchor: [sx, 0], push: 'x+', clipY: true, chip: 'tl' },
+        { kind: 'fintech', field: 'oat', e: 6, label: 'Fintech', S: 8, nat: [-gxm - rowW, -gxm, ry, bot], anchor: [-gxm, ry], push: 'y+', chip: 'tr' },
+        { kind: 'saude', field: 'manilla', e: 1.4, label: 'Saúde', S: 9, nat: [gxm, gxm + rowW, ry, bot], anchor: [gxm, ry], push: 'y+', chip: 'tl' }
       ];
     } else {
       /* retrato: o central ocupa o meio; três células em cima e três embaixo */
@@ -249,18 +252,18 @@
       var ms = 22 / M.sw, cw = (1 - 2 * ms - 2 * gx) / 3, ry2 = hy + gy;
       var c1 = [-0.5 + ms, -0.5 + ms + cw], c2 = [-cw / 2, cw / 2], c3 = [0.5 - ms - cw, 0.5 - ms];
       PANELS = [
-        { kind: 'hotel', e: 5, label: 'Hotelaria', S: 4.6, nat: [c1[0], c1[1], top, -ry2], anchor: [c1[1], -ry2], push: 'y-', chip: 'br' },
-        { kind: 'restaurante', e: 1.1, label: 'Restaurantes', S: 5.2, nat: [c2[0], c2[1], top, -ry2], anchor: [0, -ry2], push: 'y-', clipX: c2, chip: 'bl' },
-        { kind: 'areas', e: 4.5, label: '11 áreas', S: 6, nat: [c3[0], c3[1], top, -ry2], anchor: [c3[0], -ry2], push: 'y-', chip: 'bl' },
-        { kind: 'dre', e: 2.0, label: 'DRE', S: 7, nat: [c1[0], c1[1], ry2, bot], anchor: [c1[1], ry2], push: 'y+', chip: 'tr' },
-        { kind: 'ondas', e: 6, label: 'Ondas', S: 8, nat: [c2[0], c2[1], ry2, bot], anchor: [0, ry2], push: 'y+', clipX: c2, chip: 'tl' },
-        { kind: 'seguranca', e: 1.4, label: 'Segurança', S: 9, nat: [c3[0], c3[1], ry2, bot], anchor: [c3[0], ry2], push: 'y+', chip: 'tl' }
+        { kind: 'hotel', field: 'kraft', e: 5, label: 'Hotelaria', S: 4.6, nat: [c1[0], c1[1], top, -ry2], anchor: [c1[1], -ry2], push: 'y-', chip: 'br' },
+        { kind: 'restaurante', field: 'oat', e: 1.1, label: 'Restaurantes', S: 5.2, nat: [c2[0], c2[1], top, -ry2], anchor: [0, -ry2], push: 'y-', clipX: c2, chip: 'bl' },
+        { kind: 'areas', field: 'manilla', e: 4.5, label: '11 áreas', S: 6, nat: [c3[0], c3[1], top, -ry2], anchor: [c3[0], -ry2], push: 'y-', chip: 'bl' },
+        { kind: 'igaming', field: 'kraft', e: 2.0, label: 'iGaming', S: 7, nat: [c1[0], c1[1], ry2, bot], anchor: [c1[1], ry2], push: 'y+', chip: 'tr' },
+        { kind: 'fintech', field: 'oat', e: 6, label: 'Fintech', S: 8, nat: [c2[0], c2[1], ry2, bot], anchor: [0, ry2], push: 'y+', clipX: c2, chip: 'tl' },
+        { kind: 'saude', field: 'manilla', e: 1.4, label: 'Saúde', S: 9, nat: [c3[0], c3[1], ry2, bot], anchor: [c3[0], ry2], push: 'y+', chip: 'tl' }
       ];
     }
     CEN = { kind: 'centro', label: 'Qualquer setor', hx: hx, hy: hy, gx: gx, gy: gy };
     PANELS.push(CEN);
     CEN.S = 0.5 / Math.min(hx, hy);                          /* cobre a área sob o header */
-    var nf = land ? 0.4 : 0.32;                               /* lado do núcleo, em fração do painel */
+    var nf = land ? 0.4 : 0.26;                               /* lado do núcleo, em fração do painel */
     CEN.nu = [0.5 - nf / 2, 0.5 + nf / 2]; CEN.nv = [0.5 - nf / 2, 0.5 + nf / 2];
     CEN.Send = CEN.S / nf;                                    /* o núcleo cobre a tela, nas duas direções juntas */
     /* 11 áreas no anel: 4 de cada lado (nomes longos) e 3 embaixo (curtos), a pelo
@@ -330,9 +333,9 @@
   }
   function inside(x0, y0, x1, y1) { return x0 >= EDGE.l && x1 <= EDGE.r && y0 >= EDGE.t && y1 <= EDGE.b; }
   /* rótulo: etiqueta paper com texto em text (16:1); inteiro ou nada */
-  function tagFont(f) {
+  function tagFont(f, ls) {
     ctx.font = '600 ' + Math.round(f * M.dpr) + 'px ' + MONO;
-    if ('letterSpacing' in ctx) ctx.letterSpacing = (0.13 * f * M.dpr).toFixed(2) + 'px';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = ((ls === undefined ? 0.13 : ls) * f * M.dpr).toFixed(2) + 'px';
   }
   function chipSize(lines, f) {
     tagFont(f);
@@ -366,17 +369,17 @@
     var g = geomOf(pn, s, sc, shift), r = g.R, v = g.V;
     var ix = Math.min(v.x + v.w, M.sw) - Math.max(v.x, 0), iy = Math.min(v.y + v.h, vBot) - Math.max(v.y, vTop);
     if (v.w <= 0 || v.h <= 0 || ix < 12 || iy < 12) return;
-    ctx.fillStyle = C.acid;                                   /* campo do painel: pastel */
+    ctx.fillStyle = C[pn.field] || C.manilla;                 /* campo do painel: tom próprio (profundidade por valor) */
     if (!R(v.x, v.y, v.x + v.w, v.y + v.h)) return;
     ctx.save();
     ctx.beginPath(); ctx.rect(Math.round(v.x * M.dpr), Math.round(v.y * M.dpr), Math.round((v.x + v.w) * M.dpr) - Math.round(v.x * M.dpr), Math.round((v.y + v.h) * M.dpr) - Math.round(v.y * M.dpr)); ctx.clip();
     var ux = function (u) { return r.x + u * r.w; }, vy = function (q) { return r.y + q * r.h; };
     var i, j;
     if (pn.kind === 'hotel') {
-      /* prédio em acid com janelas no tom do campo; uma janela acesa em accent */
+      /* prédio em paper com janelas em manilla; uma janela acesa em clay */
       ctx.fillStyle = C.paper; R(ux(0.2), vy(0.3), ux(0.8), vy(1.02));
       for (i = 0; i < 5; i++) for (j = 0; j < 3; j++) {
-        ctx.fillStyle = (i === 3 && j === 1) ? C.accent : C.acid;
+        ctx.fillStyle = (i === 3 && j === 1) ? C.clay : C.acid;
         R(ux(0.27 + i * 0.105), vy(0.4 + j * 0.18), ux(0.27 + i * 0.105 + 0.05), vy(0.4 + j * 0.18 + 0.09));
       }
     } else if (pn.kind === 'restaurante') {
@@ -386,38 +389,43 @@
         R(cxp - d * 0.4, cyp - th - d * 0.8, cxp + d * 0.4, cyp - th - d * 0.2);
         R(cxp - d * 0.4, cyp + th + d * 0.2, cxp + d * 0.4, cyp + th + d * 0.8);
         ctx.fillStyle = C.paper; R(cxp - tw, cyp - th, cxp + tw, cyp + th);
-        if (i === 2 && j === 0) { ctx.fillStyle = C.accent; R(cxp - tw * 0.4, cyp - th * 0.4, cxp + tw * 0.4, cyp + th * 0.4); }
+        if (i === 2 && j === 0) { ctx.fillStyle = C.clay; R(cxp - tw * 0.4, cyp - th * 0.4, cxp + tw * 0.4, cyp + th * 0.4); }
       }
     } else if (pn.kind === 'areas') {
       var nn = 0;
       for (j = 0; j < 4 && nn < 11; j++) for (i = 0; i < 3 && nn < 11; i++) {
         ctx.fillStyle = C.paper;
         R(ux(0.08 + i * 0.29 + 0.02), vy(0.08 + j * 0.215 + 0.02), ux(0.08 + (i + 1) * 0.29 - 0.02), vy(0.08 + (j + 1) * 0.215 - 0.02));
-        if (nn === 4) { ctx.fillStyle = C.accent; R(ux(0.08 + i * 0.29 + 0.05), vy(0.08 + j * 0.215 + 0.05), ux(0.08 + i * 0.29 + 0.11), vy(0.08 + j * 0.215 + 0.11)); }
+        if (nn === 4) { ctx.fillStyle = C.clay; R(ux(0.08 + i * 0.29 + 0.05), vy(0.08 + j * 0.215 + 0.05), ux(0.08 + i * 0.29 + 0.11), vy(0.08 + j * 0.215 + 0.11)); }
         nn++;
       }
-    } else if (pn.kind === 'dre') {
-      var hs = [0.3, 0.46, 0.38, 0.58, 0.5, 0.72];
-      for (i = 0; i < hs.length; i++) {
-        ctx.fillStyle = C.paper;
-        R(ux(0.1 + i * 0.14), vy(0.88 - hs[i] * 0.8), ux(0.1 + i * 0.14 + 0.09), vy(0.88));
-        if (i === hs.length - 1) { ctx.fillStyle = C.accent; R(ux(0.1 + i * 0.14), vy(0.88 - hs[i] * 0.8), ux(0.1 + i * 0.14 + 0.09), vy(0.88 - hs[i] * 0.8 + 0.06)); }
+    } else if (pn.kind === 'igaming') {
+      /* quadro de odds: três linhas com o evento e duas cotações; uma cotação em destaque */
+      for (j = 0; j < 3; j++) {
+        var yy = vy(0.2 + j * 0.24);
+        ctx.fillStyle = C.paper; R(ux(0.1), yy, ux(0.56), yy + 0.15 * r.h);
+        R(ux(0.62), yy, ux(0.76), yy + 0.15 * r.h);
+        ctx.fillStyle = (j === 1) ? C.clay : C.paper; R(ux(0.8), yy, ux(0.94), yy + 0.15 * r.h);
       }
-      ctx.fillStyle = C['accent-text']; R(ux(0.06), vy(0.88), ux(0.94), vy(0.895));
-    } else if (pn.kind === 'ondas') {
-      [5, 4, 3].forEach(function (nr, ri) {
-        for (var a = 0; a < nr; a++) {
-          ctx.fillStyle = (ri === 0 && a === 0) ? C.accent : C.paper;
-          R(ux(0.08 + a * 0.17 + ri * 0.085), vy(0.14 + ri * 0.27), ux(0.08 + a * 0.17 + ri * 0.085 + 0.13), vy(0.14 + ri * 0.27 + 0.19));
-        }
-      });
-    } else if (pn.kind === 'seguranca') {
-      var cxs = ux(0.5), cys = vy(0.55), hm = Math.min(r.w, r.h) * 0.32;
-      ctx.fillStyle = C.paper; R(cxs - hm, cys - hm, cxs + hm, cys + hm);
-      ctx.fillStyle = C.acid; R(cxs - hm * 0.78, cys - hm * 0.78, cxs + hm * 0.78, cys + hm * 0.78);
-      ctx.fillStyle = C.paper; R(cxs - hm * 0.56, cys - hm * 0.56, cxs + hm * 0.56, cys + hm * 0.56);
-      ctx.fillStyle = C.acid; R(cxs - hm * 0.34, cys - hm * 0.34, cxs + hm * 0.34, cys + hm * 0.34);
-      ctx.fillStyle = C.accent; R(cxs - hm * 0.14, cys - hm * 0.14, cxs + hm * 0.14, cys + hm * 0.14);
+    } else if (pn.kind === 'fintech') {
+      /* cartão com chip em destaque e duas linhas; ao lado, três barras */
+      ctx.fillStyle = C.paper; R(ux(0.1), vy(0.22), ux(0.6), vy(0.72));
+      ctx.fillStyle = C.clay; R(ux(0.16), vy(0.32), ux(0.24), vy(0.44));
+      ctx.fillStyle = C['accent-text']; R(ux(0.16), vy(0.56), ux(0.48), vy(0.575)); R(ux(0.16), vy(0.62), ux(0.36), vy(0.635));
+      ctx.fillStyle = C.paper;
+      [0.3, 0.46, 0.62].forEach(function (h, k) { R(ux(0.68 + k * 0.09), vy(0.8 - h), ux(0.68 + k * 0.09 + 0.06), vy(0.8)); });
+    } else if (pn.kind === 'saude') {
+      /* monitor com a linha do pulso (degraus ortogonais) e o pico em destaque */
+      ctx.fillStyle = C.paper; R(ux(0.12), vy(0.2), ux(0.88), vy(0.78));
+      var pts = [[0.18, 0.52], [0.36, 0.52], [0.36, 0.36], [0.44, 0.36], [0.44, 0.66], [0.52, 0.66], [0.52, 0.46], [0.6, 0.46], [0.6, 0.52], [0.82, 0.52]];
+      var tl = Math.max(1, Math.round(2 * M.dpr)) / M.dpr;
+      ctx.fillStyle = C['accent-text'];
+      for (i = 1; i < pts.length; i++) {
+        var p0 = pts[i - 1], p1 = pts[i];
+        if (p0[1] === p1[1]) R(ux(Math.min(p0[0], p1[0])), vy(p0[1]) - tl / 2, ux(Math.max(p0[0], p1[0])), vy(p0[1]) + tl / 2);
+        else R(ux(p0[0]) - tl / 2, vy(Math.min(p0[1], p1[1])), ux(p0[0]) + tl / 2, vy(Math.max(p0[1], p1[1])));
+      }
+      ctx.fillStyle = C.clay; R(ux(0.42), vy(0.33), ux(0.46), vy(0.33) + 0.04 * r.w);
     }
     ctx.restore();
     /* rótulo no canto que dá para o central (fica na tela enquanto o painel estiver) */
@@ -427,13 +435,13 @@
     chip([pn.label], lx, ly, f, v);
   }
 
-  /* central: campo acid, núcleo (paper + grade) no meio, 11 áreas no anel ligadas a
-     ele e o rótulo "IRON AI / Qualquer setor" no alto */
+  /* central: campo clay, núcleo (paper + grade, com o wordmark IRON AI) no meio, 11
+     áreas no anel ligadas a ele por traços em tinta e o rótulo "Qualquer setor" no alto */
   function drawCentro(sc, shift) {
     var r = centerRect(sc, shift);
     var ux = function (u) { return r.x + u * r.w; }, vy = function (v) { return r.y + v * r.h; };
     var t1 = Math.max(1, Math.round(M.dpr)), k = sc / CEN.S;
-    ctx.fillStyle = C.acid; R(r.x, r.y, r.x + r.w, r.y + r.h);
+    ctx.fillStyle = C.clay; R(r.x, r.y, r.x + r.w, r.y + r.h);           /* campo do central: clay, o mais forte */
     var nx0 = ux(CEN.nu[0]), nx1 = ux(CEN.nu[1]), ny0 = vy(CEN.nv[0]), ny1 = vy(CEN.nv[1]);
     ctx.fillStyle = C.paper; R(nx0, ny0, nx1, ny1);
     ctx.fillStyle = C.line;
@@ -450,7 +458,7 @@
        cartões nunca aparecem uns com nome e outros vazios) */
     var fzAll = Math.floor(fpx + 1e-6), linesOf = [];
     for (; fzAll >= 12; fzAll--) {
-      tagFont(fzAll);
+      tagFont(fzAll, 0.06);
       var lhA = Math.round(fzAll * 1.2), okAll = true;
       linesOf = CEN.cards.map(function (c) {
         var w = (c.w * r.w) - 2 * Math.max(4, 0.4 * fzAll), h = (c.h * r.h);
@@ -465,7 +473,7 @@
     CEN.cards.forEach(function (c, ci) {
       var x0 = ux(c.u - c.w / 2), x1 = ux(c.u + c.w / 2), y0 = vy(c.v - c.h / 2), y1 = vy(c.v + c.h / 2);
       var mx = ux(c.u), my = vy(c.v), h2 = lw / 2;
-      ctx.fillStyle = C['accent-text'];
+      ctx.fillStyle = C.text;
       if (c.v > CEN.nv[1]) {                                      /* embaixo: sobe até o núcleo (passando entre os cartões de cima) */
         R(mx - h2, ny1, mx + h2, y0);
       } else if (c.u > 0.5) R(nx1, my - h2, x0, my + h2);
@@ -474,17 +482,33 @@
       if (!inside(x0, y0, x1, y1)) return;                    /* nome inteiro ou nada */
       var lines = fzAll >= 12 ? linesOf[ci] : null, lh = Math.round(fzAll * 1.2);
       if (lines) {
-        tagFont(fzAll);
+        tagFont(fzAll, 0.06);
         ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         lines.forEach(function (t, i) { ctx.fillText(t, Math.round(mx * M.dpr), Math.round((my + (i - (lines.length - 1) / 2) * lh) * M.dpr)); });
         ctx.textAlign = 'left';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
       }
     });
-    var lab = [sc >= CEN.S - 1e-6 ? 'IRON AI' : CEN.label];
+    /* o núcleo leva o wordmark IRON AI (como a laje do hero), do tamanho que couber
+       com 12 px ou mais; o rótulo do painel fica sempre "Qualquer setor" */
+    var fw = Math.min(28, Math.max(0, (nx1 - nx0) * 0.07));
+    /* só enquanto o canto do núcleo está dentro da área visível: quando o núcleo
+       cobre a tela ele já saiu pela borda e nunca fica por cima dos casos */
+    if (fw >= 12 && nx0 > 8 && ny0 > EDGE.t + 8 && inside(nx0, ny0, nx0 + fw * 6, ny0 + fw * 2)) {
+      ctx.fillStyle = C.text; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+      if ('letterSpacing' in ctx) ctx.letterSpacing = (0.1 * fw * M.dpr).toFixed(2) + 'px';
+      ctx.font = '500 ' + Math.round(fw * M.dpr) + 'px ' + FONT;
+      var bx = Math.round((nx0 + fw * 0.9) * M.dpr), by = Math.round((ny0 + fw * 1.8) * M.dpr);
+      ctx.fillText('IRON', bx, by);
+      var wI = ctx.measureText('IRON').width;
+      ctx.font = '800 ' + Math.round(fw * M.dpr) + 'px ' + FONT;
+      ctx.fillText('AI', bx + wI + Math.round(fw * 0.32 * M.dpr), by);
+      if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    }
+    var lab = [CEN.label];
     var f = 12 * (1 + 0.3 * (sc - 1)), z = chipSize(lab, f);
     var cx0 = ux(0.5) - z.w / 2, cy0 = vy(0.15) - z.h / 2;
-    ctx.fillStyle = C['accent-text']; R(ux(0.5) - lw / 2, cy0 + z.h, ux(0.5) + lw / 2, ny0);
+    ctx.fillStyle = C.text; R(ux(0.5) - lw / 2, cy0 + z.h, ux(0.5) + lw / 2, ny0);
     chip(lab, cx0, cy0, f);
     return r;
   }
@@ -492,8 +516,8 @@
   /* acabamento das bordas da área visível: uma faixa de menos de 8 px colada no header
      ou nas laterais é coberta pelo bloco que vem logo depois dela (só cor de token; a
      grade de hairlines fica) */
-  var LINE = U.rgb(U.token('--line') || '#e5ded3'), PAPER = U.rgb(U.token('--paper') || '#fcfbf8'), TOK = {};
-  ['paper', 'soft', 'surface', 'band', 'acid', 'accent', 'accent-text', 'line', 'text'].forEach(function (n) {
+  var LINE = U.rgb(U.token('--line') || '#e7e6e1'), PAPER = U.rgb(U.token('--paper') || '#faf9f5'), TOK = {};
+  ['paper', 'soft', 'surface', 'band', 'acid', 'accent', 'accent-text', 'line', 'text', 'clay', 'kraft', 'manilla', 'oat', 'modal-bg'].forEach(function (n) {
     var c = U.rgb(U.token('--' + n) || '#000000'); TOK[(c[0] << 16) | (c[1] << 8) | c[2]] = true;
   });
   function edgeClean(vTop, vBot) {
@@ -544,7 +568,7 @@
        campo do central (sem lasca do fundo ou de painel de fora) */
     var T = 18, ml = c.x, mr = M.sw - (c.x + c.w), mt = c.y - vTop, mb = vBot - (c.y + c.h);
     var fl = ml > 0 && ml < T, fr = mr > 0 && mr < T, ft = mt > 0 && mt < T, fb = mb > 0 && mb < T;
-    ctx.fillStyle = C.acid;
+    ctx.fillStyle = C.clay;
     var ya = ft ? vTop : Math.max(vTop, c.y), yb = fb ? vBot : Math.min(vBot, c.y + c.h);
     var xa = fl ? 0 : Math.max(0, c.x), xb = fr ? M.sw : Math.min(M.sw, c.x + c.w);
     if (fl) R(0, ya, c.x, yb);
@@ -561,13 +585,28 @@
     y = Math.round(y);
     updateStack(y);
     drawZoom(zoomP(y), Math.max(0, Math.round(M.zoomTop - y)));
+    updateCasos(y);
+  }
+  /* os casos sobem pela grade parada do núcleo mais depressa que a rolagem no começo
+     e desaceleram até a posição natural, que alcançam quando a área fixa se solta:
+     desvio = L·((1 − t)³ − (1 − t)), t de 0 a 1 ao longo dos L px de sobreposição.
+     Função direta da rolagem (contínua e reversível), zero nas duas pontas. */
+  var lastRise = null;
+  function updateCasos(y) {
+    if (!casosInner || !M.overlap) return;
+    var L = M.overlap, y0 = M.zoomTop + M.pc * M.zoomLen;
+    var t = U.clamp((y - y0) / L, 0, 1), u = 1 - t;
+    var rise = Math.round(L * (u * u * u - u));
+    if (rise === lastRise) return;
+    lastRise = rise;
+    casosInner.style.transform = rise ? 'translateY(' + rise + 'px)' : '';
   }
 
   /* ---------------------------------------------------------------------
      Ciclo: medidas no início, a cada refresh do ScrollTrigger (sem travas) e ao
      redimensionar; estado a cada evento de rolagem
      --------------------------------------------------------------------- */
-  function refresh() { measure(); stackState = []; lastKey = ''; update(S.scrollY()); }
+  function refresh() { measure(); stackState = []; lastKey = ''; lastRise = null; update(S.scrollY()); }
   if (ST && !reduced) {
     ST.addEventListener('refreshInit', function () { root.classList.remove('pins-on'); });
     ST.addEventListener('refresh', refresh);
