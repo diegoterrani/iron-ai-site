@@ -34,7 +34,6 @@
   var stage = document.querySelector('[data-zoom-stage]');
   var canvas = document.querySelector('[data-zoom-canvas]');
   var casos = document.querySelector('[data-casos]');
-  var casosInner = casos ? casos.querySelector('.layer__inner') : null;
   var ctx = canvas ? canvas.getContext('2d') : null;
 
   /* cores (tokens) */
@@ -60,7 +59,7 @@
       /* 2 bordas de 24 px cabem entre a base do header e o cartão da frente */
       M.T = M.hdr + 2 * STEP + 8;
       /* padding inferior da seção: space-8, ou space-7 no mobile e em tela baixa */
-      M.padB = (M.W <= 640 || (M.H <= 640 && !reduced)) ? 78 : 120;
+      M.padB = M.W <= 640 ? 78 : 120;
       if (esteira) esteira.style.setProperty('--esteira-pb', M.padB + 'px');
       layoutCards();
       list.style.setProperty('--stack-top', M.T + 'px');
@@ -76,9 +75,8 @@
       el.style.setProperty('--pin-top', Math.round(Math.min(M.hdr, M.H - el.offsetHeight)) + 'px');
     });
     if (casos) {
-      /* os casos sobem por cima da área fixa enquanto ela mostra só a grade do núcleo:
-         a seção começa (H - header) px antes do fim do zoom e o seu fundo de grade só
-         começa onde a área fixa termina (--overlap) */
+      /* os casos entram como camada que cobre o clímax: a seção começa (H - header) px
+         antes do fim da área fixa e sobe por cima dela, com a borda em hairline */
       M.overlap = reduced ? 0 : Math.max(0, M.H - M.hdr);
       casos.style.marginTop = M.overlap ? -M.overlap + 'px' : '';
       casos.style.setProperty('--overlap', M.overlap + 'px');
@@ -196,7 +194,7 @@
       /* coberto (só a borda de 24 px à vista): o campo do visual desce um degrau de
          valor por cartão por cima (manilla -> kraft -> clay), para as bordas não
          repetirem a cor do cartão da frente */
-      var covered = depth >= 1.98 ? 2 : (depth >= 0.98 ? 1 : 0);
+      var covered = depth >= 1.5 ? 2 : (depth >= 0.5 ? 1 : 0);
       var key = ty + '|' + w + '|' + v.toFixed(4) + '|' + covered;
       if (stackState[i] === key) continue;
       stackState[i] = key;
@@ -223,7 +221,7 @@
      núcleo, que vira o fundo dos casos). Rótulos de 12px ou mais, inteiros
      ou nada. Desenho em pixel inteiro, só tokens, sem opacidade.
      --------------------------------------------------------------------- */
-  var P1 = 0.6, P2 = 0.76;
+  var P1 = 0.72;
   var PANELS = [], CEN = null;
   var FONT = (getComputedStyle(root).getPropertyValue('--font-sans') || 'sans-serif').trim();
   var MONO = (getComputedStyle(root).getPropertyValue('--font-mono') || 'monospace').trim();
@@ -263,24 +261,25 @@
     CEN = { kind: 'centro', label: 'Qualquer setor', hx: hx, hy: hy, gx: gx, gy: gy };
     PANELS.push(CEN);
     CEN.S = 0.5 / Math.min(hx, hy);                          /* cobre a área sob o header */
-    var nf = land ? 0.4 : 0.26;                               /* lado do núcleo, em fração do painel */
+    var nf = land ? 0.4 : 0.3;                               /* lado do núcleo, em fração do painel */
     CEN.nu = [0.5 - nf / 2, 0.5 + nf / 2]; CEN.nv = [0.5 - nf / 2, 0.5 + nf / 2];
     CEN.Send = CEN.S / nf;                                    /* o núcleo cobre a tela, nas duas direções juntas */
-    /* 11 áreas no anel: 4 de cada lado (nomes longos) e 3 embaixo (curtos), a pelo
-       menos space-3 (22px) das bordas da tela no clímax */
-    var mu = 22 / M.sw, sideNames = ['Estratégia', 'Pessoas', 'Finanças', 'Compras', 'Comercial', 'Atendimento', 'Jurídico', 'TI e segurança'];
-    var n0 = CEN.nu[0], sv = land ? [0.34, 0.45, 0.56, 0.67] : [0.355, 0.455, 0.555, 0.655], ch = 0.09;
-    var sw = Math.min(land ? 0.2 : 0.26, n0 - 0.025 - mu), su = n0 - 0.025 - sw / 2;
-    var cards = [];
-    sv.forEach(function (v, i) { cards.push({ u: su, v: v, w: sw, h: ch, name: sideNames[i] }); });
-    sv.forEach(function (v, i) { cards.push({ u: 1 - su, v: v, w: sw, h: ch, name: sideNames[4 + i] }); });
+    /* no clímax, o núcleo ligado aos 6 módulos setoriais (os casos de uso que vêm a
+       seguir): 3 de cada lado no desktop; no retrato, duas fileiras de 3 abaixo do
+       núcleo, a pelo menos space-3 (22px) das bordas da tela */
+    var mu = 22 / M.sw, names = ['Restaurantes', 'Hotelaria', 'iGaming', 'Fintech', 'Saúde', 'Seu setor'];
+    var n0 = CEN.nu[0], cards = [], ch;
     if (land) {
-      [['Dados', 0.36], ['Operações', 0.5], ['RH', 0.64]].forEach(function (c) { cards.push({ u: c[1], v: 0.85, w: 0.12, h: ch, name: c[0] }); });
+      var sv = [0.38, 0.5, 0.62]; ch = 0.095;
+      var sw = Math.min(0.2, n0 - 0.025 - mu), su = n0 - 0.025 - sw / 2;
+      sv.forEach(function (v, i) { cards.push({ u: su, v: v, w: sw, h: ch, name: names[i] }); });
+      sv.forEach(function (v, i) { cards.push({ u: 1 - su, v: v, w: sw, h: ch, name: names[3 + i] }); });
       CEN.cardFont = 20;
     } else {
-      cards.push({ u: 0.4, v: 0.75, w: 0.18, h: 0.07, name: 'Dados' });
-      cards.push({ u: 0.6, v: 0.75, w: 0.18, h: 0.07, name: 'RH' });
-      cards.push({ u: 0.5, v: 0.87, w: 0.3, h: 0.07, name: 'Operações' });
+      ch = 0.07;
+      /* fileira de baixo primeiro: as ligações dela passam por trás da fileira de cima */
+      [0.2, 0.5, 0.8].forEach(function (u, i) { cards.push({ u: u, v: 0.86, w: 0.28, h: ch, name: names[3 + i] }); });
+      [0.2, 0.5, 0.8].forEach(function (u, i) { cards.push({ u: u, v: 0.745, w: 0.28, h: ch, name: names[i] }); });
       CEN.cardFont = 16;
     }
     CEN.cards = cards;
@@ -304,13 +303,16 @@
   }
   /* fases em fração de M.pc, o ponto em que o núcleo cobre a tela; depois dele a área
      fixa fica parada na grade e os casos de uso sobem por cima (mecanismo 6) */
+  /* fases (M.pc = ponto em que a camada dos casos começa a subir pela base):
+     divergência até 0,72·pc; clímax parado de 0,72·pc a pc (o central a 100%, nada por
+     cima: mecanismo 7); depois a câmera entra no núcleo atrás da camada dos casos, que
+     cobre a área fixa de baixo para cima (mecanismo 6) */
   function zoomState(p) {
-    var pc = M.pc || 1, a = P1 * pc, b = P2 * pc;
+    var pc = M.pc || 1, a = P1 * pc;
     var q = U.clamp(p / a, 0, 1), sc, phase;
     if (p <= a) { sc = 1 + (CEN.S - 1) * Math.pow(q, 1.3); phase = 'divergência'; }
-    else if (p <= b) { sc = CEN.S; phase = 'clímax'; }
-    else if (p < pc) { sc = CEN.S + (CEN.Send - CEN.S) * (p - b) / (pc - b); phase = 'núcleo'; }
-    else { sc = CEN.Send; phase = 'grade'; }
+    else if (p <= pc) { sc = CEN.S; phase = 'clímax'; }
+    else { sc = CEN.S + (CEN.Send - CEN.S) * U.clamp((p - pc) / (1 - pc), 0, 1); phase = 'núcleo'; }
     /* os de fora crescem sobre a escala do central (nunca ficam atrás dele: sem
        sobreposição com o central) e cada um no seu ritmo, até S no fim da divergência */
     var scq = 1 + (CEN.S - 1) * Math.pow(q, 1.3);
@@ -337,18 +339,18 @@
     ctx.font = '600 ' + Math.round(f * M.dpr) + 'px ' + MONO;
     if ('letterSpacing' in ctx) ctx.letterSpacing = ((ls === undefined ? 0.13 : ls) * f * M.dpr).toFixed(2) + 'px';
   }
-  function chipSize(lines, f) {
-    tagFont(f);
+  function chipSize(lines, f, ls) {
+    tagFont(f, ls);
     var w = 0; lines.forEach(function (t) { w = Math.max(w, ctx.measureText(t.toUpperCase()).width / M.dpr); });
     return { w: Math.ceil(w) + 2 * Math.round(0.55 * f), h: lines.length * Math.round(1.35 * f) + Math.round(0.6 * f) };
   }
-  function chip(lines, x, y, f, box) {
-    var z = chipSize(lines, f), lh = Math.round(1.35 * f);
+  function chip(lines, x, y, f, box, ls) {
+    var z = chipSize(lines, f, ls), lh = Math.round(1.35 * f);
     if (!inside(x, y, x + z.w, y + z.h)) return false;
     if (box && (x < box.x || y < box.y || x + z.w > box.x + box.w || y + z.h > box.y + box.h)) return false;
     ctx.fillStyle = C.paper; R(x, y, x + z.w, y + z.h);
     ctx.fillStyle = C.text; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-    tagFont(f);
+    tagFont(f, ls);
     lines.forEach(function (t, i) {
       ctx.fillText(t.toUpperCase(), Math.round((x + Math.round(0.55 * f)) * M.dpr), Math.round((y + Math.round(0.3 * f) + lh * (i + 0.5)) * M.dpr));
     });
@@ -395,7 +397,7 @@
       var nn = 0;
       for (j = 0; j < 4 && nn < 11; j++) for (i = 0; i < 3 && nn < 11; i++) {
         ctx.fillStyle = C.paper;
-        R(ux(0.08 + i * 0.29 + 0.02), vy(0.08 + j * 0.215 + 0.02), ux(0.08 + (i + 1) * 0.29 - 0.02), vy(0.08 + (j + 1) * 0.215 - 0.02));
+        R(ux(0.08 + i * 0.29 + 0.035), vy(0.08 + j * 0.215 + 0.035), ux(0.08 + (i + 1) * 0.29 - 0.035), vy(0.08 + (j + 1) * 0.215 - 0.035));
         if (nn === 4) { ctx.fillStyle = C.clay; R(ux(0.08 + i * 0.29 + 0.05), vy(0.08 + j * 0.215 + 0.05), ux(0.08 + i * 0.29 + 0.11), vy(0.08 + j * 0.215 + 0.11)); }
         nn++;
       }
@@ -429,10 +431,11 @@
     }
     ctx.restore();
     /* rótulo no canto que dá para o central (fica na tela enquanto o painel estiver) */
-    var f = 12 * (1 + 0.3 * (s - 1)), off = Math.round(8 * (1 + 0.3 * (s - 1))), z = chipSize([pn.label], f);
+    var f = 12 * (1 + 0.3 * (s - 1)), off = Math.round(8 * (1 + 0.3 * (s - 1)));
+    var ls = chipSize([pn.label], f).w + 2 * off <= v.w ? 0.13 : 0.06, z = chipSize([pn.label], f, ls);
     var lx = pn.chip.charAt(1) === 'r' ? v.x + v.w - off - z.w : v.x + off;
     var ly = pn.chip.charAt(0) === 'b' ? v.y + v.h - off - z.h : v.y + off;
-    chip([pn.label], lx, ly, f, v);
+    chip([pn.label], lx, ly, f, v, ls);
   }
 
   /* central: campo clay, núcleo (paper + grade, com o wordmark IRON AI) no meio, 11
@@ -458,7 +461,7 @@
        cartões nunca aparecem uns com nome e outros vazios) */
     var fzAll = Math.floor(fpx + 1e-6), linesOf = [];
     for (; fzAll >= 12; fzAll--) {
-      tagFont(fzAll, 0.06);
+      tagFont(fzAll, 0.05);
       var lhA = Math.round(fzAll * 1.2), okAll = true;
       linesOf = CEN.cards.map(function (c) {
         var w = (c.w * r.w) - 2 * Math.max(4, 0.4 * fzAll), h = (c.h * r.h);
@@ -482,7 +485,7 @@
       if (!inside(x0, y0, x1, y1)) return;                    /* nome inteiro ou nada */
       var lines = fzAll >= 12 ? linesOf[ci] : null, lh = Math.round(fzAll * 1.2);
       if (lines) {
-        tagFont(fzAll, 0.06);
+        tagFont(fzAll, 0.05);
         ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         lines.forEach(function (t, i) { ctx.fillText(t, Math.round(mx * M.dpr), Math.round((my + (i - (lines.length - 1) / 2) * lh) * M.dpr)); });
         ctx.textAlign = 'left';
@@ -491,10 +494,10 @@
     });
     /* o núcleo leva o wordmark IRON AI (como a laje do hero), do tamanho que couber
        com 12 px ou mais; o rótulo do painel fica sempre "Qualquer setor" */
-    var fw = Math.min(28, Math.max(0, (nx1 - nx0) * 0.07));
+    var fw = Math.min(28, Math.max(12, (nx1 - nx0) * 0.07));
     /* só enquanto o canto do núcleo está dentro da área visível: quando o núcleo
        cobre a tela ele já saiu pela borda e nunca fica por cima dos casos */
-    if (fw >= 12 && nx0 > 8 && ny0 > EDGE.t + 8 && inside(nx0, ny0, nx0 + fw * 6, ny0 + fw * 2)) {
+    if ((nx1 - nx0) >= fw * 6.5 && nx0 > 8 && ny0 > EDGE.t + 8 && inside(nx0, ny0, nx0 + fw * 6, ny0 + fw * 2)) {
       ctx.fillStyle = C.text; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
       if ('letterSpacing' in ctx) ctx.letterSpacing = (0.1 * fw * M.dpr).toFixed(2) + 'px';
       ctx.font = '500 ' + Math.round(fw * M.dpr) + 'px ' + FONT;
@@ -585,28 +588,12 @@
     y = Math.round(y);
     updateStack(y);
     drawZoom(zoomP(y), Math.max(0, Math.round(M.zoomTop - y)));
-    updateCasos(y);
   }
-  /* os casos sobem pela grade parada do núcleo mais depressa que a rolagem no começo
-     e desaceleram até a posição natural, que alcançam quando a área fixa se solta:
-     desvio = L·((1 − t)³ − (1 − t)), t de 0 a 1 ao longo dos L px de sobreposição.
-     Função direta da rolagem (contínua e reversível), zero nas duas pontas. */
-  var lastRise = null;
-  function updateCasos(y) {
-    if (!casosInner || !M.overlap) return;
-    var L = M.overlap, y0 = M.zoomTop + M.pc * M.zoomLen;
-    var t = U.clamp((y - y0) / L, 0, 1), u = 1 - t;
-    var rise = Math.round(L * (u * u * u - u));
-    if (rise === lastRise) return;
-    lastRise = rise;
-    casosInner.style.transform = rise ? 'translateY(' + rise + 'px)' : '';
-  }
-
   /* ---------------------------------------------------------------------
      Ciclo: medidas no início, a cada refresh do ScrollTrigger (sem travas) e ao
      redimensionar; estado a cada evento de rolagem
      --------------------------------------------------------------------- */
-  function refresh() { measure(); stackState = []; lastKey = ''; lastRise = null; update(S.scrollY()); }
+  function refresh() { measure(); stackState = []; lastKey = ''; update(S.scrollY()); }
   if (ST && !reduced) {
     ST.addEventListener('refreshInit', function () { root.classList.remove('pins-on'); });
     ST.addEventListener('refresh', refresh);

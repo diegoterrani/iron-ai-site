@@ -87,7 +87,7 @@
       stage.classList.remove('is-narrow', 'is-split', 'is-short-lead', 'is-cta-row');
       [foot, lead, actions, eyebrow].forEach(function (el) { if (el) { el.style.transform = ''; el.style.visibility = ''; } });
     };
-    var fs, w0, h0, y0, x0, bg, gapB, m, mode;
+    var fs, w0, h0, y0, x0, bg, gapB, m, mode, ctaRight = false;
 
     /* 1) lado a lado (desktop): uma metade de cada lado da mídia */
     if (landscape && W >= 1000) {
@@ -133,13 +133,16 @@
       stage.style.setProperty('--title-size', px(fs));
       var hA = halfA.offsetHeight, hB = halfB.offsetHeight, ctaW = actions.offsetWidth, ctaH = actions.offsetHeight;
       var eyH = eyebrow.offsetHeight, eyGapB = 4;   /* eyebrow -> 1ª metade */
-      var inRow = ctaW + 24 + halfB.offsetWidth <= W - 2 * hm;     /* ação na linha da 2ª metade */
-      stage.style.setProperty('--lead-w', px(W - 2 * hm));
+      /* a 2ª metade fecha o título sozinha na linha dela; abaixo, a frase e a ação na
+         mesma linha (ação à direita) — a leitura termina antes de chegar à ação */
+      var inRow = ctaW + 24 + 240 <= W - 2 * hm;
+      stage.style.setProperty('--lead-w', px(inRow ? W - 2 * hm - ctaW - 24 : W - 2 * hm));
       var leadH = lead.offsetHeight, leadGap = 12, edge = 20;
-      var rowH = inRow ? Math.max(hB, ctaH) : hB + 12 + ctaH;
+      var row2 = inRow ? Math.max(leadH, ctaH) : leadH + 12 + ctaH;
+      var rowH = hB;
       var gapMin = 16;                              /* título–painel: a tinta das letras não chega ao painel */
       var needT = hdr + 8 + eyH + eyGapB + hA + gapMin;
-      var needB = gapMin + rowH + leadGap + leadH + edge;
+      var needB = gapMin + rowH + leadGap + row2 + edge;
       var y0min = Math.max(needT, needB);
       h0 = Math.max(H * 0.3, Math.min(H * 0.65, H - 2 * y0min));
       y0 = (H - h0) / 2;
@@ -150,10 +153,11 @@
       stage.style.setProperty('--a-top', px(aTop5));
       stage.style.setProperty('--ey-top', px(aTop5 - eyGapB - eyH));
       stage.style.setProperty('--b-top', px(bTop5));
-      stage.style.setProperty('--cta-x', px(hm));
-      stage.style.setProperty('--cta-y', px(inRow ? bTop5 + (hB - ctaH) / 2 : bTop5 + hB + 12));
-      stage.style.setProperty('--lead-y', px(rowBot + leadGap));
+      stage.style.setProperty('--cta-x', px(inRow ? W - hm - ctaW : hm));
+      stage.style.setProperty('--cta-y', px(inRow ? rowBot + leadGap + (row2 - ctaH) / 2 : rowBot + leadGap + leadH + 12));
+      stage.style.setProperty('--lead-y', px(inRow ? rowBot + leadGap + (row2 - leadH) / 2 : rowBot + leadGap));
       stage.classList.toggle('is-cta-row', inRow);
+      ctaRight = inRow;
     }
 
     /* 3) retrato: 1ª metade acima, 2ª metade, texto e ação abaixo */
@@ -193,7 +197,7 @@
     stage.style.setProperty('--m-w', px(w0));
     stage.style.setProperty('--m-h', px(h0));
     heroStart = { w: w0 / W, h: h0 / H, cy: (y0 + h0 / 2) / H, cx: (x0 + w0 / 2) / W };
-    geo = { W: W, H: H, mode: mode, flank: mode === 'flank', band: mode === 'band', narrow: false, hdr: hdr, R0: { x: x0, y: y0, w: w0, h: h0 }, eyTop0: eyebrow.offsetTop, aTop0: halfA.offsetTop };
+    geo = { ctaRight: ctaRight, W: W, H: H, mode: mode, flank: mode === 'flank', band: mode === 'band', narrow: false, hdr: hdr, R0: { x: x0, y: y0, w: w0, h: h0 }, eyTop0: eyebrow.offsetTop, aTop0: halfA.offsetTop };
     return heroStart;
   }
   measureHero();
@@ -228,9 +232,17 @@
     }
     /* header fixo no topo, com a ação sempre na tela */
     var staticCta = foot.querySelector('.button');
+    var hdrCtaS = document.querySelector('.site-header__cta'), ctaShown = null;
     var solidStatic = function () {
-      var r = (staticCta || foot).getBoundingClientRect();
-      S.header.setSolid(r.top < S.header.height());
+      var r = (staticCta || foot).getBoundingClientRect(), hh = S.header.height();
+      S.header.setSolid(r.top < hh);
+      var show = r.bottom <= hh;                   /* a ação do hero já passou sob o header */
+      if (hdrCtaS && show !== ctaShown) {
+        ctaShown = show;
+        hdrCtaS.style.visibility = show ? '' : 'hidden';
+        if (show) hdrCtaS.removeAttribute('tabindex'); else hdrCtaS.setAttribute('tabindex', '-1');
+        hdrCtaS.setAttribute('aria-hidden', show ? 'false' : 'true');
+      }
     };
     S.onScroll(solidStatic);
     solidStatic();
@@ -243,7 +255,19 @@
      (mesmo deslocamento da borda: a distância até a mídia nunca diminui).
      --------------------------------------------------------------------- */
   var hero = { target: 0, p: 0, applied: -1, range: 700, visible: true, interacted: false, hdrHide: 0 };
-  var hdrState = { y: null, solid: null, rule: null }; /* último estado gravado no header */
+  var hdrState = { y: null, solid: null, rule: null, cta: null }; /* último estado gravado no header */
+  /* "Agendar diagnóstico" uma vez por vista (design-system.md, regra 2): sobre o hero
+     em repouso a ação é o botão primário do hero, e o do header fica escondido; ele
+     volta quando o header passa a viajar na folha do manifesto (a troca acontece com
+     o header fora da tela, então nada aparece de uma vez) */
+  var hdrCta = document.querySelector('.site-header__cta');
+  function setHeaderCta(show) {
+    if (!hdrCta || hdrState.cta === show) return;
+    hdrState.cta = show;
+    hdrCta.style.visibility = show ? '' : 'hidden';
+    if (show) hdrCta.removeAttribute('tabindex'); else hdrCta.setAttribute('tabindex', '-1');
+    hdrCta.setAttribute('aria-hidden', show ? 'false' : 'true');
+  }
 
 
   /* desloca um elemento do hero; opacidade sempre 1. Fora da tela, sai da árvore
@@ -341,7 +365,7 @@
         setT(eyebrow, -geo.dE * g, -dT);
         setT(lead, -geo.dLd * g, dB);
         var uc = U.clamp((p - 0.28) / (PX_BAND - 0.28), 0, 1);
-        setT(actions, -geo.dCL * Math.pow(uc, 1.5), dB);
+        setT(actions, (geo.ctaRight ? geo.dC : -geo.dCL) * Math.pow(uc, 1.5), dB);  /* sai pelo lado em que está */
       } else {
         setT(eyebrow, -geo.dE * g, -dT);          /* eyebrow acima da 1ª metade, junto com ela */
         setT(foot, 0, dB);                        /* texto e ação: empurrados pela borda de baixo */
@@ -471,6 +495,7 @@
     if (rule !== hdrState.rule) { hdrState.rule = rule; S.header.setRule(rule); }
     var solid = sheetTop < H - 0.5;
     if (solid !== hdrState.solid) { hdrState.solid = solid; S.header.setSolid(solid); }
+    setHeaderCta(sheetTop < H - 0.5);
   }
 
   /* ---------------------------------------------------------------------
@@ -534,6 +559,7 @@
 
     /* agrupa as palavras por linha renderizada: lines[k] = { first, count } */
     function measure() {
+      sizeD();
       var r = el.getBoundingClientRect();
       top = r.top + window.scrollY;
       lh = parseFloat(getComputedStyle(el).lineHeight) || 1;
@@ -546,14 +572,24 @@
         lines[k].count++;
       }
     }
-    /* A linha sendo lida é a que está logo abaixo do meio da área visível (o centro
-       dela fica entre o meio e uma linha abaixo dele); dentro dela a frente avança
-       palavra a palavra com a rolagem. Na última linha a frente anda as palavras
-       da linha e mais a própria largura: quando a linha passa do meio, o texto está
-       todo aceso (só o <i> em accent) — a leitura acaba antes do fim da página. */
+    /* A leitura acontece com a folha já encaixada (quadro parado, depois da passagem
+       hero -> manifesto): de manTop (folha no topo) até manTop + D, a frente avança
+       linha a linha e, dentro de cada linha, palavra a palavra, presa à rolagem. A
+       frase fica abaixo dos dois dados, perto do meio da tela. D é o trecho em que a
+       frase continua inteira na tela antes de a camada dos pilares chegar a ela
+       (no máximo 40% da altura da tela). Antes de encaixar, tudo apagado; subir
+       apaga de volta. Na última linha a frente anda as palavras e a própria largura. */
+    var D = 300;
+    function sizeD() {
+      var H = window.innerHeight, mr = manifesto ? manifesto.getBoundingClientRect() : null, er = el.getBoundingClientRect();
+      var relBottom = mr ? er.bottom - mr.top : H * 0.6;          /* base da frase na tela, com a folha no topo */
+      var extra = mr ? Math.max(0, mr.height - H) : 0;            /* rolagem da folha até travar pela base */
+      D = U.clamp(H - relBottom - 24 + extra, 120, H * 0.4);
+    }
     function frontIndex(y) {
-      var s = (y + (window.innerHeight + (S.header.height() || 0)) * 0.5 - top) / lh + 0.5;
-      if (!lines.length || s < 0) return 0;
+      if (!lines.length) return 0;
+      var s = (y - manTop) / D * (lines.length + 0.25);
+      if (s < 0) return 0;
       var k = Math.floor(s);
       if (k >= lines.length) return items.length + FRONT;
       var ln = lines[k];
@@ -577,7 +613,7 @@
     /* scrollY em que o texto fica todo aceso */
     function endY() {
       if (!lines.length) return 0;
-      return top + (lines.length - 0.5) * lh - (window.innerHeight + (S.header.height() || 0)) * 0.5;
+      return manTop + D;
     }
     measure();
     update(window.scrollY);

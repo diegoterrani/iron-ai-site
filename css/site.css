@@ -205,7 +205,7 @@ html.js .home-hero__fallback { display: none; }
 /* textos de apoio e ação */
 .home-hero__eyebrow { position: absolute; z-index: 3; }
 .home-hero__foot { position: absolute; z-index: 3; will-change: transform, opacity; }
-/* lead: 17px/1,75 (token); no mobile 15px/1,7 */
+/* lead: 17px/1,75 (token), em todas as larguras */
 .home-hero__lead { font-size: 17px; line-height: 1.75; color: var(--muted); }
 .home-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 26px; margin-top: 16px; }
 
@@ -295,11 +295,14 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   position: relative; z-index: 2;
   background: var(--paper);
   padding: calc(var(--header-h) + var(--space-4)) var(--gutter) var(--space-8);
+  /* a folha tem pelo menos a altura da tela: ela encaixa no topo cobrindo o hero
+     inteiro e só então trava pela base, e a frase acende com o quadro parado */
+  min-height: 100vh;
 }
 .manifesto__inner { max-width: var(--page-max); margin: 0 auto; }
 /* h2 section-title em serifa (Source Serif 4, 400, tracking -0,02em), uma expressão em <i> accent */
 .manifesto__title {
-  margin: var(--space-3) 0 0;
+  margin: var(--space-6) 0 0;
   max-width: 18.6em;
   font-family: var(--font-serif); font-optical-sizing: auto;
   font-size: var(--manifesto-size); font-weight: 400; line-height: 1.1; letter-spacing: -.02em;
@@ -318,7 +321,7 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
    em subtle (design-system.md, esclarecimento abaixo da tabela de papéis de cor) */
 .manifesto__data {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-6);
+  max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-3);
   border-top: 1px solid var(--line); border-left: 1px solid var(--line);
 }
 .datum {
@@ -359,11 +362,12 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   :root { --gutter: var(--space-3); }
   /* CTA do header continua no token ui (13px/700) com a seta de 18px; só o respiro lateral diminui */
   .site-header__cta { padding: 0 14px; }
-  .home-hero__lead { font-size: 15px; line-height: 1.7; }
   .home-hero__actions { margin-top: 12px; }
   .manifesto { padding: calc(var(--header-h) + var(--space-3)) var(--gutter) var(--space-7); }
-  .manifesto__data { grid-template-columns: 1fr; margin-top: 38px; } /* space-6 no mobile: 38px */
-  .datum strong { font-size: 40px; }
+  /* os dois dados lado a lado também no celular: a frase fica abaixo deles, perto do
+     meio da tela quando a folha encaixa (mecanismo 2) */
+  .manifesto__title { margin-top: 38px; }          /* space-6 no mobile: 38px */
+  .datum { padding: 18px 14px; min-height: 0; }
 }
 
 @media (max-width: 380px) {
@@ -507,7 +511,12 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 }
 /* faixa: visual no topo, texto embaixo (padding de card no mobile, space-4); a faixa
    fica em px inteiros (p2.js): a borda entre o visual e o texto cai num pixel */
-.stack[data-mode^="band"] .stack__card { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, var(--band-h, 1fr)) minmax(0, 1fr); }
+.stack[data-mode^="band"] .stack__card { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+/* na faixa o texto vem primeiro: o cartão seguinte sobe por cima do visual, e o nome,
+   a entrega e o preço do cartão assentado ficam inteiros */
+.stack[data-mode^="band"] .stack__body { order: -1; }
+.stack[data-mode^="band"] .stack__card[data-covered="1"] { background: var(--kraft); }
+.stack[data-mode^="band"] .stack__card[data-covered="2"] { background: var(--clay); }
 .stack[data-mode^="band"] .stack__body { justify-content: flex-start; gap: 18px; padding: var(--space-4); }
 .stack[data-mode^="band"] .stack__number { top: 26px; right: 30px; }
 .stack[data-mode="band2"] .stack__body {
@@ -526,7 +535,7 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .v-s { fill: var(--modal-bg); }
 .v-a { fill: var(--clay); }
 .v-t { fill: var(--accent-text); }
-.v-g { fill: var(--kraft); }
+.v-g { fill: var(--accent-text); }
 /* cartões cobertos: o campo do visual desce de valor a cada cartão por cima (manilla
    -> kraft -> clay), em degraus de token; as bordas empilhadas leem como cartões
    distintos (p2.js: data-covered="1" ou "2") e o corpo passa a surface */
@@ -559,12 +568,13 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 /* Casos de uso: o painel central do zoom (paper + grade de hairlines line) vira o
    fundo desta seção — a mesma grade, no mesmo passo e na mesma fase (p2.js grava
    --grid-x/--grid-y), continua sem corte. Texto sobre a grade é permitido. */
-.casos { padding: var(--space-4) var(--gutter) var(--space-8); }
-/* os casos sobem por cima da área fixa do zoom, que nesse trecho mostra só a grade do
-   núcleo: o topo da seção (--overlap, p2.js) é transparente e o fundo de grade da
-   própria seção começa onde a área fixa termina — mesma grade, mesmo passo e fase */
-.casos::before {
-  content: ''; position: absolute; left: 0; right: 0; top: var(--overlap, 0px); bottom: 0; z-index: -1;
+/* Casos de uso: camada que cobre o clímax do zoom (design-system.md, "A seção que
+   nasce do zoom"): borda de entrada em hairline line, eyebrow a space-4/space-3 da
+   borda e fundo paper com a grade de hairlines do núcleo (mesmo passo). A margem
+   negativa (p2.js) a faz subir por cima da área fixa nos últimos (H - header) px. */
+.casos {
+  padding: calc(var(--space-4) - 1px) var(--gutter) var(--space-8);
+  border-top: 1px solid var(--line);
   background-color: var(--paper);
   background-image: linear-gradient(to right, var(--line) 0 1px, transparent 1px), linear-gradient(to bottom, var(--line) 0 1px, transparent 1px);
   background-size: var(--grid, 48px) var(--grid, 48px);
@@ -591,7 +601,7 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 }
 @media (max-width: 640px) {
   .layer { padding: calc(var(--space-3) - 1px) var(--gutter) var(--space-7); }
-  .casos { padding: var(--space-3) var(--gutter) var(--space-7); }
+  .casos { padding: calc(var(--space-3) - 1px) var(--gutter) var(--space-7); }
   .features, .cases { margin-top: 38px; }
   .rules { margin-top: 38px; }
   .rules li { padding: 18px 22px; }
