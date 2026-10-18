@@ -7,12 +7,11 @@
      (o "mundo"), vista por uma janela (a mídia do hero) e por uma câmera.
 
      Mundo (não se reorganiza em nenhum momento):
-       - espinha central: 01 Estratégia e governança de IA, 02 Dados, o núcleo
-         IRON AI (laje acid com a grade de nós da capa), R$ Resultado medido no
-         DRE, 04 Finanças e controladoria;
+       - espinha central: 01 Estratégia, 02 Dados, o núcleo IRON AI (laje paper
+         com os nós acesos em accent), o DRE e 04 Finanças;
        - as outras 8 áreas em volta (colunas no desktop, fileiras no celular);
-       - fluxos ortogonais áreas <-> núcleo, linhas de entrada que chegam das
-         bordas da tela (os sistemas que a empresa já tem) e um anel entre as áreas.
+       - só os fluxos ortogonais áreas <-> núcleo, com pacotes (estilo minimalista:
+         campo acid, cartões paper, traços accent-text, destaque accent pequeno).
 
      Janela e câmera (progresso p, 0..1):
        - a janela cresce nas duas dimensões, do retângulo inicial à tela inteira;
@@ -25,8 +24,8 @@
        - rótulos com 12 px ou mais na tela em todo p.
 
      Cena de fundo (drawScene): grade de hairlines `line` sobre paper em todo o
-     palco (a mesma grade do campo, continuada além da janela) e linhas de entrada
-     tracejadas até as bordas da tela; o painel a cobre ao crescer, sem opacidade.
+     palco (a mesma grade do campo, continuada além da janela); o painel a cobre ao
+     crescer, sem opacidade.
 
    Paleta (esclarecimento "Ilustração e mídia em código"): accent, accent-text,
    acid, band, surface, text, line. Tudo quadrado, sem gradiente, sem sombra.
@@ -39,19 +38,19 @@
   var U = S.util;
 
   var AREAS = [
-    ['ESTRATÉGIA E', 'GOVERNANÇA DE IA'],
+    ['ESTRATÉGIA'],
     ['DADOS'],
-    ['PESSOAS E', 'CULTURA'],
-    ['FINANÇAS E', 'CONTROLADORIA'],
-    ['COMPRAS E', 'SUPRIMENTOS'],
+    ['PESSOAS'],
+    ['FINANÇAS'],
+    ['COMPRAS'],
     ['OPERAÇÕES'],
-    ['COMERCIAL E', 'MARKETING'],
+    ['COMERCIAL'],
     ['ATENDIMENTO'],
     ['RH'],
-    ['JURÍDICO E', 'COMPLIANCE'],
-    ['TI E', 'SEGURANÇA']
+    ['JURÍDICO'],
+    ['TI E SEGURANÇA']
   ];
-  var DRE_LABEL = ['RESULTADO', 'MEDIDO NO DRE'];
+  var DRE_LABEL = ['DRE'];
   var DRE = 11;
   var MONO = '"IBM Plex Mono", ui-monospace, monospace';
   var SANS = 'Manrope, system-ui, sans-serif';
@@ -93,9 +92,9 @@
   function readColors() {
     var t = function (n, fb) { return U.rgb(U.token(n) || fb); };
     return {
-      accent: t('--accent', '#5547c4'), accentText: t('--accent-text', '#4a3db3'),
-      acid: t('--acid', '#cdc5fb'), band: t('--band', '#e9e6fb'), surface: t('--surface', '#efeef7'),
-      text: t('--text', '#16151f'), line: t('--line', '#dddbe9')
+      accent: t('--accent', '#a3481e'), accentText: t('--accent-text', '#954119'),
+      acid: t('--acid', '#f5c9a3'), band: t('--band', '#f8e6d4'), surface: t('--surface', '#f1ece4'),
+      paper: t('--paper', '#fcfbf8'), text: t('--text', '#1d1a16'), line: t('--line', '#e5ded3')
     };
   }
 
@@ -200,7 +199,7 @@
       var w = { cards: [], conns: {}, edges: {}, extra: [], extraCard: [], ring: null, ringCards: null, layout: layout };
       var cx = W / 2, cy = H / 2;
       function card(i, x, y, cw, ch, side) {
-        var c = { i: i, label: i === DRE ? DRE_LABEL : AREAS[i], index: i === DRE ? 'R$' : (i + 1 < 10 ? '0' : '') + (i + 1),
+        var c = { i: i, label: i === DRE ? DRE_LABEL : AREAS[i], index: i === DRE ? '' : (i + 1 < 10 ? '0' : '') + (i + 1),
           x: x - cw / 2, y: y - ch / 2, w: cw, h: ch, cx: x, cy: y, side: side, dre: i === DRE };
         w.cards.push(c); return c;
       }
@@ -614,25 +613,7 @@
       var x, y;
       for (x = gx - Math.floor(gx / step) * step; x < W; x += step) { var xr = Math.round(x); if (xr >= E.x && xr < ex1) ctx.fillRect(xr, E.y, 1, E.h); }
       for (y = gy - Math.floor(gy / step) * step; y < H; y += step) { var yr = Math.round(y); if (yr >= E.y && yr < ey1) ctx.fillRect(E.x, yr, E.w, 1); }
-      var DASH = 4, GAP = 6, P = DASH + GAP, seen = {};
-      var land = layout === 'cols' || layout === 'colsShort';
-      world.cards.forEach(function (c) {
-        if (land && (c.side === 'left' || c.side === 'right')) {
-          var yy = Math.round(cam.oy + c.cy * cam.z);
-          if (seen['y' + yy + c.side]) return; seen['y' + yy + c.side] = 1;
-          if (yy < E.y || yy >= ey1) return;
-          var a, e = Math.round(c.side === 'left' ? R.x : R.x + R.w);
-          if (c.side === 'left') { for (a = e - P; a + GAP >= E.x; a -= P) ctx.fillRect(a + GAP, yy, DASH, 1); }
-          else { for (a = e; a + GAP + DASH <= ex1; a += P) ctx.fillRect(a + GAP, yy, DASH, 1); }
-        } else if (!land && (c.side === 'top' || c.side === 'bottom')) {
-          var xx = Math.round(cam.ox + c.cx * cam.z);
-          if (seen['x' + xx + c.side]) return; seen['x' + xx + c.side] = 1;
-          if (xx < E.x || xx >= ex1) return;
-          var b2, e2 = Math.round(c.side === 'top' ? R.y : R.y + R.h);
-          if (c.side === 'top') { for (b2 = e2 - P; b2 + GAP >= E.y; b2 -= P) ctx.fillRect(xx, b2 + GAP, 1, DASH); }
-          else { for (b2 = e2; b2 + GAP + DASH <= ey1; b2 += P) ctx.fillRect(xx, b2 + GAP, 1, DASH); }
-        }
-      });
+      /* estilo minimalista: fora da janela só a grade, sem guias tracejadas */
     }
 
     /* ---------- desenho alinhado ao pixel ----------
@@ -688,24 +669,19 @@
         segW(a.x, a.y, b.x, b.y, t, cap);
       }
     }
-    /* tracejado ao longo da polilinha (unidades do mundo), fase em unidades do mundo */
-    function dashW(pl, dash, gap, phase, t) {
-      var per = dash + gap, u = (((phase % per) + per) % per) - per;
-      for (; u < pl.len; u += per) partW(pl, u, u + dash, t, false);
-    }
     /* transformação do mundo, só para texto */
     function worldText() { ctx.setTransform(dpr * SN.z, 0, 0, dpr * SN.z, dpr * (SN.ox + SN.dx * SN.z), dpr * (SN.oy + SN.dy * SN.z)); }
     function deviceSpace() { ctx.setTransform(1, 0, 0, 1, 0, 0); }
 
     function drawField(cam, RD) {
       var R = cam.R;
-      ctx.fillStyle = U.css(C.accent);
+      ctx.fillStyle = U.css(C.acid);                          /* campo pastel (estilo minimalista) */
       ctx.fillRect(RD.x, RD.y, RD.w, RD.h);
       /* grade do campo: passo do mundo 44 px, câmera mais lenta (zg); as mesmas
          colunas e linhas de pixel da cena de fundo (continuam além da janela) */
       var step = 44 * cam.zg, gx = cam.ogx + (W / 2) * cam.zg, gy = cam.ogy + (H / 2) * cam.zg;
       var d = Math.max(1, Math.round(dpr));
-      ctx.fillStyle = U.css(C.accentText);
+      ctx.fillStyle = U.css(C.band);
       /* uma linha a menos de 3 px da borda da janela não é desenhada (não vira um
          filete colado à borda) */
       var gap3 = 3 * dpr, X;
@@ -719,34 +695,23 @@
       }
     }
 
-    function drawRing(t, k) {
-      if (!fg.ring) return;
-      ctx.fillStyle = U.css(C.band);
-      dashW(fg.ring, 3, 7, t * 16, lwDev(1.5));
-      ctx.fillStyle = U.css(C.acid);
-      for (var r = 0; r < sim.ring.length; r++) {
-        var pt = pointAt(fg.ring, ((t * 0.018 + sim.ring[r]) % 1) * fg.ring.len);
-        nodeW(pt.x - 3, pt.y - 3, 6, 6);
-      }
-    }
 
     function drawLines(k) {
       var tl = lwDev(Math.max(1, 2 * k));
-      ctx.fillStyle = U.css(C.band);
+      ctx.fillStyle = U.css(C.accentText);
       Object.keys(fg.conns).forEach(function (i) { polyW(fg.conns[i], tl); });
-      Object.keys(fg.edges).forEach(function (i) { if (fg.edges[i]) dashW(fg.edges[i], 2, 5, 0, tl); });
-      fg.extra.forEach(function (pl) { dashW(pl, 2, 5, 0, tl); });
+
     }
 
     function drawPackets(k) {
       var tp = lwDev(3 * k);
       for (var i = 0; i < sim.packets.length; i++) {
         var p = sim.packets[i];
-        if (p.u > 1) continue;
-        var pl = p.edge ? fg.edges[p.c] : fg.conns[p.c];
+        if (p.u > 1 || p.edge) continue;                    /* sem trilhas tracejadas, sem pacotes nelas */
+        var pl = fg.conns[p.c];
         if (!pl) continue;
         var len = pl.len, u = (p.dir === 1 ? p.u : 1 - p.u) * len;
-        var col = p.kind === 'paper' ? C.surface : C.acid;
+        var col = p.kind === 'paper' ? C.accentText : C.accent;
         ctx.fillStyle = U.css(col);
         if (p.dir === 1) partW(pl, u - 22, u, tp, true); else partW(pl, u, u + 22, tp, true);
         var pt = pointAt(pl, u);
@@ -754,21 +719,12 @@
       }
     }
 
-    function drawExtraPackets(t) {
-      ctx.fillStyle = U.css(C.acid);
-      for (var i = 0; i < fg.extra.length && i < sim.extra.length; i++) {
-        var q = sim.extra[i], u = (t * q.speed + q.phase) % (1 + q.gap);
-        if (u > 1) continue;
-        var pt = pointAt(fg.extra[i], u * fg.extra[i].len);
-        nodeW(pt.x - 5, pt.y - 5, 10, 10);
-      }
-    }
 
     function drawSlab(t) {
       var sl = world.slab, NX = sim.NX, NY = sim.NY;
       var P = Math.min(sl.w / (NX + 1), sl.h / (NY + 1));
       var x0 = sl.x + (sl.w - (NX - 1) * P) / 2, y0 = sl.y + (sl.h - (NY - 1) * P) / 2;
-      ctx.fillStyle = U.css(C.acid);
+      ctx.fillStyle = U.css(C.paper);
       rectW(sl.x, sl.y, sl.w, sl.h);
       /* wordmark do núcleo */
       var fsW = U.clamp(P * 0.95, 11, 24), lx = x0 - P * 0.15, ly = y0 + fsW * 0.36;
@@ -804,13 +760,14 @@
             var ring = 1 - Math.abs(d - (0.5 + age * 5.2)) / 1.1;
             if (ring > 0) I = Math.max(I, ring * (1 - age / 1.3));
           }
-          var sz = dot * (1 + (I > 0.5 ? 1 : 0));
-          ctx.fillStyle = U.css(I > 0.5 ? C.accent : C.accentText);
+          if (I <= 0.5) continue;
+          var sz = dot * 2;
+          ctx.fillStyle = U.css(C.accent);
           rectW(x - sz / 2, y - sz / 2, sz, sz);
         }
       }
       var as = Math.max(7, P * 0.5);
-      ctx.fillStyle = U.css(C.text);
+      ctx.fillStyle = U.css(C.accentText);
       var ta = lwDev(Math.max(1, P * 0.07) * SN.z);
       for (var a = 0; a < sim.agents.length; a++) {
         var ag = sim.agents[a];
@@ -830,14 +787,8 @@
     function drawCard(c, t) {
       var on = t - sim.nodeFlash[c.i] < 1.1;
       var mirror = c.side === 'left';
-      ctx.fillStyle = U.css(c.dre || on ? C.acid : C.surface);
+      ctx.fillStyle = U.css(c.dre || on ? C.band : C.paper);
       rectW(c.x, c.y, c.w, c.h);
-      if (c.dre) {
-        var X0 = devX(c.x), X1 = devX(c.x + c.w), Y0 = devY(c.y), Y1 = devY(c.y + c.h), tb = lwDev(2.5 * SN.z);
-        ctx.fillStyle = U.css(C.text);
-        ctx.fillRect(X0, Y0, X1 - X0, tb); ctx.fillRect(X0, Y1 - tb, X1 - X0, tb);
-        ctx.fillRect(X0, Y0, tb, Y1 - Y0); ctx.fillRect(X1 - tb, Y0, tb, Y1 - Y0);
-      }
       ctx.fillStyle = U.css(on ? C.accent : C.line);
       var sx = mirror ? c.x + c.padX * 0.8 : c.x + c.w - c.status - c.padX * 0.8;
       rectW(sx, c.y + c.padX * 0.8, c.status, c.status);
@@ -878,10 +829,10 @@
       drawField(cam, RD);
       SN.ox = cam.ox; SN.oy = cam.oy; SN.z = cam.z; SN.dx = 0; SN.dy = 0;
       fg = frameGeometry(staticRect ? 1 : p);
-      drawRing(t, cam.z);
+      /* estilo minimalista (design-system.md): só as ligações de cada área ao núcleo,
+         com os pacotes; sem anel e sem trilhas tracejadas extras */
       drawLines(cam.z);
       drawPackets(cam.z);
-      drawExtraPackets(t);
       drawSlab(t);
       for (var i = 0; i < world.cards.length; i++) {
         var c = world.cards[i], o = fg.off[c.i];

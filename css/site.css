@@ -179,7 +179,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 .home-hero__fallback {
   position: absolute; z-index: 1;
   left: var(--m-x); top: var(--m-y); width: var(--m-w); height: var(--m-h);
-  background: var(--accent);
+  background: var(--acid);
 }
 html.js .home-hero__fallback { display: none; }
 .home-hero__canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
@@ -419,7 +419,9 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
    serem feitas sem elas; no movimento reduzido não há trava. */
 .intro { z-index: 1; }
 .pins-on .intro, .pins-on [data-layer] { position: sticky; top: var(--pin-top, 0px); }
-.layer { position: relative; padding: var(--space-4) var(--gutter) var(--space-8); }
+/* a borda de entrada é uma hairline line; o padding desconta 1 px para o primeiro
+   elemento ficar a space-4 (32 px) da borda */
+.layer { position: relative; padding: calc(var(--space-4) - 1px) var(--gutter) var(--space-8); border-top: 1px solid var(--line); }
 .pilares { z-index: 2; background: var(--soft); }
 .esteira { z-index: 3; background: var(--paper); }
 .zoom { position: relative; z-index: 4; }
@@ -451,8 +453,10 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .feature { margin: 0; padding: 32px 28px 34px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .feature h3 { margin: 28px 0 12px; font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
 .feature p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--muted); }
-.feature--base { grid-column: 1 / -1; display: flex; align-items: center; gap: 22px; padding: 24px 28px; }
-.feature--base h3 { margin: 0 0 4px; }
+/* FeatureItem largo (design-system.md, "Estilo minimalista"): a base, numa linha sob
+   os três pilares, sem icon-box — título card-title e a frase em muted */
+.feature--wide { grid-column: 1 / -1; display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 16px; row-gap: 4px; padding: 24px 28px; }
+.feature--wide h3 { margin: 0; }
 
 /* Esteira: cartões que se empilham (barra: mecanismo 3). Todos presos no topo em
    --stack-top; o que sobe por cima cobre o anterior, que encolhe (0,96 -> 0,90) e
@@ -468,12 +472,11 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 /* a esteira fica presa pela base no instante em que o último cartão termina a pausa:
    a folga sob o cartão da frente é a mesma de sempre (p2.js) */
 .layer.esteira { padding-bottom: var(--esteira-pb, var(--space-8)); }
-/* Cartão de etapa = ProductCard do design system (número mono no canto em subtle,
-   icon-box, tag mono em link, nome 30px, descrição muted, entregas com check em
-   accent-text, text-link no rodapé, hover deep-2 em .25s), num cartão largo da pilha:
-   o visual em código ocupa o lado esquerdo até a borda do cartão (campo accent), de
-   modo que a faixa visível de cada cartão coberto mostra o visual saturado.
-   Em telas estreitas ou baixas o visual vira uma faixa no topo do cartão (data-mode). */
+/* Cartão de etapa = ProductCard minimalista (design-system.md, "Estilo minimalista"):
+   número mono no canto em subtle, nome product-title, uma linha em muted e o preço;
+   borda line, padding 44/32, hover deep-2 em .25s. O visual em código ocupa o lado
+   esquerdo até a borda do cartão (campo acid). Em telas estreitas o visual vira uma
+   faixa no topo do cartão (data-mode: >980 side; 641–980 band2; ≤640 band1). */
 .stack__card {
   position: sticky; top: var(--stack-top, 140px);
   display: grid; grid-template-columns: minmax(0, var(--vis-a, 58fr)) minmax(0, var(--vis-b, 42fr));
@@ -482,70 +485,79 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   transition: background .25s, color .25s;
 }
 .stack__card:hover { background: var(--deep-2); }
-.stack__visual { position: relative; overflow: hidden; min-width: 0; min-height: 0; background: var(--accent); }
+.stack__visual { position: relative; overflow: hidden; min-width: 0; min-height: 0; background: var(--acid); }
 .stack__svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .stack__body {
-  position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
+  position: relative; display: flex; flex-direction: column; justify-content: flex-start; gap: 24px;
   min-width: 0; min-height: 0; padding: var(--space-5);
 }
 .stack__number { position: absolute; top: 35px; right: 38px; font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
-/* lado: icon-box, apresentação, entregas e rodapé se distribuem na altura do cartão */
-.stack[data-mode="side"] .stack__head { display: contents; }
-.stack__tag { margin: 0; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
-.stack__name { margin: 9px 0 13px; font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -.03em; color: var(--text); }
-.stack__what { margin: 0; font-size: 14px; line-height: 1.65; color: var(--muted); }
-.stack__list { margin: 0; padding: 0; list-style: none; }
-.stack__list li { display: flex; gap: 10px; padding: 7px 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
-.stack__list .ico { margin-top: 1px; color: var(--accent-text); }
-.stack__foot { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
-.stack__price { display: flex; flex-direction: column; gap: 6px; align-self: stretch; margin: 0; padding-top: 18px; border-top: 1px solid var(--line); }
-.stack__price-label { font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle); }
-.stack__price strong { font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
-/* faixa: visual no topo, texto embaixo (padding de card no mobile, space-4) */
-/* faixa em px inteiros (p2.js): a borda entre o visual e o texto cai num pixel */
+.stack__intro { padding-right: 32px; }
+.stack__name { margin: 0 0 13px; font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -.03em; color: var(--text); }
+.stack__what { margin: 0; max-width: 24em; font-size: 14px; line-height: 1.65; color: var(--muted); }
+.stack__price {
+  margin: 0; padding-top: 18px; border-top: 1px solid var(--line);
+  font-size: 20px; font-weight: 600; line-height: 1.35; letter-spacing: -.025em; color: var(--text);
+}
+/* faixa: visual no topo, texto embaixo (padding de card no mobile, space-4); a faixa
+   fica em px inteiros (p2.js): a borda entre o visual e o texto cai num pixel */
 .stack[data-mode^="band"] .stack__card { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, var(--band-h, 1fr)) minmax(0, 1fr); }
 .stack[data-mode^="band"] .stack__body { justify-content: flex-start; gap: 18px; padding: var(--space-4); }
-/* na faixa, icon-box e tag dividem a primeira linha */
-.stack[data-mode^="band"] .stack__head { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; align-content: start; column-gap: 16px; }
-.stack[data-mode^="band"] .stack__intro { display: contents; }
-.stack[data-mode^="band"] .stack__head .stack__tag { margin: 0; padding-right: 32px; }
-.stack[data-mode^="band"] .stack__name, .stack[data-mode^="band"] .stack__what { grid-column: 1 / -1; }
-.stack[data-mode^="band"] .stack__name { margin-top: 18px; }
+.stack[data-mode^="band"] .stack__number { top: 26px; right: 30px; }
 .stack[data-mode="band2"] .stack__body {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-areas: "head list" "head foot"; grid-template-rows: auto 1fr; gap: 18px 28px; align-content: start;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-content: start;
 }
-.stack[data-mode="band2"] .stack__head { grid-area: head; }
-.stack[data-mode="band2"] .stack__list { grid-area: list; padding-right: 36px; }
-.stack[data-mode="band2"] .stack__foot { grid-area: foot; }
-/* tela muito baixa: a descrição sai (as entregas repetem o mesmo conteúdo), o preço
-   usa o tamanho lead e o text-link sobe para a linha do rótulo "Preço" */
+.stack[data-mode="band2"] .stack__price { align-self: start; margin-top: 40px; }
+/* tela muito baixa: a descrição sai e o preço usa o tamanho lead */
 .stack[data-tight] .stack__what { display: none; }
-.stack[data-tight] .stack__foot { position: relative; }
-.stack[data-tight] .stack__foot .text-link { position: absolute; top: 21px; right: 0; }
-.stack[data-tight] .stack__price strong { font-size: 17px; }
+.stack[data-tight] .stack__price { font-size: 17px; }
+.esteira__more { margin-top: var(--space-5); }
 /* cores da ilustração (tokens; design-system.md, "Ilustração e mídia em código") */
-.v-f { fill: var(--accent); }
-.v-a { fill: var(--acid); }
+/* pastéis e neutros claros nos campos e figuras; o terracota accent só como destaque
+   e accent-text só como traço fino ("Estilo minimalista", regra 4) */
+.v-f { fill: var(--acid); }
 .v-b { fill: var(--band); }
-.v-s { fill: var(--surface); }
+.v-s { fill: var(--paper); }
+.v-a { fill: var(--accent); }
 .v-t { fill: var(--accent-text); }
-.v-g { fill: var(--accent-text); }
+.v-g { fill: var(--band); }
+/* cartão coberto: o campo do visual desce um degrau de token (acid -> band); as
+   bordas empilhadas leem como cartões distintos do da frente (p2.js: data-covered) */
+.stack__card[data-covered] .stack__visual { background: var(--band); }
+.stack__card[data-covered] .v-f { fill: var(--band); }
+.stack__card[data-covered] { background: var(--surface); }
 
-.regras { margin-top: var(--space-6); }
-.features--rules { margin-top: var(--space-3); }
+/* Regras públicas da oferta: só os títulos, em linha de três divididas por line */
+.rules {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: var(--space-6) 0 0; padding: 0; list-style: none;
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+/* card-title (20px/700), sem descrição */
+.rules li {
+  padding: 22px 28px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text);
+}
 
 /* Zoom (barra: mecanismo 4): área fixa de 100vh durante 300vh de rolagem; os
    painéis são desenhados no canvas (p2.js), em pixel inteiro e só com tokens */
-.zoom { height: 400vh; }
-.zoom__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--soft); }
+/* 340vh de área fixa: ~250vh de zoom e, no fim, ~90vh em que os casos sobem por cima
+   da grade parada do núcleo (p2.js: M.pc) */
+.zoom { height: 440vh; }
+.zoom__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--paper); }
+/* borda de entrada da camada do zoom, em hairline line, como as outras camadas */
+.zoom__stage::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line); z-index: 1; }
 .zoom__canvas { display: block; width: 100%; height: 100%; }
 
 /* Casos de uso: o painel central do zoom (paper + grade de hairlines line) vira o
    fundo desta seção — a mesma grade, no mesmo passo e na mesma fase (p2.js grava
    --grid-x/--grid-y), continua sem corte. Texto sobre a grade é permitido. */
-.casos {
-  padding: var(--space-4) var(--gutter) var(--space-8);
+.casos { padding: var(--space-4) var(--gutter) var(--space-8); }
+/* os casos sobem por cima da área fixa do zoom, que nesse trecho mostra só a grade do
+   núcleo: o topo da seção (--overlap, p2.js) é transparente e o fundo de grade da
+   própria seção começa onde a área fixa termina — mesma grade, mesmo passo e fase */
+.casos::before {
+  content: ''; position: absolute; left: 0; right: 0; top: var(--overlap, 0px); bottom: 0; z-index: -1;
   background-color: var(--paper);
   background-image: linear-gradient(to right, var(--line) 0 1px, transparent 1px), linear-gradient(to bottom, var(--line) 0 1px, transparent 1px);
   background-size: var(--grid, 48px) var(--grid, 48px);
@@ -557,15 +569,15 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   border-top: 1px solid var(--line); border-left: 1px solid var(--line);
 }
 .case { position: relative; display: flex; flex-direction: column; padding: 44px; background: var(--paper); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.case__number { position: absolute; top: 35px; right: 38px; font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
-.case__tag { margin: 0; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
-.case h3 { margin: 9px 0 13px; font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -.03em; color: var(--text); }
-.case p { margin: 0; font-size: 14px; line-height: 1.65; color: var(--muted); }
+/* tag do design system (mono 12px, 600, tracking .13em, link); seletor com a classe do
+   cartão para não ser vencido por ".case p" */
+.case .case__tag { margin: 0; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
+.case h3 { margin: 9px 0 13px; font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
+.case .case__text { margin: 0; font-size: 14px; line-height: 1.65; color: var(--muted); }
 .case ul { margin: 0; padding: 0; list-style: none; }
 .case li { display: flex; gap: 10px; padding: 7px 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .case li .ico { margin-top: 1px; color: var(--accent-text); }
 .proof {
-  display: flex; align-items: flex-start; gap: 22px;
   max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-5); padding: 28px;
   background: var(--paper); border: 1px solid var(--line);
 }
@@ -573,13 +585,15 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .proof__text { margin: 0; font-size: 15px; line-height: 1.75; color: var(--muted); }
 
 @media (max-width: 980px) {
-  .features, .cases { grid-template-columns: 1fr; }
-  .feature--base { padding: 24px 28px; }
+  .features, .cases, .rules { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .layer, .casos { padding: var(--space-3) var(--gutter) var(--space-7); }
+  .layer { padding: calc(var(--space-3) - 1px) var(--gutter) var(--space-7); }
+  .casos { padding: var(--space-3) var(--gutter) var(--space-7); }
   .features, .cases { margin-top: 38px; }
-  .regras { margin-top: 38px; }
+  .rules { margin-top: 38px; }
+  .rules li { padding: 18px 22px; }
+  .feature--wide { padding: 22px; }
   .feature { padding: 26px 22px 28px; }
   .case { padding: 32px; }
   .proof { padding: 22px; }

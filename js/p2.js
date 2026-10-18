@@ -6,11 +6,11 @@
      o coberto encolhe (0,96 -> 0,90, pela largura, em px inteiros) e sobe 24 px por
      cartão acima dele; a faixa visível de cada um mostra o visual em accent. O
      visual interno entra em 2x e chega a 1x quando o cartão assenta (viewBox).
-   - Transição por zoom (mecanismos 4 e 7): área fixa de 100vh durante 300vh; 6
-     painéis de setor e o central crescem de 1x até 4,2–9x em ritmos próprios (os
-     rápidos atrás, saindo de trás dos lentos); o central cobre a área sob o header,
-     fica em tela cheia (núcleo IRON AI ligado às 11 áreas) e a câmera entra no núcleo,
-     que vira o fundo dos casos de uso (mesma grade, mesmo passo e fase; mecanismo 6).
+   - Transição por zoom (mecanismos 4 e 7): área fixa de 100vh durante 300vh; a 1x
+     uma grade de painéis separados com o central (o maior) no meio; os 6 de fora
+     crescem até 4,2–9x em ritmos próprios, empurrados pelo central, sem sobreposição;
+     o central cobre a área sob o header, fica em tela cheia (núcleo IRON AI ligado às
+     11 áreas) e a câmera entra no núcleo, que vira o fundo dos casos (mecanismo 6).
    Tudo é função direta da posição da rolagem (mecanismo 5): igual descendo e
    subindo, sem nada disparado por tempo. Movimento reduzido: estático e completo.
    Desenho do zoom em pixel inteiro e só com tokens (nada esmaece por opacidade).
@@ -73,9 +73,18 @@
     pinned.forEach(function (el) {
       el.style.setProperty('--pin-top', Math.round(Math.min(M.hdr, M.H - el.offsetHeight)) + 'px');
     });
+    if (casos) {
+      /* os casos sobem por cima da área fixa enquanto ela mostra só a grade do núcleo:
+         a seção começa (H - header) px antes do fim do zoom e o seu fundo de grade só
+         começa onde a área fixa termina (--overlap) */
+      M.overlap = reduced ? 0 : Math.max(0, M.H - M.hdr);
+      casos.style.marginTop = M.overlap ? -M.overlap + 'px' : '';
+      casos.style.setProperty('--overlap', M.overlap + 'px');
+    }
     if (zoom && canvas) {
       M.zoomTop = docTop(zoom);
       M.zoomLen = Math.max(1, zoom.offsetHeight - (stage ? stage.offsetHeight : M.H));
+      M.pc = reduced ? 1 : U.clamp(1 - (M.overlap || 0) / M.zoomLen, 0.5, 1);   /* núcleo cobre a tela */
       M.dpr = Math.min(window.devicePixelRatio || 1, 2);
       M.sw = stage.clientWidth; M.sh = stage.clientHeight;
       /* o zoom se centra na área visível sob o header (que fica sempre na tela) */
@@ -107,7 +116,7 @@
     var body = c.querySelector('.stack__body');
     if (mode !== 'side') return body.offsetHeight;
     var cs = getComputedStyle(body), pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-    return pad + 3 * 24 + ['.icon-box', '.stack__intro', '.stack__list', '.stack__foot'].reduce(function (sum, q) { return sum + c.querySelector(q).offsetHeight; }, 0);
+    return pad + 24 + ['.stack__intro', '.stack__price'].reduce(function (sum, q) { return sum + c.querySelector(q).offsetHeight; }, 0);
   }
   function layoutCards() {
     cards.forEach(function (c) { c.style.width = ''; c.style.transform = ''; });
@@ -115,16 +124,15 @@
     var prefer = M.H - M.T - M.padB, maxH = M.H - M.hdr - M.padB;
     var tries = [];
     if (reduced) {                                          /* estático: altura natural, conteúdo inteiro */
-      list.setAttribute('data-mode', M.W > 900 ? 'side' : (M.W >= 560 ? 'band2' : 'band1'));
+      list.setAttribute('data-mode', M.W > 980 ? 'side' : (M.W > 640 ? 'band2' : 'band1'));
       list.removeAttribute('data-tight');
       M.mode = list.getAttribute('data-mode'); M.cardH = 0; M.Wc = Math.round(list.getBoundingClientRect().width);
       return;
     }
-    if (M.W > 900) tries.push(['side', 62, false], ['side', 58, false], ['side', 52, false]);
-    if (M.W >= 560) tries.push(['band2', 0, false]);
-    tries.push(['band1', 0, false]);
-    if (M.W >= 560) tries.push(['band2', 0, true]);
-    tries.push(['band1', 0, true]);
+    /* breakpoints do design system: >980 lado a lado; 641–980 faixa em 2 colunas; ≤640 faixa */
+    if (M.W > 980) tries.push(['side', 62, false], ['side', 58, false], ['side', 52, false], ['side', 52, true]);
+    else if (M.W > 640) tries.push(['band2', 0, false], ['band2', 0, true]);
+    else tries.push(['band1', 0, false], ['band1', 0, true]);
     var pick = null, best = null;
     function tryMode(mode, fr, tight) {
       list.setAttribute('data-mode', mode);
@@ -183,105 +191,134 @@
          bordas e o visual ficam em pixel inteiro, sem cor intermediária) */
       var cut = Math.round(M.Wc * (1 - sc) / 2), w = M.Wc - 2 * cut;
       var v = 2 - arrive[i];                                /* visual: 2x ao entrar, 1x ao assentar */
-      var key = ty + '|' + w + '|' + v.toFixed(4);
+      /* coberto (só a borda de 24 px à vista): o campo do visual passa de acid a band,
+         um degrau de token, para a borda não repetir a cor do cartão da frente */
+      var covered = depth >= 0.98;
+      var key = ty + '|' + w + '|' + v.toFixed(4) + '|' + covered;
       if (stackState[i] === key) continue;
       stackState[i] = key;
       cards[i].style.transform = ty ? 'translateY(' + ty + 'px)' : '';
       cards[i].style.width = cut ? w + 'px' : '';
+      if (covered) cards[i].setAttribute('data-covered', ''); else cards[i].removeAttribute('data-covered');
       if (svgs[i]) zoomBox(svgs[i], v);
     }
   }
 
   /* ---------------------------------------------------------------------
      Zoom (barra: mecanismos 4 e 7). Área fixa de 100vh durante 300vh; p vai de 0 a 1:
-     - p 0 a 0,6: os 7 painéis crescem de 1x até 4,2–9x, cada um no seu ritmo (os de
-       fora em linha reta; o central mais devagar, em q^1,5) e o central cobre a área
-       sob o header em q = 1;
-     - p 0,6 a 0,8: clímax, o central em tela cheia: o núcleo IRON AI ligado às 11
-       áreas, em accent, com cartões claros (mídia em valor pleno);
-     - p 0,8 a 1: a câmera entra no núcleo (paper + grade de hairlines) até ele cobrir
-       a tela. É a mesma grade, no mesmo passo e fase, do fundo dos casos de uso.
-     Campos saturados (accent / accent-text) com figuras claras e rótulo de 12px ou
-     mais em cada painel. Desenho em pixel inteiro, só tokens, sem opacidade.
+     - p 0 a 0,6: divergência. A 1x é uma grade de painéis separados por vãos: o
+       central inteiro, no meio, é o maior. Ele cresce devagar (q^1,3) e empurra os 6
+       de fora, que crescem cada um no seu ritmo (até 4,2–9x) a partir da borda que dá
+       para o central. Ninguém se sobrepõe; o vão fica constante. Em q = 1 o central
+       cobre a área sob o header;
+     - p 0,6 a 0,76: clímax, o central em tela cheia: o núcleo IRON AI ligado às 11
+       áreas, com cartões paper sobre o campo acid (mídia em valor pleno);
+     - p 0,76 a 1: a câmera entra no núcleo (paper + grade de hairlines) até ele cobrir
+       a tela em p = 1. É a mesma grade, no mesmo passo e fase, do fundo dos casos.
+     Vãos em paper; campos dos painéis em acid (pastel), figuras em paper e um único
+     destaque em accent; traços finos em accent-text (o paper dentro do central é só o
+     núcleo, que vira o fundo dos casos). Rótulos de 12px ou mais, inteiros
+     ou nada. Desenho em pixel inteiro, só tokens, sem opacidade.
      --------------------------------------------------------------------- */
-  var P1 = 0.6, P2 = 0.8;
+  var P1 = 0.6, P2 = 0.76;
   var PANELS = [], CEN = null;
-  var AREAS = ['Estratégia e governança de IA', 'Dados', 'Pessoas e cultura', 'Finanças e controladoria',
-    'Compras e suprimentos', 'Operações', 'Comercial e marketing', 'Atendimento', 'RH',
-    'Jurídico e compliance', 'TI e segurança'];
   var FONT = (getComputedStyle(root).getPropertyValue('--font-sans') || 'sans-serif').trim();
+  var MONO = (getComputedStyle(root).getPropertyValue('--font-mono') || 'monospace').trim();
 
-  /* retângulo de cada painel em fração da área visível (largura W, altura H - header),
-     a partir do centro dela: [x0, x1, y0, y1]; S = escala no fim do zoom */
   function setupZoom() {
-    var land = M.sw >= M.ha;
-    var top = -0.5 + (M.W <= 760 ? 22 : 32) / M.ha;          /* primeiro bloco a 32/22 px da borda */
+    var land = M.sw >= M.ha, mob = M.W <= 760;
+    var G0 = mob ? 12 : 16;                                  /* vão em px */
+    var gx = G0 / M.sw, gy = G0 / M.ha, m = (mob ? 22 : 32) / M.ha;
+    var top = -0.5 + m, bot = 0.5 - m;
     M.orient = land ? 'paisagem' : 'retrato';
-    /* de trás para a frente: os mais rápidos atrás, o central na frente. Cada painel
-       começa com a borda interna escondida atrás dos da frente e "sai" de trás deles
-       ao crescer mais depressa (paralaxe): os rápidos ficam na tela até 5–9x */
+    var hx, hy;
     if (land) {
+      hx = hy = 0.17;
+      var gxm = gx / 2, rowW = 0.33, sideW = 0.22, sx = hx + gx, ry = hy + gy;
       PANELS = [
-        { kind: 'seguranca', label: 'Segurança', r: [0.06, 0.44, 0.06, 0.42], S: 9, corner: 'br' },
-        { kind: 'ondas', label: 'Ondas', r: [-0.44, -0.04, 0.10, 0.42], S: 8, corner: 'bl' },
-        { kind: 'dre', label: 'DRE', r: [-0.10, 0.20, 0.08, 0.42], S: 7, corner: 'bl' },
-        { kind: 'areas', label: '11 áreas', r: [-0.44, -0.09, -0.32, 0.14], S: 6, corner: 'tl' },
-        { kind: 'hotel', label: 'Hotelaria', r: [-0.20, 0.34, top, -0.09], S: 4.6, corner: 'tl' },
-        { kind: 'restaurante', label: 'Restaurantes', r: [0.10, 0.44, -0.16, 0.12], S: 4.2, corner: 'tr' },
-        { kind: 'centro', label: 'Qualquer setor', r: [-0.125, 0.125, -0.125, 0.125] }
+        { kind: 'hotel', e: 5, label: 'Hotelaria', S: 4.6, nat: [-gxm - rowW, -gxm, top, -ry], anchor: [-gxm, -ry], push: 'y-', chip: 'br' },
+        { kind: 'restaurante', e: 1.1, label: 'Restaurantes', S: 5.2, nat: [gxm, gxm + rowW, top, -ry], anchor: [gxm, -ry], push: 'y-', chip: 'bl' },
+        { kind: 'areas', e: 4.5, label: '11 áreas', S: 6, nat: [-sx - sideW, -sx, -hy, hy], anchor: [-sx, 0], push: 'x-', clipY: true, chip: 'tr' },
+        { kind: 'dre', e: 2.0, label: 'DRE', S: 7, nat: [sx, sx + sideW, -hy, hy], anchor: [sx, 0], push: 'x+', clipY: true, chip: 'tl' },
+        { kind: 'ondas', e: 6, label: 'Ondas', S: 8, nat: [-gxm - rowW, -gxm, ry, bot], anchor: [-gxm, ry], push: 'y+', chip: 'tr' },
+        { kind: 'seguranca', e: 1.4, label: 'Segurança', S: 9, nat: [gxm, gxm + rowW, ry, bot], anchor: [gxm, ry], push: 'y+', chip: 'tl' }
       ];
     } else {
-      /* retrato: o central é o maior painel, o mais central e o da frente */
+      /* retrato: o central ocupa o meio; três células em cima e três embaixo */
+      hx = hy = 0.25;
+      var ms = 22 / M.sw, cw = (1 - 2 * ms - 2 * gx) / 3, ry2 = hy + gy;
+      var c1 = [-0.5 + ms, -0.5 + ms + cw], c2 = [-cw / 2, cw / 2], c3 = [0.5 - ms - cw, 0.5 - ms];
       PANELS = [
-        { kind: 'dre', label: 'DRE', r: [0.06, 0.48, -0.12, 0.14], S: 9, corner: 'mr' },
-        { kind: 'areas', label: '11 áreas', r: [-0.48, -0.06, -0.14, 0.12], S: 8, corner: 'ml' },
-        { kind: 'ondas', label: 'Ondas', r: [-0.48, 0.02, 0.08, 0.46], S: 5.4, corner: 'bl' },
-        { kind: 'seguranca', label: 'Segurança', r: [-0.02, 0.48, 0.09, 0.46], S: 5, corner: 'br' },
-        { kind: 'hotel', label: 'Hotelaria', r: [-0.48, 0.04, top, -0.09], S: 4.6, corner: 'tl' },
-        { kind: 'restaurante', label: 'Restaurantes', r: [-0.02, 0.48, -0.40, -0.08], S: 4.2, corner: 'tr' },
-        { kind: 'centro', label: 'Qualquer setor', r: [-0.20, 0.20, -0.20, 0.20] }
+        { kind: 'hotel', e: 5, label: 'Hotelaria', S: 4.6, nat: [c1[0], c1[1], top, -ry2], anchor: [c1[1], -ry2], push: 'y-', chip: 'br' },
+        { kind: 'restaurante', e: 1.1, label: 'Restaurantes', S: 5.2, nat: [c2[0], c2[1], top, -ry2], anchor: [0, -ry2], push: 'y-', clipX: c2, chip: 'bl' },
+        { kind: 'areas', e: 4.5, label: '11 áreas', S: 6, nat: [c3[0], c3[1], top, -ry2], anchor: [c3[0], -ry2], push: 'y-', chip: 'bl' },
+        { kind: 'dre', e: 2.0, label: 'DRE', S: 7, nat: [c1[0], c1[1], ry2, bot], anchor: [c1[1], ry2], push: 'y+', chip: 'tr' },
+        { kind: 'ondas', e: 6, label: 'Ondas', S: 8, nat: [c2[0], c2[1], ry2, bot], anchor: [0, ry2], push: 'y+', clipX: c2, chip: 'tl' },
+        { kind: 'seguranca', e: 1.4, label: 'Segurança', S: 9, nat: [c3[0], c3[1], ry2, bot], anchor: [c3[0], ry2], push: 'y+', chip: 'tl' }
       ];
     }
-    CEN = PANELS[PANELS.length - 1];
-    /* o central cobre a área visível em s = Sc; o núcleo (metade do painel) cobre a
-       tela em 2·Sc, no fim do trecho fixo */
-    CEN.S = 0.5 / Math.min(-CEN.r[0], CEN.r[1], -CEN.r[2], CEN.r[3]);
-    CEN.nu = land ? [0.25, 0.75] : [0.30, 0.70]; CEN.nv = [0.25, 0.75];
-    CEN.Send = CEN.S / Math.min(CEN.nu[1] - CEN.nu[0], CEN.nv[1] - CEN.nv[0]);
-    /* cartões das 11 áreas no anel do central (u, v do centro; largura, altura): 4 à
-       direita, 4 à esquerda, 3 embaixo; em cima, o rótulo "IRON AI / Qualquer setor" */
-    var cw, ch, bw, pos, sv = [0.32, 0.44, 0.56, 0.68];
-    var su;
-    if (land) { su = 0.125; cw = 0.15; ch = 0.11; bw = 0.15; pos = [[0.3, 0.875], [0.5, 0.875], [0.7, 0.875]]; CEN.cardFont = 15; }
-    else { su = 0.155; cw = 0.27; ch = 0.10; bw = 0.21; pos = [[0.27, 0.875], [0.5, 0.875], [0.73, 0.875]]; CEN.cardFont = 13; }
-    var all = [];
-    sv.forEach(function (v) { all.push([su, v, cw]); });
-    sv.forEach(function (v) { all.push([1 - su, v, cw]); });
-    pos.forEach(function (p) { all.push([p[0], p[1], bw]); });
-    pos = all;
-    var order = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    CEN.cards = pos.map(function (p, i) { return { u: p[0], v: p[1], w: p[2], h: ch, name: AREAS[order[i]] }; });
+    CEN = { kind: 'centro', label: 'Qualquer setor', hx: hx, hy: hy, gx: gx, gy: gy };
+    PANELS.push(CEN);
+    CEN.S = 0.5 / Math.min(hx, hy);                          /* cobre a área sob o header */
+    var nf = land ? 0.4 : 0.32;                               /* lado do núcleo, em fração do painel */
+    CEN.nu = [0.5 - nf / 2, 0.5 + nf / 2]; CEN.nv = [0.5 - nf / 2, 0.5 + nf / 2];
+    CEN.Send = CEN.S / nf;                                    /* o núcleo cobre a tela, nas duas direções juntas */
+    /* 11 áreas no anel: 4 de cada lado (nomes longos) e 3 embaixo (curtos), a pelo
+       menos space-3 (22px) das bordas da tela no clímax */
+    var mu = 22 / M.sw, sideNames = ['Estratégia', 'Pessoas', 'Finanças', 'Compras', 'Comercial', 'Atendimento', 'Jurídico', 'TI e segurança'];
+    var n0 = CEN.nu[0], sv = land ? [0.34, 0.45, 0.56, 0.67] : [0.355, 0.455, 0.555, 0.655], ch = 0.09;
+    var sw = Math.min(land ? 0.2 : 0.26, n0 - 0.025 - mu), su = n0 - 0.025 - sw / 2;
+    var cards = [];
+    sv.forEach(function (v, i) { cards.push({ u: su, v: v, w: sw, h: ch, name: sideNames[i] }); });
+    sv.forEach(function (v, i) { cards.push({ u: 1 - su, v: v, w: sw, h: ch, name: sideNames[4 + i] }); });
+    if (land) {
+      [['Dados', 0.36], ['Operações', 0.5], ['RH', 0.64]].forEach(function (c) { cards.push({ u: c[1], v: 0.85, w: 0.12, h: ch, name: c[0] }); });
+      CEN.cardFont = 20;
+    } else {
+      cards.push({ u: 0.4, v: 0.75, w: 0.18, h: 0.07, name: 'Dados' });
+      cards.push({ u: 0.6, v: 0.75, w: 0.18, h: 0.07, name: 'RH' });
+      cards.push({ u: 0.5, v: 0.87, w: 0.3, h: 0.07, name: 'Operações' });
+      CEN.cardFont = 16;
+    }
+    CEN.cards = cards;
   }
 
-  function rectOf(pn, s, shift) {
-    var x0 = M.ox + pn.r[0] * M.sw * s, x1 = M.ox + pn.r[1] * M.sw * s;
-    var cy = M.oy - (shift || 0);
-    var y0 = cy + pn.r[2] * M.ha * s, y1 = cy + pn.r[3] * M.ha * s;
-    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0, s: s };
+  /* moldura do conteúdo (R) e parte visível (V) de um painel de fora, com escala
+     própria s e o central em sc; em px de canvas */
+  /* zoom em paralaxe: cada painel escala em torno do centro da área visível, com a
+     sua escala s. Os de fora crescem mais depressa que o central (S de 4,6 a 9 contra
+     ~3), então se afastam dele e uns dos outros em ritmos diferentes: os vãos abrem de
+     forma irregular e o central nunca é coberto. */
+  function geomOf(pn, s, sc, shift) {
+    var n = pn.nat;
+    var cy = M.oy - (shift || 0), X = function (f) { return M.ox + f * M.sw; }, Y = function (f) { return cy + f * M.ha; };
+    var r = { x: X(n[0] * s), y: Y(n[2] * s), w: (n[1] - n[0]) * s * M.sw, h: (n[3] - n[2]) * s * M.ha };
+    return { R: r, V: r };
   }
+  function centerRect(sc, shift) {
+    var cy = M.oy - (shift || 0);
+    return { x: M.ox - CEN.hx * sc * M.sw, y: cy - CEN.hy * sc * M.ha, w: 2 * CEN.hx * sc * M.sw, h: 2 * CEN.hy * sc * M.ha };
+  }
+  /* fases em fração de M.pc, o ponto em que o núcleo cobre a tela; depois dele a área
+     fixa fica parada na grade e os casos de uso sobem por cima (mecanismo 6) */
   function zoomState(p) {
-    var q = U.clamp(p / P1, 0, 1), sc, phase;
-    if (p <= P1) { sc = 1 + (CEN.S - 1) * Math.pow(q, 1.5); phase = 'zoom'; }
-    else if (p <= P2) { sc = CEN.S * (1 + 0.06 * (p - P1) / (P2 - P1)); phase = 'clímax'; }
-    else { sc = 1.06 * CEN.S + (CEN.Send - 1.06 * CEN.S) * (p - P2) / (1 - P2); phase = 'núcleo'; }
-    return { p: p, q: q, phase: phase, s: PANELS.map(function (pn) { return pn === CEN ? sc : 1 + (pn.S - 1) * q; }) };
+    var pc = M.pc || 1, a = P1 * pc, b = P2 * pc;
+    var q = U.clamp(p / a, 0, 1), sc, phase;
+    if (p <= a) { sc = 1 + (CEN.S - 1) * Math.pow(q, 1.3); phase = 'divergência'; }
+    else if (p <= b) { sc = CEN.S; phase = 'clímax'; }
+    else if (p < pc) { sc = CEN.S + (CEN.Send - CEN.S) * (p - b) / (pc - b); phase = 'núcleo'; }
+    else { sc = CEN.Send; phase = 'grade'; }
+    /* os de fora crescem sobre a escala do central (nunca ficam atrás dele: sem
+       sobreposição com o central) e cada um no seu ritmo, até S no fim da divergência */
+    var scq = 1 + (CEN.S - 1) * Math.pow(q, 1.3);
+    return { p: p, q: q, phase: phase, sc: sc, s: PANELS.map(function (pn) {
+      return pn === CEN ? sc : scq * (1 + (pn.S / CEN.S - 1) * Math.pow(q, pn.e || 1));
+    }) };
   }
   function zoomP(y) { return U.clamp((y - M.zoomTop) / M.zoomLen, 0, 1); }
 
-  /* desenho em px de dispositivo, sempre em pixel inteiro */
-  /* bordas da área visível (px CSS, coordenadas do canvas): um bloco cortado por uma
-     delas que ficaria com menos de 8 px visíveis não é desenhado (sem lasca colada
-     no header ou nas laterais) */
+  /* desenho em px de dispositivo, sempre em pixel inteiro; um bloco cortado por uma
+     borda da área visível que ficaria com menos de 8 px não é desenhado */
   var EDGE = { t: 0, b: 1e9, l: 0, r: 1e9 }, SLIVER = 8;
   function R(x0, y0, x1, y1) {
     if ((y0 < EDGE.t && y1 > EDGE.t && y1 - EDGE.t < SLIVER) || (y0 < EDGE.b && y1 > EDGE.b && EDGE.b - y0 < SLIVER) ||
@@ -291,23 +328,29 @@
     ctx.fillRect(X0, Y0, X1 - X0, Y1 - Y0);
     return true;
   }
-  function frame(x0, y0, x1, y1, t) {
-    var X0 = Math.round(x0 * M.dpr), Y0 = Math.round(y0 * M.dpr), X1 = Math.round(x1 * M.dpr), Y1 = Math.round(y1 * M.dpr);
-    ctx.fillRect(X0, Y0, X1 - X0, t); ctx.fillRect(X0, Y1 - t, X1 - X0, t);
-    ctx.fillRect(X0, Y0, t, Y1 - Y0); ctx.fillRect(X1 - t, Y0, t, Y1 - Y0);
+  function inside(x0, y0, x1, y1) { return x0 >= EDGE.l && x1 <= EDGE.r && y0 >= EDGE.t && y1 <= EDGE.b; }
+  /* rótulo: etiqueta paper com texto em text (16:1); inteiro ou nada */
+  function tagFont(f) {
+    ctx.font = '600 ' + Math.round(f * M.dpr) + 'px ' + MONO;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = (0.13 * f * M.dpr).toFixed(2) + 'px';
   }
-  /* rótulo: etiqueta acid com texto em text (contraste 12:1), font em px CSS */
-  function chip(lines, x, y, f) {
-    var pad = Math.round(0.55 * f), lh = Math.round(1.35 * f), w = 0;
-    ctx.font = '700 ' + Math.round(f * M.dpr) + 'px ' + FONT;
-    lines.forEach(function (t) { w = Math.max(w, ctx.measureText(t).width / M.dpr); });
-    var cwid = Math.ceil(w) + 2 * pad, chh = lines.length * lh + Math.round(0.6 * f);
-    ctx.fillStyle = C.acid; if (!R(x, y, x + cwid, y + chh)) return { w: cwid, h: chh };
+  function chipSize(lines, f) {
+    tagFont(f);
+    var w = 0; lines.forEach(function (t) { w = Math.max(w, ctx.measureText(t.toUpperCase()).width / M.dpr); });
+    return { w: Math.ceil(w) + 2 * Math.round(0.55 * f), h: lines.length * Math.round(1.35 * f) + Math.round(0.6 * f) };
+  }
+  function chip(lines, x, y, f, box) {
+    var z = chipSize(lines, f), lh = Math.round(1.35 * f);
+    if (!inside(x, y, x + z.w, y + z.h)) return false;
+    if (box && (x < box.x || y < box.y || x + z.w > box.x + box.w || y + z.h > box.y + box.h)) return false;
+    ctx.fillStyle = C.paper; R(x, y, x + z.w, y + z.h);
     ctx.fillStyle = C.text; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    tagFont(f);
     lines.forEach(function (t, i) {
-      ctx.fillText(t, Math.round((x + pad) * M.dpr), Math.round((y + Math.round(0.3 * f) + lh * (i + 0.5)) * M.dpr));
+      ctx.fillText(t.toUpperCase(), Math.round((x + Math.round(0.55 * f)) * M.dpr), Math.round((y + Math.round(0.3 * f) + lh * (i + 0.5)) * M.dpr));
     });
-    return { w: cwid, h: chh };
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    return true;
   }
   function wrap(text, maxW) {
     var words = text.split(' '), lines = [], cur = '';
@@ -319,163 +362,153 @@
     return lines;
   }
 
-  function drawPanel(pn, s, shift, vTop, vBot) {
-    var r = rectOf(pn, s, shift);
-    /* parte visível (sob o header); um resto menor que 12 px não é desenhado (sem lascas) */
-    var ix = Math.min(r.x + r.w, M.sw) - Math.max(r.x, 0), iy = Math.min(r.y + r.h, vBot) - Math.max(r.y, vTop);
-    if (ix <= 0 || iy <= 0) return;
-    if (pn !== CEN && (ix < 12 || iy < 12)) return;
-    var X0 = Math.round(r.x * M.dpr), Y0 = Math.round(r.y * M.dpr), X1 = Math.round((r.x + r.w) * M.dpr), Y1 = Math.round((r.y + r.h) * M.dpr);
-    /* vão: uma borda do fundo em volta, para o painel da frente se separar do de trás */
-    var gw = 5 * s;
-    if (pn === CEN) {                                       /* perto de cobrir, o vão do central afina */
-      var mm = Math.min(Math.max(0, r.x), Math.max(0, M.sw - r.x - r.w), Math.max(0, r.y - vTop), Math.max(0, vBot - r.y - r.h));
-      gw = Math.min(gw, mm / 3);
-    }
-    gw = Math.round(gw * M.dpr);
-    ctx.fillStyle = C.soft; ctx.fillRect(X0 - gw, Y0 - gw, X1 - X0 + 2 * gw, Y1 - Y0 + 2 * gw);
+  function drawNeighbor(pn, s, sc, shift, vTop, vBot) {
+    var g = geomOf(pn, s, sc, shift), r = g.R, v = g.V;
+    var ix = Math.min(v.x + v.w, M.sw) - Math.max(v.x, 0), iy = Math.min(v.y + v.h, vBot) - Math.max(v.y, vTop);
+    if (v.w <= 0 || v.h <= 0 || ix < 12 || iy < 12) return;
+    ctx.fillStyle = C.acid;                                   /* campo do painel: pastel */
+    if (!R(v.x, v.y, v.x + v.w, v.y + v.h)) return;
     ctx.save();
-    ctx.beginPath(); ctx.rect(X0, Y0, X1 - X0, Y1 - Y0); ctx.clip();
-    var ux = function (u) { return r.x + u * r.w; }, vy = function (v) { return r.y + v * r.h; };
-    var m = Math.min(r.w, r.h);
-    var sq = function (u, v, side) { var a = side * m / 2; R(ux(u) - a, vy(v) - a, ux(u) + a, vy(v) + a); };
-    var t1 = Math.max(1, Math.round(M.dpr));
-    var i, j, k;
-
-    if (pn === CEN) { drawCentro(r, s, shift, ux, vy, t1); ctx.restore(); return; }
-
-    ctx.fillStyle = C['accent-text']; R(r.x, r.y, r.x + r.w, r.y + r.h);
-    /* desenho em toda a área do painel (só a parte de fora aparece no começo) */
-    var bu = function (a) { return 0.06 + a * 0.88; }, bv = function (a) { return 0.06 + a * 0.88; };
+    ctx.beginPath(); ctx.rect(Math.round(v.x * M.dpr), Math.round(v.y * M.dpr), Math.round((v.x + v.w) * M.dpr) - Math.round(v.x * M.dpr), Math.round((v.y + v.h) * M.dpr) - Math.round(v.y * M.dpr)); ctx.clip();
+    var ux = function (u) { return r.x + u * r.w; }, vy = function (q) { return r.y + q * r.h; };
+    var i, j;
     if (pn.kind === 'hotel') {
-      ctx.fillStyle = C.surface; R(ux(bu(0)), vy(bv(0.1)), ux(bu(1)), vy(bv(1)));
-      ctx.fillStyle = C.band; R(ux(0), vy(bv(0)), ux(1), vy(bv(0.1)));
-      for (i = 0; i < 9; i++) for (j = 0; j < 4; j++) {
-        ctx.fillStyle = (i * 4 + j) % 5 === 2 ? C.acid : C.accent;
-        R(ux(bu(0.05 + i * 0.106)), vy(bv(0.2 + j * 0.2)), ux(bu(0.05 + i * 0.106 + 0.06)), vy(bv(0.2 + j * 0.2 + 0.12)));
-      }
-    } else if (pn.kind === 'areas') {
-      var n = 0;
-      for (j = 0; j < 4 && n < 11; j++) for (i = 0; i < 3 && n < 11; i++) {
-        ctx.fillStyle = n === 4 ? C.acid : C.surface;
-        R(ux(bu(i / 3 + 0.03)), vy(bv(j / 4 + 0.03)), ux(bu((i + 1) / 3 - 0.03)), vy(bv((j + 1) / 4 - 0.03)));
-        n++;
+      /* prédio em acid com janelas no tom do campo; uma janela acesa em accent */
+      ctx.fillStyle = C.paper; R(ux(0.2), vy(0.3), ux(0.8), vy(1.02));
+      for (i = 0; i < 5; i++) for (j = 0; j < 3; j++) {
+        ctx.fillStyle = (i === 3 && j === 1) ? C.accent : C.acid;
+        R(ux(0.27 + i * 0.105), vy(0.4 + j * 0.18), ux(0.27 + i * 0.105 + 0.05), vy(0.4 + j * 0.18 + 0.09));
       }
     } else if (pn.kind === 'restaurante') {
       for (i = 0; i < 4; i++) for (j = 0; j < 2; j++) {
-        var cxp = ux(bu(0.125 + i * 0.25)), cyp = vy(bv(0.27 + j * 0.5)), tw = 0.07 * r.w, th = 0.1 * r.h, d = Math.min(tw, th);
-        ctx.fillStyle = C.surface;
+        var cxp = ux(0.14 + i * 0.24), cyp = vy(0.32 + j * 0.42), tw = 0.065 * r.w, th = 0.11 * r.h, d = Math.min(tw, th);
+        ctx.fillStyle = C.paper;
         R(cxp - d * 0.4, cyp - th - d * 0.8, cxp + d * 0.4, cyp - th - d * 0.2);
         R(cxp - d * 0.4, cyp + th + d * 0.2, cxp + d * 0.4, cyp + th + d * 0.8);
-        ctx.fillStyle = (i + j) % 3 === 0 ? C.band : C.acid; R(cxp - tw, cyp - th, cxp + tw, cyp + th);
+        ctx.fillStyle = C.paper; R(cxp - tw, cyp - th, cxp + tw, cyp + th);
+        if (i === 2 && j === 0) { ctx.fillStyle = C.accent; R(cxp - tw * 0.4, cyp - th * 0.4, cxp + tw * 0.4, cyp + th * 0.4); }
+      }
+    } else if (pn.kind === 'areas') {
+      var nn = 0;
+      for (j = 0; j < 4 && nn < 11; j++) for (i = 0; i < 3 && nn < 11; i++) {
+        ctx.fillStyle = C.paper;
+        R(ux(0.08 + i * 0.29 + 0.02), vy(0.08 + j * 0.215 + 0.02), ux(0.08 + (i + 1) * 0.29 - 0.02), vy(0.08 + (j + 1) * 0.215 - 0.02));
+        if (nn === 4) { ctx.fillStyle = C.accent; R(ux(0.08 + i * 0.29 + 0.05), vy(0.08 + j * 0.215 + 0.05), ux(0.08 + i * 0.29 + 0.11), vy(0.08 + j * 0.215 + 0.11)); }
+        nn++;
       }
     } else if (pn.kind === 'dre') {
-      var hs = [0.3, 0.46, 0.38, 0.58, 0.5, 0.7, 0.62, 0.9];
+      var hs = [0.3, 0.46, 0.38, 0.58, 0.5, 0.72];
       for (i = 0; i < hs.length; i++) {
-        ctx.fillStyle = i === hs.length - 1 ? C.acid : C.surface;
-        R(ux(bu(0.02 + i * 0.123)), vy(bv(0.92 - hs[i] * 0.86)), ux(bu(0.02 + i * 0.123 + 0.08)), vy(bv(0.92)));
+        ctx.fillStyle = C.paper;
+        R(ux(0.1 + i * 0.14), vy(0.88 - hs[i] * 0.8), ux(0.1 + i * 0.14 + 0.09), vy(0.88));
+        if (i === hs.length - 1) { ctx.fillStyle = C.accent; R(ux(0.1 + i * 0.14), vy(0.88 - hs[i] * 0.8), ux(0.1 + i * 0.14 + 0.09), vy(0.88 - hs[i] * 0.8 + 0.06)); }
       }
-      ctx.fillStyle = C.band; R(ux(0), vy(bv(0.92)), ux(1), vy(bv(0.97)));
+      ctx.fillStyle = C['accent-text']; R(ux(0.06), vy(0.88), ux(0.94), vy(0.895));
     } else if (pn.kind === 'ondas') {
-      var rows = [[6, C.acid], [5, C.band], [4, C.surface]];
-      rows.forEach(function (rw, ri) {
-        ctx.fillStyle = rw[1];
-        for (var a = 0; a < rw[0]; a++) R(ux(bu(a * 0.165 + ri * 0.08)), vy(bv(ri / 3 + 0.05)), ux(bu(a * 0.165 + ri * 0.08 + 0.13)), vy(bv((ri + 1) / 3 - 0.05)));
+      [5, 4, 3].forEach(function (nr, ri) {
+        for (var a = 0; a < nr; a++) {
+          ctx.fillStyle = (ri === 0 && a === 0) ? C.accent : C.paper;
+          R(ux(0.08 + a * 0.17 + ri * 0.085), vy(0.14 + ri * 0.27), ux(0.08 + a * 0.17 + ri * 0.085 + 0.13), vy(0.14 + ri * 0.27 + 0.19));
+        }
       });
     } else if (pn.kind === 'seguranca') {
-      var cxs = ux(pn.corner.charAt(1) === 'r' ? 0.66 : 0.34), cys = vy(pn.corner.charAt(0) === 'b' ? 0.62 : 0.38), hm = Math.min(r.w, r.h) * 0.3;
-      ctx.fillStyle = C.band; R(cxs - hm, cys - hm, cxs + hm, cys + hm);
-      ctx.fillStyle = C['accent-text']; R(cxs - hm * 0.78, cys - hm * 0.78, cxs + hm * 0.78, cys + hm * 0.78);
-      ctx.fillStyle = C.surface; R(cxs - hm * 0.58, cys - hm * 0.58, cxs + hm * 0.58, cys + hm * 0.58);
-      ctx.fillStyle = C['accent-text']; R(cxs - hm * 0.4, cys - hm * 0.4, cxs + hm * 0.4, cys + hm * 0.4);
-      ctx.fillStyle = C.acid; R(cxs - hm * 0.22, cys - hm * 0.22, cxs + hm * 0.22, cys + hm * 0.22);
+      var cxs = ux(0.5), cys = vy(0.55), hm = Math.min(r.w, r.h) * 0.32;
+      ctx.fillStyle = C.paper; R(cxs - hm, cys - hm, cxs + hm, cys + hm);
+      ctx.fillStyle = C.acid; R(cxs - hm * 0.78, cys - hm * 0.78, cxs + hm * 0.78, cys + hm * 0.78);
+      ctx.fillStyle = C.paper; R(cxs - hm * 0.56, cys - hm * 0.56, cxs + hm * 0.56, cys + hm * 0.56);
+      ctx.fillStyle = C.acid; R(cxs - hm * 0.34, cys - hm * 0.34, cxs + hm * 0.34, cys + hm * 0.34);
+      ctx.fillStyle = C.accent; R(cxs - hm * 0.14, cys - hm * 0.14, cxs + hm * 0.14, cys + hm * 0.14);
     }
-    /* rótulo no canto de fora (o que aparece desde o começo): 12px em s = 1 */
-    var f = 12 * s, off = 8 * s;
-    ctx.font = '700 ' + Math.round(f * M.dpr) + 'px ' + FONT;
-    var cwid = Math.ceil(ctx.measureText(pn.label).width / M.dpr) + 2 * Math.round(0.55 * f), chh = Math.round(1.35 * f) + Math.round(0.6 * f);
-    var lx = pn.corner.charAt(1) === 'r' ? r.x + r.w - off - cwid : r.x + off;
-    var ly = pn.corner.charAt(0) === 'b' ? r.y + r.h - off - chh : (pn.corner.charAt(0) === 'm' ? r.y + r.h / 2 - chh / 2 : r.y + off);
-    ctx.fillStyle = C['accent-text']; R(lx - 4 * s, ly - 4 * s, lx + cwid + 4 * s, ly + chh + 4 * s);
-    chip([pn.label], lx, ly, f);
     ctx.restore();
+    /* rótulo no canto que dá para o central (fica na tela enquanto o painel estiver) */
+    var f = 12 * (1 + 0.3 * (s - 1)), off = Math.round(8 * (1 + 0.3 * (s - 1))), z = chipSize([pn.label], f);
+    var lx = pn.chip.charAt(1) === 'r' ? v.x + v.w - off - z.w : v.x + off;
+    var ly = pn.chip.charAt(0) === 'b' ? v.y + v.h - off - z.h : v.y + off;
+    chip([pn.label], lx, ly, f, v);
   }
 
-  /* central: campo accent, núcleo (paper + grade) no meio, 11 áreas no anel, ligadas a
-     ele; rótulo "IRON AI / Qualquer setor" no canto */
-  function drawCentro(r, s, shift, ux, vy, t1) {
-    ctx.fillStyle = C.accent; R(r.x, r.y, r.x + r.w, r.y + r.h);
-    var k = s / CEN.S;                                       /* 1 no clímax */
-    /* núcleo: grade com passo G na tela quando ele cobre a tela (s = Send) */
+  /* central: campo acid, núcleo (paper + grade) no meio, 11 áreas no anel ligadas a
+     ele e o rótulo "IRON AI / Qualquer setor" no alto */
+  function drawCentro(sc, shift) {
+    var r = centerRect(sc, shift);
+    var ux = function (u) { return r.x + u * r.w; }, vy = function (v) { return r.y + v * r.h; };
+    var t1 = Math.max(1, Math.round(M.dpr)), k = sc / CEN.S;
+    ctx.fillStyle = C.acid; R(r.x, r.y, r.x + r.w, r.y + r.h);
     var nx0 = ux(CEN.nu[0]), nx1 = ux(CEN.nu[1]), ny0 = vy(CEN.nv[0]), ny1 = vy(CEN.nv[1]);
     ctx.fillStyle = C.paper; R(nx0, ny0, nx1, ny1);
     ctx.fillStyle = C.line;
-    var pitch = (G / CEN.Send) * s, cxs = M.ox, cys = M.oy - shift;
+    var pitch = (G / CEN.Send) * sc, cxs = M.ox, cys = M.oy - shift;
     var NX0 = Math.round(nx0 * M.dpr), NX1 = Math.round(nx1 * M.dpr), NY0 = Math.round(ny0 * M.dpr), NY1 = Math.round(ny1 * M.dpr);
     if (pitch >= 3) {
       var a;
       for (a = Math.ceil((nx0 - cxs) / pitch); cxs + a * pitch < nx1; a++) ctx.fillRect(Math.round((cxs + a * pitch) * M.dpr), NY0, t1, NY1 - NY0);
       for (a = Math.ceil((ny0 - cys) / pitch); cys + a * pitch < ny1; a++) ctx.fillRect(NX0, Math.round((cys + a * pitch) * M.dpr), NX1 - NX0, t1);
     }
-    /* ligações (band) e cartões das áreas (surface, texto em text quando ≥ 12px) */
     var lw = Math.max(1, Math.round(2 * k)), fpx = CEN.cardFont * k;
-    CEN.cards.forEach(function (c) {
+    /* um só tamanho de rótulo para as 11 áreas: o maior em que todos os nomes cabem
+       inteiros, com 12 px ou mais; se algum não couber, nenhum nome é desenhado (os
+       cartões nunca aparecem uns com nome e outros vazios) */
+    var fzAll = Math.floor(fpx + 1e-6), linesOf = [];
+    for (; fzAll >= 12; fzAll--) {
+      tagFont(fzAll);
+      var lhA = Math.round(fzAll * 1.2), okAll = true;
+      linesOf = CEN.cards.map(function (c) {
+        var w = (c.w * r.w) - 2 * Math.max(4, 0.4 * fzAll), h = (c.h * r.h);
+        var L = wrap(c.name.toUpperCase(), w), wm = 0;
+        L.forEach(function (t) { wm = Math.max(wm, ctx.measureText(t).width / M.dpr); });
+        if (L.length * lhA > h - 6 || wm > c.w * r.w - 6 || L.length > 2) okAll = false;
+        return L;
+      });
+      if (okAll) break;
+    }
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    CEN.cards.forEach(function (c, ci) {
       var x0 = ux(c.u - c.w / 2), x1 = ux(c.u + c.w / 2), y0 = vy(c.v - c.h / 2), y1 = vy(c.v + c.h / 2);
       var mx = ux(c.u), my = vy(c.v), h2 = lw / 2;
-      ctx.fillStyle = C.band;
-      if (c.v > 0.75) R(mx - h2, ny1, mx + h2, y0);
-      else if (c.u > 0.5) R(nx1, my - h2, x0, my + h2);
+      ctx.fillStyle = C['accent-text'];
+      if (c.v > CEN.nv[1]) {                                      /* embaixo: sobe até o núcleo (passando entre os cartões de cima) */
+        R(mx - h2, ny1, mx + h2, y0);
+      } else if (c.u > 0.5) R(nx1, my - h2, x0, my + h2);
       else R(x1, my - h2, nx0, my + h2);
-      ctx.fillStyle = C.surface; if (!R(x0, y0, x1, y1)) return;
-      /* texto em text, do maior tamanho que couber (nunca abaixo de 12px) */
-      var fz = Math.floor(fpx + 1e-6), lines = null, lh = 0;
-      while (fz >= 12) {
-        ctx.font = '600 ' + Math.round(fz * M.dpr) + 'px ' + FONT;
-        lines = wrap(c.name, (x1 - x0) - 2 * Math.max(5, 0.5 * fz)); lh = Math.round(fz * 1.28);
-        var wmax = 0; lines.forEach(function (t) { wmax = Math.max(wmax, ctx.measureText(t).width / M.dpr); });
-        if (lines.length * lh <= (y1 - y0) - 6 && wmax <= (x1 - x0) - 6) break;
-        fz -= 1; lines = null;
-      }
+      ctx.fillStyle = C.paper; if (!R(x0, y0, x1, y1)) return;
+      if (!inside(x0, y0, x1, y1)) return;                    /* nome inteiro ou nada */
+      var lines = fzAll >= 12 ? linesOf[ci] : null, lh = Math.round(fzAll * 1.2);
       if (lines) {
+        tagFont(fzAll);
         ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        lines.forEach(function (t, i) {
-          ctx.fillText(t, Math.round(mx * M.dpr), Math.round((my + (i - (lines.length - 1) / 2) * lh) * M.dpr));
-        });
+        lines.forEach(function (t, i) { ctx.fillText(t, Math.round(mx * M.dpr), Math.round((my + (i - (lines.length - 1) / 2) * lh) * M.dpr)); });
+        ctx.textAlign = 'left';
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
       }
     });
-    ctx.textAlign = 'left';
-    /* rótulo do central, em cima e ligado ao núcleo: cresce mais devagar que o painel
-       (12px em s = 1) e sai pela borda de cima quando a câmera entra no núcleo */
-    var f = 12 * (1 + 0.3 * (s - 1));
-    ctx.font = '700 ' + Math.round(f * M.dpr) + 'px ' + FONT;
-    var tw = Math.max(ctx.measureText('IRON AI').width, ctx.measureText(CEN.label).width) / M.dpr;
-    var cwid = Math.ceil(tw) + 2 * Math.round(0.55 * f), chh = 2 * Math.round(1.35 * f) + Math.round(0.6 * f);
-    var cx0 = ux(0.5) - cwid / 2, cy0 = vy(0.125) - chh / 2;
-    ctx.fillStyle = C.band; R(ux(0.5) - lw / 2, cy0 + chh, ux(0.5) + lw / 2, ny0);
-    chip(['IRON AI', CEN.label], cx0, cy0, f);
+    var lab = [sc >= CEN.S - 1e-6 ? 'IRON AI' : CEN.label];
+    var f = 12 * (1 + 0.3 * (sc - 1)), z = chipSize(lab, f);
+    var cx0 = ux(0.5) - z.w / 2, cy0 = vy(0.15) - z.h / 2;
+    ctx.fillStyle = C['accent-text']; R(ux(0.5) - lw / 2, cy0 + z.h, ux(0.5) + lw / 2, ny0);
+    chip(lab, cx0, cy0, f);
+    return r;
   }
 
   /* acabamento das bordas da área visível: uma faixa de menos de 8 px colada no header
-     ou nas laterais (resto de bloco cortado, vão, campo entre dois blocos) é coberta
-     pelo bloco que vem logo depois dela, coluna a coluna (ou linha a linha) */
-  var LINE = U.rgb(U.token('--line') || '#dddbe9'), PAPER = U.rgb(U.token('--paper') || '#fbfbfd'), TOK = {};
+     ou nas laterais é coberta pelo bloco que vem logo depois dela (só cor de token; a
+     grade de hairlines fica) */
+  var LINE = U.rgb(U.token('--line') || '#e5ded3'), PAPER = U.rgb(U.token('--paper') || '#fcfbf8'), TOK = {};
   ['paper', 'soft', 'surface', 'band', 'acid', 'accent', 'accent-text', 'line', 'text'].forEach(function (n) {
     var c = U.rgb(U.token('--' + n) || '#000000'); TOK[(c[0] << 16) | (c[1] << 8) | c[2]] = true;
   });
   function edgeClean(vTop, vBot) {
-    var d = Math.max(1, Math.round(SLIVER * M.dpr)), Wd = canvas.width, Hd = canvas.height;
+    var d = Math.max(1, Math.round(SLIVER * M.dpr)), Wd = canvas.width;
     var T = Math.round(vTop * M.dpr), B = Math.round(vBot * M.dpr);
     function band(x, y, w, h, vertical, fromEnd) {
       if (w <= 0 || h <= 0) return;
       var img = ctx.getImageData(x, y, w, h), a = img.data, n = vertical ? w : h, len = vertical ? h : w, changed = false;
       for (var i = 0; i < n; i++) {
-        var idx = function (k) { var kk = fromEnd ? len - 1 - k : k; return vertical ? (kk * w + i) * 4 : (i * w + kk) * 4; };
+        var idx = function (kk0) { var kk = fromEnd ? len - 1 - kk0 : kk0; return vertical ? (kk * w + i) * 4 : (i * w + kk) * 4; };
         var j = idx(len - 1), r = a[j], g = a[j + 1], b = a[j + 2];
-        if (!TOK[(r << 16) | (g << 8) | b]) continue;          /* só estende cor de token (nunca antialias de texto) */
+        if (!TOK[(r << 16) | (g << 8) | b]) continue;
         var k = len - 1;
         while (k > 0) { var q = idx(k - 1); if (a[q] !== r || a[q + 1] !== g || a[q + 2] !== b) break; k--; }
         if (k > 0) {
-          /* fio da grade (line) sobre paper fica: é a grade de hairlines, não lasca */
           var isGrid = function (t) { return (a[t] === LINE[0] && a[t + 1] === LINE[1] && a[t + 2] === LINE[2]) || (a[t] === PAPER[0] && a[t + 1] === PAPER[1] && a[t + 2] === PAPER[2]); };
           var grid = isGrid(j);
           for (var m0 = 0; m0 < k && grid; m0++) grid = isGrid(idx(m0));
@@ -485,10 +518,10 @@
       }
       if (changed) ctx.putImageData(img, x, y);
     }
-    band(0, T, Wd, Math.min(d + 1, B - T), true, false);              /* sob o header */
-    band(0, Math.max(T, B - d - 1), Wd, Math.min(d + 1, B - T), true, true);   /* base da tela */
-    band(0, T, Math.min(d + 1, Wd), B - T, false, false);             /* esquerda */
-    band(Math.max(0, Wd - d - 1), T, Math.min(d + 1, Wd), B - T, false, true); /* direita */
+    band(0, T, Wd, Math.min(d + 1, B - T), true, false);
+    band(0, Math.max(T, B - d - 1), Wd, Math.min(d + 1, B - T), true, true);
+    band(0, T, Math.min(d + 1, Wd), B - T, false, false);
+    band(Math.max(0, Wd - d - 1), T, Math.min(d + 1, Wd), B - T, false, true);
   }
 
   var lastKey = '';
@@ -504,14 +537,14 @@
     var vTop = Math.max(0, M.hdr - rise), vBot = Math.min(M.sh, M.H - rise);
     EDGE.t = vTop; EDGE.b = vBot; EDGE.l = 0; EDGE.r = M.sw;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = C.soft; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0; i < PANELS.length; i++) drawPanel(PANELS[i], zs.s[i], shift, vTop, vBot);
-    /* o central, perto de cobrir: uma sobra menor que 18 px entre ele e a borda vira
-       campo accent (sem lasca do fundo ou de painel de trás); o conteúdo não se move */
-    var c = rectOf(CEN, zs.s[PANELS.length - 1], shift), T = 18;
-    var ml = c.x, mr = M.sw - (c.x + c.w), mt = c.y - vTop, mb = vBot - (c.y + c.h);
+    ctx.fillStyle = C.paper; ctx.fillRect(0, 0, canvas.width, canvas.height);  /* vãos em paper */
+    for (var i = PANELS.length - 2; i >= 0; i--) drawNeighbor(PANELS[i], zs.s[i], zs.sc, shift, vTop, vBot);  /* rápidos atrás */
+    var c = drawCentro(zs.sc, shift);
+    /* perto de cobrir: uma sobra menor que 18 px entre o central e a borda vira campo
+       campo do central (sem lasca do fundo ou de painel de fora) */
+    var T = 18, ml = c.x, mr = M.sw - (c.x + c.w), mt = c.y - vTop, mb = vBot - (c.y + c.h);
     var fl = ml > 0 && ml < T, fr = mr > 0 && mr < T, ft = mt > 0 && mt < T, fb = mb > 0 && mb < T;
-    ctx.fillStyle = C.accent;
+    ctx.fillStyle = C.acid;
     var ya = ft ? vTop : Math.max(vTop, c.y), yb = fb ? vBot : Math.min(vBot, c.y + c.h);
     var xa = fl ? 0 : Math.max(0, c.x), xb = fr ? M.sw : Math.min(M.sw, c.x + c.w);
     if (fl) R(0, ya, c.x, yb);
@@ -549,7 +582,7 @@
     metrics: function () { return JSON.parse(JSON.stringify(M)); },
     zoomP: function () { return zoomP(S.scrollY()); },
     zoomState: function (p) { return zoomState(p === undefined ? zoomP(S.scrollY()) : p); },
-    panelRects: function (p) { var zs = zoomState(p === undefined ? zoomP(S.scrollY()) : p); return PANELS.map(function (pn, i) { var r = rectOf(pn, zs.s[i], 0); return { kind: pn.kind, label: pn.label, S: pn === CEN ? CEN.Send : pn.S, x: r.x, y: r.y, w: r.w, h: r.h, s: zs.s[i] }; }); },
+    panelRects: function (p) { var zs = zoomState(p === undefined ? zoomP(S.scrollY()) : p); return PANELS.map(function (pn, i) { var r = pn === CEN ? centerRect(zs.sc, 0) : geomOf(pn, zs.s[i], zs.sc, 0).V; return { kind: pn.kind, label: pn.label, S: pn === CEN ? CEN.Send : pn.S, x: r.x, y: r.y, w: r.w, h: r.h, s: zs.s[i] }; }); },
     stack: function () {
       return cards.map(function (c, i) {
         var r = c.getBoundingClientRect();
