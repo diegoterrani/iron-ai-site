@@ -1,0 +1,84 @@
+/* IRON AI — generated from tokens.json */
+:root, [data-theme="light"] {
+  --ink: #16151f;
+  --deep: #f1f0f8;
+  --paper: #fbfbfd;
+  --deep-2: #f5f4fb;
+  --soft: #f4f4f9;
+  --form-bg: #f7f6fc;
+  --modal-bg: #ffffff;
+  --surface: #efeef7;
+  --band: #e9e6fb;
+  --button-dark-bg: #ffffff;
+  --surface-2: #e8e7f1;
+  --icon-bg: #eeebfd;
+  --footer-bg: #efeef6;
+  --line: #dddbe9;
+  --line-soft: #5547c42e;
+  --hairline: #16151f1f;
+  --field-line: #8e8ba5;
+  --icon-border: #d3cdf6;
+  --button-dark-border: #8e8ba5;
+  --text: #16151f;
+  --nav-text: #3d3b4f;
+  --muted: #4d4b60;
+  --subtle: #646278;
+  --acid: #cdc5fb;
+  --acid-hover: #b8adf7;
+  --accent: #5547c4;
+  --accent-text: #4a3db3;
+  --link: #4f42bd;
+  --live: #7466e3;
+  --icon-ink: #4a3db3;
+  --focus: #5547c4;
+  --danger: #b42330;
+  --field-error: #a8401f;
+  --risk-red: #c03b3b;
+  --risk-red-ink: #7f1d1d;
+  --risk-yellow: #a16207;
+  --risk-yellow-ink: #713f12;
+  --risk-green: #2f7d4f;
+  --risk-green-ink: #14532d;
+  --red-bg: #fff1f2;
+  --red-accent: #b91c1c;
+  --yellow-bg: #fffbeb;
+  --yellow-accent: #92400e;
+  --green-bg: #f0fdf4;
+  --green-accent: #166534;
+  --neutral-bg: #f8fafc;
+  --neutral-accent: #0f172a;
+  --shadow-modal: 0 35px 100px #16151f29;
+  --shadow-live: 0 0 0 5px #7466e32e;
+}
+:root {
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 22px;
+  --space-4: 32px;
+  --space-5: 44px;
+  --space-6: 60px;
+  --space-7: 78px;
+  --space-8: 120px;
+  --header-height: 84px;
+  --control-height: 48px;
+  --icon-box: 46px;
+  --page-max: 1240px;
+  --radius-none: 0;
+  --radius-full: 50%;
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+.hero { font-family: var(--font-sans); font-size: 92px; line-height: 0.99; font-weight: 600; letter-spacing: -0.055em; }
+.section-title { font-family: var(--font-sans); font-size: 61px; line-height: 1.06; font-weight: 600; letter-spacing: -0.05em; }
+.stat { font-family: var(--font-sans); font-size: 53px; line-height: 1; font-weight: 700; letter-spacing: -0.06em; }
+.product-title { font-family: var(--font-sans); font-size: 30px; line-height: 1.2; font-weight: 700; letter-spacing: -0.03em; }
+.card-title { font-family: var(--font-sans); font-size: 20px; line-height: 1.35; font-weight: 700; letter-spacing: -0.025em; }
+.lead { font-family: var(--font-sans); font-size: 17px; line-height: 1.75; font-weight: 400; }
+.body { font-family: var(--font-sans); font-size: 15px; line-height: 1.75; font-weight: 400; }
+.body-sm { font-family: var(--font-sans); font-size: 14px; line-height: 1.7; font-weight: 400; }
+.ui { font-family: var(--font-sans); font-size: 13px; line-height: 1.2; font-weight: 700; }
+.label { font-family: var(--font-sans); font-size: 12px; line-height: 1.5; font-weight: 700; }
+.brand { font-family: var(--font-sans); font-size: 14px; line-height: 1; font-weight: 500; letter-spacing: 0.1em; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; font-weight: 600; letter-spacing: 0.15em; }
+.tag { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; font-weight: 600; letter-spacing: 0.13em; }
+.index { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; font-weight: 400; }

@@ -1,0 +1,600 @@
+/* =========================================================================
+   IRON AI — site.css
+   Base comum a todas as páginas + seções da home.
+   Cores, espaços e tipos vêm de tokens.css (design system IRON AI, modo claro).
+   Regras: tudo quadrado (radius-none), bordas em vez de sombras, sem gradientes.
+   Ordem: 1 fontes · 2 variáveis do site · 3 base · 4 componentes · 5 header
+          6 home/hero · 7 home/manifesto · 8 marcadores de próximas partes
+          9 responsivo · 10 movimento reduzido
+   ========================================================================= */
+
+/* 1. Fontes locais (CSP: font-src 'self') ------------------------------- */
+@font-face { font-family: "Manrope"; src: url("../fonts/manrope-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Manrope"; src: url("../fonts/manrope-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Manrope"; src: url("../fonts/manrope-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Manrope"; src: url("../fonts/manrope-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Manrope"; src: url("../fonts/manrope-latin-800-normal.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("../fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("../fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("../fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+
+/* 2. Variáveis do site (derivadas dos tokens) --------------------------- */
+:root {
+  --gutter: max(6vw, calc(50vw - 620px));      /* lateral das seções */
+  --header-h: var(--header-height);            /* 84px */
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+  --manifesto-size: clamp(36px, calc(24px + 2.6vw), 61px); /* section-title, fluido 36 -> 61 */
+}
+
+/* 3. Base ---------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { overflow-x: clip; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: inherit; text-decoration: none; }
+img, svg, canvas { display: block; }
+p { margin: 0; }
+h1, h2, h3 { margin: 0; font-weight: 600; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+::selection { background: var(--acid); color: var(--text); }
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.skip-link {
+  position: fixed; top: 12px; left: 12px; z-index: 100;
+  padding: 12px 18px; background: var(--modal-bg); border: 1px solid var(--button-dark-border);
+  font: 700 13px/1 var(--font-sans); color: var(--text);
+  transform: translateY(-160%); transition: transform .2s;
+}
+.skip-link:focus { transform: none; }
+
+.container { width: min(var(--page-max), 100% - 48px); margin-inline: auto; }
+
+/* 4. Componentes (padrões de ds/components/bundle.css) ------------------- */
+.brand {
+  display: inline-flex; align-items: baseline; gap: .32em;
+  font: 500 14px/1 var(--font-sans); letter-spacing: .1em; white-space: nowrap; color: var(--text);
+}
+.brand b { font-weight: 800; }
+
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: var(--control-height); padding: 0 var(--space-3);
+  border: 0; border-radius: var(--radius-none);
+  font: 700 13px/1 var(--font-sans); white-space: nowrap; cursor: pointer;
+  transition: transform .2s, background-color .2s;
+}
+.button:hover { transform: translateY(-2px); }
+.button-primary { background: var(--acid); color: var(--text); }
+.button-primary:hover { background: var(--acid-hover); }
+.button-dark { background: var(--button-dark-bg); color: var(--text); border: 1px solid var(--button-dark-border); }
+.button-small { min-height: 42px; padding: 0 18px; background: transparent; color: var(--text); border: 1px solid var(--button-dark-border); }
+/* hover dos botões de contorno (design-system.md, Movimento, esclarecimento da r21):
+   translateY(-2px) do .button + fundo surface, em .2s; o mesmo no foco visível */
+.button-small:hover, .button-dark:hover,
+.button-small:focus-visible, .button-dark:focus-visible { background: var(--surface); }
+.button-small:focus-visible, .button-dark:focus-visible { transform: translateY(-2px); }
+.text-link {
+  display: inline-flex; align-items: center; gap: 9px; padding: 0; background: none; border: 0;
+  font: 800 12px/1 var(--font-sans); color: var(--link);
+}
+.ico { width: 18px; height: 18px; flex: none; }
+.ico path, .ico circle, .ico rect, .ico line {
+  fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.eyebrow {
+  display: flex; align-items: center; gap: 10px; margin: 0;
+  color: var(--link); text-transform: uppercase; letter-spacing: .15em;
+  font: 600 12px/1.5 var(--font-mono);
+}
+.eyebrow > span { display: block; width: 25px; height: 1px; flex: none; background: currentColor; }
+
+/* 5. Header -------------------------------------------------------------- */
+/* Header sempre opaco (paper, opacidade 1), 84px em todas as larguras, com nav e
+   "Agendar diagnóstico" sempre. Só se move na vertical: --hdr-y (px), gravado
+   pelo JS a cada quadro a partir da posição (expansão do hero; na passagem, a
+   borda da folha do manifesto); sem transição por tempo. */
+.site-header {
+  --y: var(--hdr-y, 0px);
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  height: var(--header-h);
+  background: var(--paper);
+  transform: translate3d(0, var(--y), 0);
+  will-change: transform;
+}
+/* borda inferior: hairline em todos os estados em que aparece (sobre o hero, encaixado
+   e no movimento reduzido; design-system.md). Viajando na borda da
+   folha o header é a faixa de cima da própria folha, sem divisória: --rule = 0.
+   Encaixado, a divisória se abre do centro para as pontas nos 32/22 px de
+   rolagem em que o conteúdo chega à base do header (--rule de 0 a 1, home.js). */
+.site-header::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--hairline);
+  transform: scaleX(var(--rule, 1));
+}
+/* foco de teclado no header ou menu aberto: ele fica inteiro no topo da tela */
+.site-header:has(:focus-visible), .site-header.nav-open { --y: 0px; }
+.site-header__inner {
+  display: flex; align-items: center; gap: 34px;
+  height: 100%; padding: 0 var(--gutter);
+}
+.site-nav { display: flex; align-items: center; gap: 34px; margin-left: auto; }
+.site-nav a { font: 700 13px/1 var(--font-sans); color: var(--nav-text); transition: color .2s; }
+.site-nav a:hover { color: var(--accent-text); }
+.site-header__cta { min-height: 42px; padding: 0 18px; }
+.site-header__menu {
+  display: none; place-items: center; width: 42px; height: 42px; padding: 0;
+  background: var(--button-dark-bg); color: var(--text);
+  border: 1px solid var(--button-dark-border); border-radius: var(--radius-none); cursor: pointer;
+  transition: transform .2s, background-color .2s;
+}
+.site-header__menu:hover, .site-header__menu:focus-visible { background: var(--surface); transform: translateY(-2px); }
+.site-header__menu .ico-x { display: none; }
+.site-header.nav-open .site-header__menu .ico-menu { display: none; }
+.site-header.nav-open .site-header__menu .ico-x { display: block; }
+
+/* 6. Home — hero com rolagem travada e mídia que expande ------------------
+   Um foco: a mídia centrada (45% × até 65% da tela). Todo texto do hero fica
+   sobre o fundo paper do palco, nunca sobre ilustração. No desktop, coluna
+   esquerda: eyebrow + 1ª metade do título; coluna direita: 2ª metade + texto +
+   ação. Em telas em retrato: 1ª metade acima da mídia, 2ª metade, texto e ação
+   abaixo. A camada de fundo (bloco acid com a grade de nós da capa) é desenhada
+   no canvas só onde não há texto e some na expansão. Na expansão, cada texto é
+   empurrado para fora pela borda da mídia do seu lado (home.js).
+   O JS grava a geometria inicial da mídia em --m-x/--m-y/--m-w/--m-h (px) e o
+   tamanho do título em --title-size; os valores abaixo valem sem JS. */
+
+.intro { position: relative; }
+/* margem lateral do palco do hero em repouso: a da seção, no mínimo space-4 (mobile: space-3) */
+.home-hero { --hm: max(var(--gutter), var(--space-4)); }
+@media (max-width: 640px) { .home-hero { --hm: var(--space-3); } }
+
+.home-hero {
+  position: sticky; top: 0; z-index: 0;
+  height: 100vh;
+}
+.home-hero__stage {
+  --m-x: 15%; --m-w: 70%; --m-y: 30%; --m-h: 40%;
+  --gap-t: 28px; --gap-b: 20px; --hg: 40px;
+  --title-size: clamp(36px, 11.2vw, 48px);
+  --foot-bottom: clamp(20px, 3vh, 32px);
+  position: relative; height: 100%; overflow: hidden;
+  background: var(--paper);
+  will-change: transform;
+}
+
+/* mídia: desenhada no canvas; o fallback só aparece sem JS */
+.home-hero__fallback {
+  position: absolute; z-index: 1;
+  left: var(--m-x); top: var(--m-y); width: var(--m-w); height: var(--m-h);
+  background: var(--accent);
+}
+html.js .home-hero__fallback { display: none; }
+.home-hero__canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+
+/* título partido */
+.home-hero__title {
+  margin: 0;
+  font-size: var(--title-size); font-weight: 600; line-height: .99; letter-spacing: -.055em;
+  color: var(--text);
+}
+.home-hero__title em { font-style: normal; color: var(--accent); }
+.home-hero__half {
+  position: absolute; z-index: 3; display: block;
+  white-space: nowrap; pointer-events: none;
+  will-change: transform, opacity;
+}
+.home-hero__half br { display: none; }
+
+/* textos de apoio e ação */
+.home-hero__eyebrow { position: absolute; z-index: 3; }
+.home-hero__foot { position: absolute; z-index: 3; will-change: transform, opacity; }
+/* lead: 17px/1,75 (token); no mobile 15px/1,7 */
+.home-hero__lead { font-size: 17px; line-height: 1.75; color: var(--muted); }
+.home-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 26px; margin-top: 16px; }
+
+/* telas estreitas (padrão): uma metade acima e outra abaixo da mídia */
+.home-hero__half .br-s { display: inline; }
+.home-hero__half--a { left: var(--hm); bottom: calc(100% - var(--m-y) + var(--gap-b)); }
+.home-hero__half--b { right: var(--hm); top: calc(var(--m-y) + var(--m-h) + var(--gap-b)); text-align: right; }
+.home-hero__eyebrow { left: var(--hm); top: var(--ey-top, calc(var(--header-h) + 14px)); }
+.home-hero__foot { left: var(--hm); right: var(--hm); bottom: var(--foot-bottom); }
+/* celulares estreitos: a 2ª metade quebra em "na sua / margem." para caber no page-max a 48px */
+.is-stack.is-tight .home-hero__half--b .br-f { display: inline; }
+
+/* texto de apoio: versão curta onde a altura é pouca (paisagem baixa, celular baixo) */
+.home-hero__lead .lead-short { display: none; }
+.is-short-lead .home-hero__lead .lead-long { display: none; }
+.is-short-lead .home-hero__lead .lead-short { display: inline; }
+
+/* paisagem baixa ou estreita (600–999 px, ou onde o lado a lado não comporta 48px):
+   painel central (45% da largura, centrado também na altura). Eyebrow e 1ª metade do
+   título acima dele, à esquerda; 2ª metade em uma linha abaixo, à direita, com a ação
+   na mesma linha, à esquerda, e a frase curta embaixo. */
+.is-band .home-hero__half br { display: none; }
+/* eyebrow acima da 1ª metade; frase curta abaixo da linha da 2ª metade */
+.is-band .home-hero__eyebrow { left: var(--hm); top: var(--ey-top); }
+.is-band .home-hero__lead { position: absolute; left: var(--hm); top: var(--lead-y); width: var(--lead-w); margin: 0; text-wrap: balance; pointer-events: auto; will-change: transform; }
+.is-band .home-hero__half--a { left: var(--hm); top: var(--a-top); bottom: auto; }
+.is-band .home-hero__half--b { right: var(--hm); top: var(--b-top); }
+.is-band .home-hero__foot { inset: 0; width: auto; pointer-events: none; }
+.is-band .home-hero__actions { position: absolute; left: var(--cta-x); top: var(--cta-y); margin: 0; pointer-events: auto; will-change: transform; }
+
+/* desktop: uma metade de cada lado da mídia, na mesma faixa — a frase continua
+   na linha de base: "Coloque / a IA para / trabalhar [mídia] na sua / margem."
+   Coluna esquerda: eyebrow (alinhado ao topo da mídia) e 1ª metade.
+   Coluna direita: 2ª metade e, ancorados embaixo, o texto e a ação. */
+.is-flank .home-hero__half .br-s { display: none; }
+.is-flank .home-hero__half .br-f { display: inline; }
+.is-flank .home-hero__half--a {
+  left: auto; bottom: auto; text-align: right;
+  right: calc(100% - var(--m-x) + var(--gap-t));
+  top: calc(var(--band-c, calc(var(--m-y) + var(--m-h) / 2)) - var(--title-size) * 1.98);
+}
+.is-flank .home-hero__half--b {
+  right: auto; text-align: left;
+  left: calc(var(--m-x) + var(--m-w) + var(--gap-t));
+  top: var(--band-c, calc(var(--m-y) + var(--m-h) / 2));
+}
+.is-flank .home-hero__eyebrow {
+  left: auto; bottom: auto; justify-content: flex-end;
+  right: calc(100% - var(--m-x) + var(--gap-t));
+  top: var(--m-y);
+  /* nunca mais perto da borda da tela que --hg (>= space-4): se não couber numa
+     linha, quebra em "Do diagnóstico / à operação", com o fio na 1ª linha e o
+     texto alinhado à margem, como a 1ª metade do título logo abaixo */
+  max-width: calc(var(--m-x) - var(--gap-t) - var(--hg));
+  align-items: flex-start; text-align: left;
+}
+.is-flank .home-hero__eyebrow > span { margin-top: 8.5px; }
+.is-flank .home-hero__foot {
+  top: auto; margin: 0; width: auto;
+  left: calc(var(--m-x) + var(--m-w) + var(--gap-t));
+  right: var(--hg);
+  bottom: var(--foot-bottom);
+}
+/* lado a lado estreito (600–999 px): texto e ação centrados abaixo da mídia;
+   o eyebrow quebra em linhas na coluna esquerda */
+.is-flank.is-narrow .home-hero__foot {
+  left: 0; right: 0; margin: 0 auto; width: min(560px, 100% - 2 * var(--hg));
+  text-align: center;
+}
+.is-flank.is-narrow .home-hero__actions { justify-content: center; }
+.is-flank.is-narrow .home-hero__eyebrow {
+  max-width: calc(var(--m-x) - var(--gap-t) - var(--hg));
+  flex-wrap: wrap; justify-content: flex-end; text-align: right; row-gap: 2px;
+}
+
+/* espaço de rolagem para a expansão ligada à rolagem (telas de toque) */
+.home-hero__spacer { height: 0; }
+html.hero-scroll .home-hero__spacer { height: 90vh; }
+
+/* 7. Home — manifesto que acende com a leitura --------------------------- */
+/* Eyebrow (rótulo) -> h2 em section-title -> StatGrid.
+   Camada que cobre a anterior (design-system.md, "Camadas que cobrem a anterior"):
+   a folha sobe com a barra do header na borda (home.js); os primeiros 84px da
+   folha são o header e o eyebrow fica a space-4 (mobile: space-3) da base dele.
+   Padding inferior space-8 (mobile: space-7). Movimento reduzido: padding normal. */
+.manifesto {
+  position: relative; z-index: 2;
+  background: var(--paper);
+  padding: calc(var(--header-h) + var(--space-4)) var(--gutter) var(--space-8);
+}
+.manifesto__inner { max-width: var(--page-max); margin: 0 auto; }
+/* h2 section-title: 600, entrelinha 1,06, tracking -0,05em, uma expressão em <i> accent */
+.manifesto__title {
+  margin: var(--space-3) 0 0;
+  max-width: 18.6em;
+  font-size: var(--manifesto-size); font-weight: 600; line-height: 1.06; letter-spacing: -.05em;
+  color: var(--text);
+}
+.manifesto__title i { font-style: normal; color: var(--accent); }
+/* leitura (home.js; design-system.md, Movimento, "texto que acende"): cada palavra
+   tem um de três estados, todos em cor de token — apagada (subtle) -> frente (muted)
+   -> acesa (text; só o <i> acende em accent). O estado é função direta da posição
+   da rolagem, recalculado a cada quadro, sem transição por tempo. */
+.manifesto__title .w { display: inline; }
+.manifesto__title .w.is-off { color: var(--subtle); }
+.manifesto__title .w.is-front { color: var(--muted); }
+/* StatGrid: stat 53px/700/-0,06em em accent, rótulo 13px 700, legenda (fonte do dado)
+   como `.stat-grid small` do bundle — Manrope 12px/400, sem maiúsculas nem tracking —
+   em subtle (design-system.md, esclarecimento abaixo da tabela de papéis de cor) */
+.manifesto__data {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-6);
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.datum {
+  display: flex; flex-direction: column; min-height: 155px;
+  margin: 0; padding: 23px 18px;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.datum strong { display: block; font-size: 53px; font-weight: 700; line-height: 1; letter-spacing: -.06em; color: var(--accent); }
+.datum__label { margin-top: 25px; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--text); }
+.datum figcaption { margin-top: 6px; font: 400 12px/1.5 var(--font-sans); letter-spacing: normal; text-transform: none; color: var(--subtle); }
+
+/* 8. Marcador das próximas partes ---------------------------------------- */
+/* sem conteúdo nesta parte: altura 0, ou só o necessário para a leitura do manifesto
+   terminar antes do fim da página (home.js) */
+.next-parts { position: relative; z-index: 2; min-height: 0; background: var(--paper); }
+
+/* 9. Responsivo ---------------------------------------------------------- */
+@media (max-width: 980px) {
+  .site-nav { gap: 24px; }
+}
+
+@media (max-width: 760px) {
+  .site-header__inner { gap: 10px; }
+  .site-header__menu { display: grid; }
+  .site-nav {
+    position: absolute; top: 100%; left: 0; right: 0;
+    display: none; flex-direction: column; align-items: stretch; gap: 0; margin: 0;
+    padding: 8px var(--gutter) 18px; background: var(--paper); border-bottom: 1px solid var(--line);
+  }
+  /* menu aberto: ui 13px/700 em nav-text, como no desktop; área de toque >= 48px */
+  .site-nav a { display: flex; align-items: center; min-height: 48px; padding: 0; border-bottom: 1px solid var(--line); }
+  .site-header.nav-open .site-nav { display: flex; }
+  .site-header.nav-open { background: var(--paper); }
+  .site-header__cta { margin-left: auto; }
+}
+
+@media (max-width: 640px) {
+  :root { --gutter: var(--space-3); }
+  /* CTA do header continua no token ui (13px/700) com a seta de 18px; só o respiro lateral diminui */
+  .site-header__cta { padding: 0 14px; }
+  .home-hero__lead { font-size: 15px; line-height: 1.7; }
+  .home-hero__actions { margin-top: 12px; }
+  .manifesto { padding: calc(var(--header-h) + var(--space-3)) var(--gutter) var(--space-7); }
+  .manifesto__data { grid-template-columns: 1fr; margin-top: 38px; } /* space-6 no mobile: 38px */
+  .datum strong { font-size: 40px; }
+}
+
+@media (max-width: 380px) {
+  .site-header__cta { padding: 0 12px; }
+}
+
+/* 10. Movimento reduzido: sem rolagem travada, sem coreografia ------------ */
+@media (prefers-reduced-motion: reduce) {
+  .site-header { --y: 0px; --rule: 1; will-change: auto; }
+  /* sem coreografia o header não viaja na folha: padding de seção normal */
+  .manifesto { padding-top: var(--space-8); border-top: 1px solid var(--line); }
+  /* hero estático em fluxo: bloco de texto sobre paper, depois a mídia em tela
+     cheia como bloco próprio (a rede completa, com os nomes das 11 áreas) */
+  .home-hero { position: relative; height: auto; }
+  .home-hero__stage {
+    height: auto; overflow: visible; will-change: auto;
+    display: flex; flex-direction: column; align-items: flex-start;
+    padding: calc(var(--header-h) + 28px) var(--hm) 0;
+  }
+  .home-hero__eyebrow, .home-hero__half, .home-hero__foot,
+  .is-flank .home-hero__eyebrow, .is-flank .home-hero__half--a, .is-flank .home-hero__half--b, .is-flank .home-hero__foot,
+  .is-band .home-hero__eyebrow, .is-band .home-hero__half--a, .is-band .home-hero__half--b, .is-band .home-hero__foot,
+  .is-band .home-hero__lead, .is-band .home-hero__actions {
+    position: static; transform: none !important; opacity: 1 !important; visibility: visible !important; will-change: auto;
+  }
+  .home-hero__eyebrow { order: 1; }
+  /* h1 hero: 48px ou mais e sempre maior que o section-title (36 -> 61) da mesma largura */
+  .home-hero__title { order: 2; margin-top: 18px; max-width: 14em; font-size: clamp(48px, 5.6vw, 80px); }
+  .home-hero__half, .is-flank .home-hero__half--a, .is-flank .home-hero__half--b { display: inline; white-space: normal; text-align: left; }
+  .home-hero__half br, .home-hero__half .br-s,
+  .is-flank .home-hero__half .br-f, .is-flank .home-hero__half .br-s,
+  .is-stack.is-tight .home-hero__half--b .br-f { display: none; }
+  .home-hero__foot, .is-flank .home-hero__foot, .is-flank.is-narrow .home-hero__foot, .is-band .home-hero__foot { order: 3; width: auto; max-width: 560px; margin: 34px 0 0; text-align: left; pointer-events: auto; }
+  .is-band .home-hero__actions { margin-top: 16px; }
+  .home-hero__lead .lead-long, .is-short-lead .home-hero__lead .lead-long { display: inline; }
+  .home-hero__lead .lead-short, .is-short-lead .home-hero__lead .lead-short { display: none; }
+  .is-flank.is-narrow .home-hero__actions { justify-content: flex-start; }
+  .home-hero__fallback { display: none; }
+  .home-hero__canvas {
+    order: 4; position: relative; inset: auto;
+    width: calc(100% + 2 * var(--hm)); height: 100vh;
+    margin: 44px calc(-1 * var(--hm)) 0;
+  }
+  .home-hero__spacer, html.hero-scroll .home-hero__spacer { height: 0; }
+  .button, .button:hover, .button:focus-visible,
+  .site-header__menu, .site-header__menu:hover, .site-header__menu:focus-visible { transition: none; transform: none; }
+  .skip-link { transition: none; }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 640px) {
+  .manifesto { padding-top: var(--space-7); }
+}
+
+/* 10. Home — P2: pilares, esteira empilhada, zoom e casos de uso ----------
+   Cada seção entra como camada por cima da anterior (barra: mecanismo 6): a
+   anterior fica presa pela base (position: sticky com top negativo, calculado em
+   p2.js) enquanto a seguinte sobe; a borda que entra traz conteúdo a space-4
+   (mobile: space-3). As travas só valem com .pins-on (p2.js), para as medidas
+   serem feitas sem elas; no movimento reduzido não há trava. */
+.intro { z-index: 1; }
+.pins-on .intro, .pins-on [data-layer] { position: sticky; top: var(--pin-top, 0px); }
+.layer { position: relative; padding: var(--space-4) var(--gutter) var(--space-8); }
+.pilares { z-index: 2; background: var(--soft); }
+.esteira { z-index: 3; background: var(--paper); }
+.zoom { position: relative; z-index: 4; }
+.casos { position: relative; z-index: 5; }
+.next-parts { z-index: 6; }
+.layer__inner { max-width: var(--page-max); margin: 0 auto; }
+
+/* h2 de seção (section-title) com uma expressão em <i> accent */
+.section-h2 {
+  margin: var(--space-3) 0 0; max-width: 18.6em;
+  font-size: var(--manifesto-size); font-weight: 600; line-height: 1.06; letter-spacing: -.05em;
+  color: var(--text);
+}
+.section-h2 i { font-style: normal; color: var(--accent); }
+.section-lead { margin: 18px 0 0; max-width: 40em; font-size: 17px; line-height: 1.75; color: var(--muted); }
+
+/* FeatureItem (design system): icon-box 46px, card-title 20px, body-sm muted; trios
+   separados por borda line (bordas compartilhadas, como no StatGrid) */
+.icon-box {
+  display: grid; place-items: center; width: 46px; height: 46px; flex: none;
+  color: var(--icon-ink); background: var(--icon-bg); border: 1px solid var(--icon-border);
+}
+.icon-box .ico { width: 20px; height: 20px; }
+.features {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.feature { margin: 0; padding: 32px 28px 34px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.feature h3 { margin: 28px 0 12px; font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
+.feature p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--muted); }
+.feature--base { grid-column: 1 / -1; display: flex; align-items: center; gap: 22px; padding: 24px 28px; }
+.feature--base h3 { margin: 0 0 4px; }
+
+/* Esteira: cartões que se empilham (barra: mecanismo 3). Todos presos no topo em
+   --stack-top; o que sobe por cima cobre o anterior, que encolhe (0,96 -> 0,90) e
+   sobe 24 px por cartão acima dele — no quadro intermediário ficam 2 ou 3 bordas.
+   O visual interno entra em 2x e chega a 1x quando o cartão assenta (p2.js). */
+.stack {
+  list-style: none; max-width: var(--page-max);
+  margin: var(--space-6) auto 0; padding: 0;
+}
+/* pausa com os 5 cartões empilhados: um espaço no fluxo (o sticky não entra no
+   padding do contêiner, por isso não é padding) */
+.stack::after { content: ''; display: block; height: var(--stack-hold, 0px); }
+/* a esteira fica presa pela base no instante em que o último cartão termina a pausa:
+   a folga sob o cartão da frente é a mesma de sempre (p2.js) */
+.layer.esteira { padding-bottom: var(--esteira-pb, var(--space-8)); }
+/* Cartão de etapa = ProductCard do design system (número mono no canto em subtle,
+   icon-box, tag mono em link, nome 30px, descrição muted, entregas com check em
+   accent-text, text-link no rodapé, hover deep-2 em .25s), num cartão largo da pilha:
+   o visual em código ocupa o lado esquerdo até a borda do cartão (campo accent), de
+   modo que a faixa visível de cada cartão coberto mostra o visual saturado.
+   Em telas estreitas ou baixas o visual vira uma faixa no topo do cartão (data-mode). */
+.stack__card {
+  position: sticky; top: var(--stack-top, 140px);
+  display: grid; grid-template-columns: minmax(0, var(--vis-a, 58fr)) minmax(0, var(--vis-b, 42fr));
+  width: 100%; height: var(--card-h, 560px); margin: 0 auto;
+  background: var(--paper); border: 1px solid var(--line);
+  transition: background .25s, color .25s;
+}
+.stack__card:hover { background: var(--deep-2); }
+.stack__visual { position: relative; overflow: hidden; min-width: 0; min-height: 0; background: var(--accent); }
+.stack__svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.stack__body {
+  position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
+  min-width: 0; min-height: 0; padding: var(--space-5);
+}
+.stack__number { position: absolute; top: 35px; right: 38px; font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
+/* lado: icon-box, apresentação, entregas e rodapé se distribuem na altura do cartão */
+.stack[data-mode="side"] .stack__head { display: contents; }
+.stack__tag { margin: 0; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
+.stack__name { margin: 9px 0 13px; font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -.03em; color: var(--text); }
+.stack__what { margin: 0; font-size: 14px; line-height: 1.65; color: var(--muted); }
+.stack__list { margin: 0; padding: 0; list-style: none; }
+.stack__list li { display: flex; gap: 10px; padding: 7px 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.stack__list .ico { margin-top: 1px; color: var(--accent-text); }
+.stack__foot { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+.stack__price { display: flex; flex-direction: column; gap: 6px; align-self: stretch; margin: 0; padding-top: 18px; border-top: 1px solid var(--line); }
+.stack__price-label { font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle); }
+.stack__price strong { font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
+/* faixa: visual no topo, texto embaixo (padding de card no mobile, space-4) */
+/* faixa em px inteiros (p2.js): a borda entre o visual e o texto cai num pixel */
+.stack[data-mode^="band"] .stack__card { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, var(--band-h, 1fr)) minmax(0, 1fr); }
+.stack[data-mode^="band"] .stack__body { justify-content: flex-start; gap: 18px; padding: var(--space-4); }
+/* na faixa, icon-box e tag dividem a primeira linha */
+.stack[data-mode^="band"] .stack__head { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; align-content: start; column-gap: 16px; }
+.stack[data-mode^="band"] .stack__intro { display: contents; }
+.stack[data-mode^="band"] .stack__head .stack__tag { margin: 0; padding-right: 32px; }
+.stack[data-mode^="band"] .stack__name, .stack[data-mode^="band"] .stack__what { grid-column: 1 / -1; }
+.stack[data-mode^="band"] .stack__name { margin-top: 18px; }
+.stack[data-mode="band2"] .stack__body {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: "head list" "head foot"; grid-template-rows: auto 1fr; gap: 18px 28px; align-content: start;
+}
+.stack[data-mode="band2"] .stack__head { grid-area: head; }
+.stack[data-mode="band2"] .stack__list { grid-area: list; padding-right: 36px; }
+.stack[data-mode="band2"] .stack__foot { grid-area: foot; }
+/* tela muito baixa: a descrição sai (as entregas repetem o mesmo conteúdo), o preço
+   usa o tamanho lead e o text-link sobe para a linha do rótulo "Preço" */
+.stack[data-tight] .stack__what { display: none; }
+.stack[data-tight] .stack__foot { position: relative; }
+.stack[data-tight] .stack__foot .text-link { position: absolute; top: 21px; right: 0; }
+.stack[data-tight] .stack__price strong { font-size: 17px; }
+/* cores da ilustração (tokens; design-system.md, "Ilustração e mídia em código") */
+.v-f { fill: var(--accent); }
+.v-a { fill: var(--acid); }
+.v-b { fill: var(--band); }
+.v-s { fill: var(--surface); }
+.v-t { fill: var(--accent-text); }
+.v-g { fill: var(--accent-text); }
+
+.regras { margin-top: var(--space-6); }
+.features--rules { margin-top: var(--space-3); }
+
+/* Zoom (barra: mecanismo 4): área fixa de 100vh durante 300vh de rolagem; os
+   painéis são desenhados no canvas (p2.js), em pixel inteiro e só com tokens */
+.zoom { height: 400vh; }
+.zoom__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--soft); }
+.zoom__canvas { display: block; width: 100%; height: 100%; }
+
+/* Casos de uso: o painel central do zoom (paper + grade de hairlines line) vira o
+   fundo desta seção — a mesma grade, no mesmo passo e na mesma fase (p2.js grava
+   --grid-x/--grid-y), continua sem corte. Texto sobre a grade é permitido. */
+.casos {
+  padding: var(--space-4) var(--gutter) var(--space-8);
+  background-color: var(--paper);
+  background-image: linear-gradient(to right, var(--line) 0 1px, transparent 1px), linear-gradient(to bottom, var(--line) 0 1px, transparent 1px);
+  background-size: var(--grid, 48px) var(--grid, 48px);
+  background-position: var(--grid-x, 50vw) var(--grid-y, 0px);
+}
+.cases {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.case { position: relative; display: flex; flex-direction: column; padding: 44px; background: var(--paper); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.case__number { position: absolute; top: 35px; right: 38px; font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
+.case__tag { margin: 0; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
+.case h3 { margin: 9px 0 13px; font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -.03em; color: var(--text); }
+.case p { margin: 0; font-size: 14px; line-height: 1.65; color: var(--muted); }
+.case ul { margin: 0; padding: 0; list-style: none; }
+.case li { display: flex; gap: 10px; padding: 7px 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.case li .ico { margin-top: 1px; color: var(--accent-text); }
+.proof {
+  display: flex; align-items: flex-start; gap: 22px;
+  max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-5); padding: 28px;
+  background: var(--paper); border: 1px solid var(--line);
+}
+.proof__tag { margin: 0 0 8px; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
+.proof__text { margin: 0; font-size: 15px; line-height: 1.75; color: var(--muted); }
+
+@media (max-width: 980px) {
+  .features, .cases { grid-template-columns: 1fr; }
+  .feature--base { padding: 24px 28px; }
+}
+@media (max-width: 640px) {
+  .layer, .casos { padding: var(--space-3) var(--gutter) var(--space-7); }
+  .features, .cases { margin-top: 38px; }
+  .regras { margin-top: 38px; }
+  .feature { padding: 26px 22px 28px; }
+  .case { padding: 32px; }
+  .proof { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* estático e completo: sem travas, cartões em sequência, visuais em 1x, painéis do
+     zoom parados num bloco do tamanho da tela; padding normal de seção */
+  .layer, .casos { padding-top: var(--space-8); }
+  .stack { padding-bottom: 0; }
+  .stack__card { position: relative; top: auto; height: auto; min-height: 420px; margin-bottom: 16px; transform: none !important; transition: none; }
+  .stack__visual { min-height: 260px; }
+  .stack[data-mode^="band"] .stack__card { grid-template-rows: auto auto; }
+  .zoom { height: auto; }
+  .zoom__stage { position: relative; height: 100vh; }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 640px) {
+  .layer, .casos { padding-top: var(--space-7); }
+}
