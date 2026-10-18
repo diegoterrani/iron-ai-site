@@ -377,8 +377,10 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 
 /* 10. Movimento reduzido: sem rolagem travada, sem coreografia ------------ */
 @media (prefers-reduced-motion: reduce) {
-  /* sem encaixe de folha: a seção tem a altura do conteúdo e o padding normal */
+  /* sem encaixe de folha: a seção tem a altura do conteúdo e o padding normal, e os
+     pilares vêm logo depois, sem pausa */
   .manifesto { min-height: 0; }
+  .pilares { margin-top: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .site-header { --y: 0px; --rule: 1; will-change: auto; }
@@ -437,6 +439,11 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
    elemento ficar a space-4 (32 px) da borda */
 .layer { position: relative; padding: calc(var(--space-4) - 1px) var(--gutter) var(--space-8); border-top: 1px solid var(--line); }
 .pilares { z-index: 2; background: var(--soft); }
+/* pausa da folha do manifesto (design-system.md, "Folha do manifesto"): a folha fica
+   parada enquanto a frase acende (clamp(220px, 42vh, 380px), home.js) e mais ~30% da
+   tela já acesa; só então a camada dos pilares sobe. A margem fica atrás da folha
+   presa, que cobre a tela inteira */
+.pilares { margin-top: calc(clamp(220px, 42vh, 380px) + clamp(160px, 30vh, 280px)); }
 .esteira { z-index: 3; background: var(--paper); }
 .zoom { position: relative; z-index: 4; }
 .casos { position: relative; z-index: 5; }
@@ -526,8 +533,10 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-content: start;
 }
 .stack[data-mode="band2"] .stack__price { align-self: start; margin-top: 40px; }
-/* tela muito baixa: a descrição sai e o preço usa o tamanho lead */
-.stack[data-tight] .stack__what { display: none; }
+/* tela baixa: a descrição continua (é o que o cliente recebe); o corpo usa o padding
+   de cartão do mobile (32) e o preço o tamanho lead */
+.stack[data-tight] .stack__body { padding: var(--space-4); }
+.stack[data-tight] .stack__number { top: 26px; right: 30px; }
 .stack[data-tight] .stack__price { font-size: 17px; }
 .esteira__more { margin-top: var(--space-5); }
 /* cores da ilustração (tokens; design-system.md, "Ilustração e mídia em código") */
@@ -565,7 +574,7 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 /* 340vh de área fixa: ~250vh de zoom e, no fim, ~90vh em que os casos sobem por cima
    da grade parada do núcleo (p2.js: M.pc) */
 .zoom { height: 440vh; }
-.zoom__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--paper); }
+.zoom__stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--band); }
 /* borda de entrada da camada do zoom, em hairline line, como as outras camadas */
 .zoom__stage::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line); z-index: 1; }
 .zoom__canvas { display: block; width: 100%; height: 100%; }
@@ -635,5 +644,9 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 @media (max-height: 700px) {
   .datum { min-height: 0; padding: 14px 16px; }
   .datum__label { margin-top: 14px; }
-  .manifesto__title { margin-top: 38px; }
+  /* em janela baixa a frase vem logo depois do eyebrow e os dados ficam embaixo dela:
+     com os dados em cima, a frase cairia no terço de baixo da tela */
+  .manifesto__inner { display: flex; flex-direction: column; }
+  .manifesto__title { order: 1; margin-top: var(--space-3); }
+  .manifesto__data { order: 2; margin-top: 38px; }
 }

@@ -58,8 +58,10 @@
     if (list) {
       /* 2 bordas de 24 px cabem entre a base do header e o cartão da frente */
       M.T = M.hdr + 2 * STEP + 8;
-      /* padding inferior da seção: space-8, ou space-7 no mobile e em tela baixa */
-      M.padB = M.W <= 640 ? 78 : 120;
+      /* padding inferior da seção: space-8, ou space-7 no mobile e nas janelas com menos
+         de 700 px de altura, onde o cartão só fica com a altura mínima do guia (420) com
+         space-7 embaixo (design-system.md, "Pilha da esteira") */
+      M.padB = (M.W <= 640 || M.H < 700) ? 78 : 120;
       if (esteira) esteira.style.setProperty('--esteira-pb', M.padB + 'px');
       layoutCards();
       list.style.setProperty('--stack-top', M.T + 'px');
@@ -142,12 +144,14 @@
       var need = 0;
       cards.forEach(function (c) { need = Math.max(need, Math.ceil(bodyNeed(c, mode)) + 2); });
       var h, band, ok;
+      /* altura mínima do ProductCard (420, ds/components/ProductCard) sempre que couber */
+      var minH = Math.min(420, maxH);
       if (mode === 'side') {
-        h = Math.min(Math.max(prefer, need), 700); band = h; ok = need <= Math.min(maxH, 700);
+        h = Math.min(Math.max(prefer, need, minH), 700); band = h; ok = need <= Math.min(maxH, 700);
         h = Math.min(Math.max(h, need), maxH);
       } else {
         var minBand = Math.max(100, Math.round(0.26 * prefer));
-        h = Math.min(Math.max(prefer, need + minBand), maxH); band = h - need; ok = band >= minBand;
+        h = Math.min(Math.max(prefer, need + minBand, minH), maxH); band = h - need; ok = band >= minBand;
       }
       return { mode: mode, fr: fr, tight: tight, h: Math.round(Math.max(300, h)), need: need, band: band, ok: ok };
     }
@@ -195,7 +199,9 @@
       /* coberto (só a borda de 24 px à vista): o campo do visual desce um degrau de
          valor por cartão por cima (manilla -> kraft -> clay), para as bordas não
          repetirem a cor do cartão da frente */
-      var covered = depth >= 1.5 ? 2 : (depth >= 0.5 ? 1 : 0);
+      /* o degrau entra assim que o cartão de cima começa a cobrir: sinal de camada desde
+         o início do percurso */
+      var covered = depth > 1.02 ? 2 : (depth > 0.02 ? 1 : 0);
       var key = ty + '|' + w + '|' + v.toFixed(4) + '|' + covered;
       if (stackState[i] === key) continue;
       stackState[i] = key;
@@ -207,20 +213,22 @@
   }
 
   /* ---------------------------------------------------------------------
-     Zoom (barra: mecanismos 4 e 7). Área fixa de 100vh durante 300vh; p vai de 0 a 1:
-     - p 0 a 0,6: divergência. A 1x é uma grade de painéis separados por vãos: o
-       central inteiro, no meio, é o maior. Ele cresce devagar (q^1,3) e empurra os 6
-       de fora, que crescem cada um no seu ritmo (até 4,2–9x) a partir da borda que dá
-       para o central. Ninguém se sobrepõe; o vão fica constante. Em q = 1 o central
-       cobre a área sob o header;
-     - p 0,6 a 0,76: clímax, o central em tela cheia: o núcleo IRON AI ligado às 11
-       áreas, com cartões paper sobre o campo acid (mídia em valor pleno);
-     - p 0,76 a 1: a câmera entra no núcleo (paper + grade de hairlines) até ele cobrir
-       a tela em p = 1. É a mesma grade, no mesmo passo e fase, do fundo dos casos.
-     Vãos em paper; campos dos painéis em acid (pastel), figuras em paper e um único
-     destaque em accent; traços finos em accent-text (o paper dentro do central é só o
-     núcleo, que vira o fundo dos casos). Rótulos de 12px ou mais, inteiros
-     ou nada. Desenho em pixel inteiro, só tokens, sem opacidade.
+     Zoom (barra: mecanismos 4 e 7). Área fixa de 100vh durante 340vh; p vai de 0 a 1:
+     - divergência (p até 0,72·pc): a 1x, sete painéis separados por vãos sobre o chão
+       `band`, de tamanhos diferentes. O central (25% da área sob o header no desktop) é
+       o mais lento: cresce de 1x a 4x e termina cobrindo a área sob o header. Os seis de
+       fora crescem de 1x a 4,6–9x, cada um no seu ritmo e sempre mais depressa que o
+       central. Cada um fica preso pela borda que dá para o central (a âncora), que o
+       central empurra para fora; o vão de cada painel abre no seu ritmo. Assim os de fora
+       ocupam a sobra entre o central e a borda da tela até o central cobrir tudo: nunca
+       há central emoldurado sobre campo vazio (mecanismo 4, sem faixa vazia);
+     - clímax (até pc): o central a 100% sob o header, o núcleo IRON AI ligado aos 6
+       módulos setoriais, com os nomes (mecanismo 7);
+     - núcleo (de pc a 1): a câmera entra no núcleo (paper + grade de hairlines, a grade
+       dos casos) atrás da camada dos casos, que sobe por cima (mecanismo 6).
+     Campos em clay/kraft/manilla/oat (vizinhos em valores diferentes), figuras em paper,
+     um destaque clay pequeno por painel, traços em accent-text (em text sobre clay).
+     Rótulos de 12px ou mais, inteiros ou nada. Pixel inteiro, só tokens, sem opacidade.
      --------------------------------------------------------------------- */
   var P1 = 0.72;
   var PANELS = [], CEN = null;
@@ -229,97 +237,123 @@
 
   function setupZoom() {
     var land = M.sw >= M.ha, mob = M.W <= 760;
-    var G0 = mob ? 12 : 16;                                  /* vão em px */
+    var G0 = mob ? 12 : 16;                                  /* vão a 1x, em px */
+    M.G0 = G0;
     var gx = G0 / M.sw, gy = G0 / M.ha, m = (mob ? 22 : 32) / M.ha;
     var top = -0.5 + m, bot = 0.5 - m;
     M.orient = land ? 'paisagem' : 'retrato';
-    var hx, hy;
-    if (land) {
-      hx = hy = 0.17;
-      var gxm = gx / 2, rowW = 0.33, sideW = 0.22, sx = hx + gx, ry = hy + gy;
-      PANELS = [
-        { kind: 'hotel', field: 'kraft', e: 6, label: 'Hotelaria', S: 4.6, nat: [-gxm - rowW, -gxm, top, -ry], anchor: [-gxm, -ry], push: 'y-', chip: 'br' },
-        { kind: 'restaurante', field: 'oat', e: 1.6, label: 'Restaurantes', S: 5.2, nat: [gxm, gxm + rowW, top, -ry], anchor: [gxm, -ry], push: 'y-', chip: 'bl' },
-        { kind: 'areas', field: 'manilla', e: 5, label: '11 áreas', S: 6, nat: [-sx - sideW, -sx, -hy, hy], anchor: [-sx, 0], push: 'x-', clipY: true, chip: 'tr' },
-        { kind: 'igaming', field: 'kraft', e: 5.5, label: 'iGaming', S: 7, nat: [sx, sx + sideW, -hy, hy], anchor: [sx, 0], push: 'x+', clipY: true, chip: 'tl' },
-        { kind: 'fintech', field: 'oat', e: 2.2, label: 'Fintech', S: 8, nat: [-gxm - rowW, -gxm, ry, bot], anchor: [-gxm, ry], push: 'y+', chip: 'tr' },
-        { kind: 'saude', field: 'manilla', e: 7, label: 'Saúde', S: 9, nat: [gxm, gxm + rowW, ry, bot], anchor: [gxm, ry], push: 'y+', chip: 'tl' }
-      ];
-    } else {
-      /* retrato: o central ocupa o meio; três células em cima e três embaixo */
-      hx = hy = 0.25;
-      var ms = 22 / M.sw, cw = (1 - 2 * ms - 2 * gx) / 3, ry2 = hy + gy;
-      var c1 = [-0.5 + ms, -0.5 + ms + cw], c2 = [-cw / 2, cw / 2], c3 = [0.5 - ms - cw, 0.5 - ms];
-      PANELS = [
-        { kind: 'hotel', field: 'kraft', e: 6, label: 'Hotelaria', S: 4.6, nat: [c1[0], c1[1], top, -ry2], anchor: [c1[1], -ry2], push: 'y-', chip: 'br' },
-        { kind: 'restaurante', field: 'oat', e: 1.6, label: 'Restaurantes', S: 5.2, nat: [c2[0], c2[1], top, -ry2], anchor: [0, -ry2], push: 'y-', clipX: c2, chip: 'bl' },
-        { kind: 'areas', field: 'manilla', e: 5, label: '11 áreas', S: 6, nat: [c3[0], c3[1], top, -ry2], anchor: [c3[0], -ry2], push: 'y-', chip: 'bl' },
-        { kind: 'igaming', field: 'kraft', e: 5.5, label: 'iGaming', S: 7, nat: [c1[0], c1[1], ry2, bot], anchor: [c1[1], ry2], push: 'y+', chip: 'tr' },
-        { kind: 'fintech', field: 'oat', e: 2.2, label: 'Fintech', S: 8, nat: [c2[0], c2[1], ry2, bot], anchor: [0, ry2], push: 'y+', clipX: c2, chip: 'tl' },
-        { kind: 'saude', field: 'manilla', e: 7, label: 'Saúde', S: 9, nat: [c3[0], c3[1], ry2, bot], anchor: [c3[0], ry2], push: 'y+', chip: 'tl' }
-      ];
-    }
-    CEN = { kind: 'centro', label: 'Qualquer setor', hx: hx, hy: hy, gx: gx, gy: gy };
+    /* central: miniatura da área sob o header (mesma proporção), para cobri-la sem
+       distorção. 25% no desktop (4x, como a referência); no retrato, 44% da largura,
+       para o rótulo e o wordmark caberem inteiros a 1x */
+    var h0 = land ? 0.125 : 0.22, hx = h0, hy = h0;
+    var ty = -(hy + gy), by = hy + gy, sx = hx + gx, g2 = gx / 2;
+    /* larguras a partir da costura (faixas de cima e de baixo) e das laterais */
+    /* no retrato as laterais vão até além da borda da tela (são estreitas: assim o
+       rótulo cabe inteiro) */
+    var w = land ? { ho: 0.36, re: 0.30, fi: 0.30, sa: 0.38, ar: 0.20, ig: 0.24 }
+                 : { ho: 0.42, re: 0.36, fi: 0.36, sa: 0.42, ar: 0.52 - sx, ig: 0.52 - sx };
+    var dT = land ? 0.06 : 0.04, dB = land ? 0.05 : 0.04;      /* alturas diferentes: sem mosaico */
+    /* side: faixa em que o painel fica (top, bot, l, r); a: âncora (na borda que dá para o
+       central); S: escala final; e: expoente do ritmo (<= 1,3, o do central: nunca mais
+       lento que ele); k: ritmo em que o vão abre; chip: canto do rótulo (o interno) */
+    PANELS = [
+      { kind: 'hotel', field: 'kraft', label: 'Hotelaria', side: 'top', S: 4.6, e: 1.0, k: 1.4, chip: 'br',
+        nat: [-g2 - w.ho, -g2, top, ty], a: [-g2, ty] },
+      { kind: 'restaurante', field: 'oat', label: 'Restaurantes', side: 'top', S: 6.2, e: 0.9, k: 2.4, chip: 'bl',
+        nat: [g2, g2 + w.re, top + dT, ty], a: [g2, ty] },
+      { kind: 'areas', field: 'manilla', label: '11 áreas', side: 'l', S: 5.4, e: 1.1, k: 0.8, chip: 'tr',
+        nat: [-sx - w.ar, -sx, -hy, hy], a: [-sx, 0] },
+      { kind: 'igaming', field: 'kraft', label: 'iGaming', side: 'r', S: 7.4, e: 0.95, k: 2.0, chip: 'tl',
+        nat: [sx, sx + w.ig, -hy, hy], a: [sx, 0] },
+      { kind: 'fintech', field: 'kraft', label: 'Fintech', side: 'bot', S: 8, e: 1.05, k: 1.7, chip: 'tr',
+        nat: [-g2 - w.fi, -g2, by, bot - dB], a: [-g2, by] },
+      { kind: 'saude', field: 'manilla', label: 'Saúde', side: 'bot', S: 9, e: 0.85, k: 0.6, chip: 'tl',
+        nat: [g2, g2 + w.sa, by, bot], a: [g2, by] }
+    ];
+    /* as costuras entre os dois painéis de cima e os dois de baixo derivam em sentidos
+       opostos (fração da largura, em q = 1) */
+    M.seamT = -0.05; M.seamB = 0.06;
+    CEN = { kind: 'centro', label: 'Qualquer setor', hx: hx, hy: hy, S: 0.5 / h0, e: 1.3 };
     PANELS.push(CEN);
-    CEN.S = 0.5 / Math.min(hx, hy);                          /* cobre a área sob o header */
-    var nf = land ? 0.4 : 0.36;                               /* lado do núcleo, em fração do painel */
+    var nf = land ? 0.4 : 0.42;                               /* lado do núcleo, em fração do painel */
     CEN.nu = [0.5 - nf / 2, 0.5 + nf / 2]; CEN.nv = [0.5 - nf / 2, 0.5 + nf / 2];
     CEN.Send = CEN.S / nf;                                    /* o núcleo cobre a tela, nas duas direções juntas */
-    /* no clímax, o núcleo ligado aos 6 módulos setoriais (os casos de uso que vêm a
-       seguir): 3 de cada lado no desktop; no retrato, duas fileiras de 3 abaixo do
-       núcleo, a pelo menos space-3 (22px) das bordas da tela */
-    var mu = 22 / M.sw, names = ['Restaurantes', 'Hotelaria', 'iGaming', 'Fintech', 'Saúde', 'Seu setor'];
+    /* módulos setoriais (os casos de uso que vêm a seguir) ligados ao núcleo: 3 de cada
+       lado no desktop; no retrato, duas fileiras de 3 abaixo do núcleo. Cada um é um
+       bloco em manilla ou oat (alternados, contra o campo clay); no clímax ganha o nome */
+    var mu = 22 / M.sw, names = ['Restaurantes', 'Hotelaria', 'iGaming', 'Fintech', 'Saúde', 'Sob medida'];
+    var fields = ['oat', 'manilla', 'oat', 'manilla', 'oat', 'manilla'];
     var n0 = CEN.nu[0], cards = [], ch;
     if (land) {
       var sv = [0.38, 0.5, 0.62]; ch = 0.095;
-      var sw = Math.min(0.2, n0 - 0.025 - mu), su = n0 - 0.025 - sw / 2;
-      sv.forEach(function (v, i) { cards.push({ u: su, v: v, w: sw, h: ch, name: names[i] }); });
-      sv.forEach(function (v, i) { cards.push({ u: 1 - su, v: v, w: sw, h: ch, name: names[3 + i] }); });
+      var cw = Math.min(0.2, n0 - 0.025 - mu), su = n0 - 0.025 - cw / 2;
+      sv.forEach(function (v, i) { cards.push({ u: su, v: v, w: cw, h: ch, name: names[i], field: fields[i] }); });
+      sv.forEach(function (v, i) { cards.push({ u: 1 - su, v: v, w: cw, h: ch, name: names[3 + i], field: fields[3 + i] }); });
       CEN.cardFont = 20;
     } else {
-      ch = 0.07;
-      /* fileira de baixo primeiro: as ligações dela passam por trás da fileira de cima */
-      [0.2, 0.5, 0.8].forEach(function (u, i) { cards.push({ u: u, v: 0.86, w: 0.28, h: ch, name: names[3 + i] }); });
-      [0.2, 0.5, 0.8].forEach(function (u, i) { cards.push({ u: u, v: 0.745, w: 0.28, h: ch, name: names[i] }); });
+      ch = 0.06;
+      /* três fileiras de dois abaixo do núcleo, de baixo para cima: as ligações das de
+         baixo passam por trás das de cima */
+      [2, 1, 0].forEach(function (row) {
+        [0.3, 0.7].forEach(function (u, col) {
+          var i = row * 2 + col;
+          cards.push({ u: u, v: 0.76 + row * 0.08, w: 0.38, h: ch, name: names[i], field: fields[i] });
+        });
+      });
       CEN.cardFont = 16;
     }
     CEN.cards = cards;
   }
 
-  /* moldura do conteúdo (R) e parte visível (V) de um painel de fora, com escala
-     própria s e o central em sc; em px de canvas */
-  /* zoom em paralaxe: cada painel escala em torno do centro da área visível, com a
-     sua escala s. Os de fora crescem mais depressa que o central (S de 4,6 a 9 contra
-     ~3), então se afastam dele e uns dos outros em ritmos diferentes: os vãos abrem de
-     forma irregular e o central nunca é coberto. */
-  function geomOf(pn, s, sc, shift) {
-    var n = pn.nat;
-    var cy = M.oy - (shift || 0), X = function (f) { return M.ox + f * M.sw; }, Y = function (f) { return cy + f * M.ha; };
-    var r = { x: X(n[0] * s), y: Y(n[2] * s), w: (n[1] - n[0]) * s * M.sw, h: (n[3] - n[2]) * s * M.ha };
-    return { R: r, V: r };
+  /* Geometria de um painel de fora, em px de canvas, com a escala própria s, o central
+     em sc e o avanço q da divergência:
+     - a âncora (ponto da borda que dá para o central) acompanha a borda do central, a
+       um vão que abre no ritmo do painel (k) e nunca passa de 45% da sobra até a borda
+       da tela, para o painel continuar visível até o central cobrir tudo;
+     - o painel cresce a partir da âncora, com a escala s (conteúdo em R);
+     - V é a parte que o painel ocupa: as laterais ficam na altura do central, entre as
+       faixas de cima e de baixo, para ninguém se sobrepor. */
+  function gapPx(pn, q, sobra) { return Math.min(M.G0 * (1 + pn.k * q), Math.max(0, 0.45 * sobra)); }
+  function geomOf(pn, s, sc, shift, q) {
+    var n = pn.nat, a = pn.a, cy = M.oy - (shift || 0);
+    var cxp = CEN.hx * sc * M.sw, cyp = CEN.hy * sc * M.ha, Ax, Ay;
+    q = q || 0;
+    if (pn.side === 'top' || pn.side === 'bot') {
+      var g = gapPx(pn, q, M.ha / 2 - cyp);
+      Ay = pn.side === 'top' ? cy - cyp - g : cy + cyp + g;
+      var seam = (pn.side === 'top' ? M.seamT : M.seamB) * q * M.sw, gs = M.G0 * (1 + 1.6 * q) / 2;
+      Ax = M.ox + seam + (a[0] < 0 ? -gs : gs);
+    } else {
+      var g2 = gapPx(pn, q, M.sw / 2 - cxp);
+      Ax = pn.side === 'l' ? M.ox - cxp - g2 : M.ox + cxp + g2;
+      Ay = cy;
+    }
+    var r = { x: Ax + (n[0] - a[0]) * s * M.sw, y: Ay + (n[2] - a[1]) * s * M.ha, w: (n[1] - n[0]) * s * M.sw, h: (n[3] - n[2]) * s * M.ha };
+    var v = { x: r.x, y: r.y, w: r.w, h: r.h };
+    if (pn.side === 'l' || pn.side === 'r') {
+      var y0 = Math.max(v.y, cy - cyp), y1 = Math.min(v.y + v.h, cy + cyp);
+      v.y = y0; v.h = Math.max(0, y1 - y0);
+    }
+    return { R: r, V: v };
   }
   function centerRect(sc, shift) {
     var cy = M.oy - (shift || 0);
     return { x: M.ox - CEN.hx * sc * M.sw, y: cy - CEN.hy * sc * M.ha, w: 2 * CEN.hx * sc * M.sw, h: 2 * CEN.hy * sc * M.ha };
   }
-  /* fases em fração de M.pc, o ponto em que o núcleo cobre a tela; depois dele a área
-     fixa fica parada na grade e os casos de uso sobem por cima (mecanismo 6) */
   /* fases (M.pc = ponto em que a camada dos casos começa a subir pela base):
      divergência até 0,72·pc; clímax parado de 0,72·pc a pc (o central a 100%, nada por
      cima: mecanismo 7); depois a câmera entra no núcleo atrás da camada dos casos, que
-     cobre a área fixa de baixo para cima (mecanismo 6) */
+     cobre a área fixa de baixo para cima (mecanismo 6). Cada painel de fora vai de 1x a
+     S (4,6–9x) com expoente e <= 1,3 e S > 4: em todo quadro ele está maior que o
+     central (ritmo da referência: o central é o mais lento) */
   function zoomState(p) {
     var pc = M.pc || 1, a = P1 * pc;
     var q = U.clamp(p / a, 0, 1), sc, phase;
-    if (p <= a) { sc = 1 + (CEN.S - 1) * Math.pow(q, 1.3); phase = 'divergência'; }
+    if (p <= a) { sc = 1 + (CEN.S - 1) * Math.pow(q, CEN.e); phase = 'divergência'; }
     else if (p <= pc) { sc = CEN.S; phase = 'clímax'; }
     else { sc = CEN.S + (CEN.Send - CEN.S) * U.clamp((p - pc) / (1 - pc), 0, 1); phase = 'núcleo'; }
-    /* cada painel de fora cresce de 1x até S (4,6–9x) no seu ritmo (expoente e): os de
-       e alto ficam para trás no começo e o central, desenhado por cima, avança sobre eles
-       (profundidade por sobreposição) e os de e baixo se afastam cedo; os que ficam
-       para trás enchem as bordas até o central cobrir a tela */
     return { p: p, q: q, phase: phase, sc: sc, s: PANELS.map(function (pn) {
-      return pn === CEN ? sc : 1 + (pn.S - 1) * Math.pow(q, pn.e || 1);
+      return pn === CEN ? sc : 1 + (pn.S - 1) * Math.pow(q, pn.e);
     }) };
   }
   function zoomP(y) { return U.clamp((y - M.zoomTop) / M.zoomLen, 0, 1); }
@@ -369,83 +403,98 @@
     return lines;
   }
 
-  function drawNeighbor(pn, s, sc, shift, vTop, vBot) {
-    var g = geomOf(pn, s, sc, shift), r = g.R, v = g.V;
+  /* Painel de fora. O conteúdo fica perto da âncora (o canto ou a borda que dá para o
+     central), a parte que continua na tela enquanto o painel cresce; o destaque clay
+     fica ali. Devolve true se o rótulo foi desenhado. */
+  function drawNeighbor(pn, s, sc, shift, vTop, vBot, q) {
+    var g = geomOf(pn, s, sc, shift, q), r = g.R, v = g.V;
     var ix = Math.min(v.x + v.w, M.sw) - Math.max(v.x, 0), iy = Math.min(v.y + v.h, vBot) - Math.max(v.y, vTop);
-    if (v.w <= 0 || v.h <= 0 || ix < 12 || iy < 12) return;
+    if (v.w <= 0 || v.h <= 0 || ix < 12 || iy < 12) return false;
     ctx.fillStyle = C[pn.field] || C.manilla;                 /* campo do painel: tom próprio (profundidade por valor) */
-    if (!R(v.x, v.y, v.x + v.w, v.y + v.h)) return;
+    if (!R(v.x, v.y, v.x + v.w, v.y + v.h)) return false;
     ctx.save();
-    ctx.beginPath(); ctx.rect(Math.round(v.x * M.dpr), Math.round(v.y * M.dpr), Math.round((v.x + v.w) * M.dpr) - Math.round(v.x * M.dpr), Math.round((v.y + v.h) * M.dpr) - Math.round(v.y * M.dpr)); ctx.clip();
-    var ux = function (u) { return r.x + u * r.w; }, vy = function (q) { return r.y + q * r.h; };
-    var i, j;
+    var X0 = Math.round(Math.max(v.x, 0) * M.dpr), Y0 = Math.round(Math.max(v.y, vTop) * M.dpr);
+    var X1 = Math.round(Math.min(v.x + v.w, M.sw) * M.dpr), Y1 = Math.round(Math.min(v.y + v.h, vBot) * M.dpr);
+    ctx.beginPath(); ctx.rect(X0, Y0, X1 - X0, Y1 - Y0); ctx.clip();
+    var ux = function (u) { return r.x + u * r.w; }, vy = function (t) { return r.y + t * r.h; };
+    /* traço fino: 2 px a 1x, engrossa com o painel (continua traço, nunca bloco) */
+    var tl = Math.max(1, Math.round(2 * Math.sqrt(s) * M.dpr)) / M.dpr, i, j;
     if (pn.kind === 'hotel') {
-      /* prédio em paper com janelas em manilla; uma janela acesa em clay */
-      ctx.fillStyle = C.paper; R(ux(0.2), vy(0.3), ux(0.8), vy(1.02));
-      for (i = 0; i < 5; i++) for (j = 0; j < 3; j++) {
-        ctx.fillStyle = (i === 3 && j === 1) ? C.clay : C.acid;
-        R(ux(0.27 + i * 0.105), vy(0.4 + j * 0.18), ux(0.27 + i * 0.105 + 0.05), vy(0.4 + j * 0.18 + 0.09));
+      /* âncora embaixo à direita: prédio em paper à direita, janelas no tom do campo,
+         a de baixo à direita acesa em clay */
+      ctx.fillStyle = C.paper; R(ux(0.36), vy(0.2), ux(0.8), vy(1.02));
+      for (i = 0; i < 3; i++) for (j = 0; j < 4; j++) {
+        ctx.fillStyle = (i === 2 && j === 3) ? C.clay : C[pn.field];
+        R(ux(0.42 + i * 0.13), vy(0.28 + j * 0.17), ux(0.42 + i * 0.13 + 0.07), vy(0.28 + j * 0.17 + 0.09));
       }
     } else if (pn.kind === 'restaurante') {
-      for (i = 0; i < 4; i++) for (j = 0; j < 2; j++) {
-        var cxp = ux(0.14 + i * 0.24), cyp = vy(0.32 + j * 0.42), tw = 0.065 * r.w, th = 0.11 * r.h, d = Math.min(tw, th);
+      /* âncora embaixo à esquerda: duas fileiras de mesas com cadeiras; um prato em clay */
+      for (i = 0; i < 3; i++) for (j = 0; j < 2; j++) {
+        var cxp = ux(0.13 + i * 0.22), cyp = vy(0.5 + j * 0.27), tw = 0.06 * r.w, th = 0.075 * r.h, d = Math.min(tw, th);
         ctx.fillStyle = C.paper;
-        R(cxp - d * 0.4, cyp - th - d * 0.8, cxp + d * 0.4, cyp - th - d * 0.2);
-        R(cxp - d * 0.4, cyp + th + d * 0.2, cxp + d * 0.4, cyp + th + d * 0.8);
-        ctx.fillStyle = C.paper; R(cxp - tw, cyp - th, cxp + tw, cyp + th);
-        if (i === 2 && j === 0) { ctx.fillStyle = C.clay; R(cxp - tw * 0.4, cyp - th * 0.4, cxp + tw * 0.4, cyp + th * 0.4); }
+        R(cxp - d * 0.45, cyp - th - d * 0.85, cxp + d * 0.45, cyp - th - d * 0.25);
+        R(cxp - d * 0.45, cyp + th + d * 0.25, cxp + d * 0.45, cyp + th + d * 0.85);
+        R(cxp - tw, cyp - th, cxp + tw, cyp + th);
+        if (i === 0 && j === 1) { ctx.fillStyle = C.clay; R(cxp - d * 0.45, cyp - d * 0.45, cxp + d * 0.45, cyp + d * 0.45); }
       }
     } else if (pn.kind === 'areas') {
+      /* âncora na borda direita: 11 caixas em 3 colunas (o canto de cima à direita fica
+         livre para o rótulo); a do meio à direita em clay */
       var nn = 0;
       for (j = 0; j < 4 && nn < 11; j++) for (i = 0; i < 3 && nn < 11; i++) {
+        if (j === 0 && i === 2) continue;
         ctx.fillStyle = C.paper;
         R(ux(0.08 + i * 0.29 + 0.035), vy(0.08 + j * 0.215 + 0.035), ux(0.08 + (i + 1) * 0.29 - 0.035), vy(0.08 + (j + 1) * 0.215 - 0.035));
         if (nn === 4) { ctx.fillStyle = C.clay; R(ux(0.08 + i * 0.29 + 0.05), vy(0.08 + j * 0.215 + 0.05), ux(0.08 + i * 0.29 + 0.11), vy(0.08 + j * 0.215 + 0.11)); }
         nn++;
       }
     } else if (pn.kind === 'igaming') {
-      /* quadro de odds: três linhas com o evento e duas cotações; uma cotação em destaque */
+      /* âncora na borda esquerda: quadro de odds com as cotações à esquerda; a do meio em clay */
       for (j = 0; j < 3; j++) {
-        var yy = vy(0.2 + j * 0.24);
-        ctx.fillStyle = C.paper; R(ux(0.1), yy, ux(0.56), yy + 0.15 * r.h);
-        R(ux(0.62), yy, ux(0.76), yy + 0.15 * r.h);
-        ctx.fillStyle = (j === 1) ? C.clay : C.paper; R(ux(0.8), yy, ux(0.94), yy + 0.15 * r.h);
+        var yy = vy(0.22 + j * 0.22), hh = 0.13 * r.h;
+        ctx.fillStyle = (j === 1) ? C.clay : C.paper; R(ux(0.08), yy, ux(0.2), yy + hh);
+        ctx.fillStyle = C.paper; R(ux(0.24), yy, ux(0.36), yy + hh);
+        R(ux(0.42), yy, ux(0.9), yy + hh);
       }
     } else if (pn.kind === 'fintech') {
-      /* cartão com chip em destaque e duas linhas; ao lado, três barras */
-      ctx.fillStyle = C.paper; R(ux(0.1), vy(0.22), ux(0.6), vy(0.72));
-      ctx.fillStyle = C.clay; R(ux(0.16), vy(0.32), ux(0.24), vy(0.44));
-      ctx.fillStyle = C['accent-text']; R(ux(0.16), vy(0.56), ux(0.48), vy(0.575)); R(ux(0.16), vy(0.62), ux(0.36), vy(0.635));
+      /* âncora em cima à direita: cartão com chip em clay e duas linhas; barras embaixo à esquerda */
+      ctx.fillStyle = C.paper; R(ux(0.46), vy(0.15), ux(0.9), vy(0.52));
+      ctx.fillStyle = C.clay; R(ux(0.54), vy(0.22), ux(0.62), vy(0.32));
+      ctx.fillStyle = C['accent-text']; R(ux(0.54), vy(0.4), ux(0.8), vy(0.4) + tl); R(ux(0.54), vy(0.46), ux(0.7), vy(0.46) + tl);
       ctx.fillStyle = C.paper;
-      [0.3, 0.46, 0.62].forEach(function (h, k) { R(ux(0.68 + k * 0.09), vy(0.8 - h), ux(0.68 + k * 0.09 + 0.06), vy(0.8)); });
+      [0.2, 0.32, 0.44].forEach(function (h, k) { R(ux(0.1 + k * 0.09), vy(0.9 - h), ux(0.1 + k * 0.09 + 0.06), vy(0.9)); });
     } else if (pn.kind === 'saude') {
-      /* monitor com a linha do pulso (degraus ortogonais) e o pico em destaque */
-      ctx.fillStyle = C.paper; R(ux(0.12), vy(0.2), ux(0.88), vy(0.78));
-      var pts = [[0.18, 0.52], [0.36, 0.52], [0.36, 0.36], [0.44, 0.36], [0.44, 0.66], [0.52, 0.66], [0.52, 0.46], [0.6, 0.46], [0.6, 0.52], [0.82, 0.52]];
-      var tl = Math.max(1, Math.round(2 * M.dpr)) / M.dpr;
+      /* âncora em cima à esquerda: monitor com a linha do pulso (degraus ortogonais) e o pico em clay */
+      ctx.fillStyle = C.paper; R(ux(0.08), vy(0.15), ux(0.64), vy(0.58));
+      var pts = [[0.12, 0.38], [0.24, 0.38], [0.24, 0.23], [0.3, 0.23], [0.3, 0.5], [0.36, 0.5], [0.36, 0.32], [0.42, 0.32], [0.42, 0.38], [0.6, 0.38]];
       ctx.fillStyle = C['accent-text'];
       for (i = 1; i < pts.length; i++) {
         var p0 = pts[i - 1], p1 = pts[i];
-        if (p0[1] === p1[1]) R(ux(Math.min(p0[0], p1[0])), vy(p0[1]) - tl / 2, ux(Math.max(p0[0], p1[0])), vy(p0[1]) + tl / 2);
+        if (p0[1] === p1[1]) R(ux(Math.min(p0[0], p1[0])), vy(p0[1]) - tl / 2, ux(Math.max(p0[0], p1[0])) + tl / 2, vy(p0[1]) + tl / 2);
         else R(ux(p0[0]) - tl / 2, vy(Math.min(p0[1], p1[1])), ux(p0[0]) + tl / 2, vy(Math.max(p0[1], p1[1])));
       }
-      ctx.fillStyle = C.clay; R(ux(0.42), vy(0.33), ux(0.46), vy(0.33) + 0.04 * r.w);
+      ctx.fillStyle = C.clay; R(ux(0.22), vy(0.18), ux(0.26), vy(0.18) + 0.04 * r.w);
     }
     ctx.restore();
-    /* rótulo no canto que dá para o central (fica na tela enquanto o painel estiver) */
-    var f = 12 * (1 + 0.3 * (s - 1)), off = Math.round(8 * (1 + 0.3 * (s - 1)));
+    /* rótulo no canto interno (o que dá para o central e fica na tela enquanto o painel
+       estiver nela); cresce com o painel, até 1,8x */
+    var f = 12 * Math.min(1.8, 1 + 0.2 * (s - 1)), off = Math.round(8 * f / 12);
+    /* tracking .13em; se não couber, .06em (design-system.md, regra 4) e depois um recuo
+       menor; se nem assim couber, o chip não entra (inteiro ou nada) */
     var ls = 0.13;
     if (chipSize([pn.label], f, ls).w + 2 * off > v.w) ls = 0.06;
-    if (chipSize([pn.label], f, ls).w + 2 * off > v.w) { ls = 0; off = Math.min(off, 5); }
+    if (chipSize([pn.label], f, ls).w + 2 * off > v.w) off = Math.min(off, 5);
     var z = chipSize([pn.label], f, ls);
     var lx = pn.chip.charAt(1) === 'r' ? v.x + v.w - off - z.w : v.x + off;
     var ly = pn.chip.charAt(0) === 'b' ? v.y + v.h - off - z.h : v.y + off;
-    chip([pn.label], lx, ly, f, v, ls);
+    return chip([pn.label], lx, ly, f, v, ls);
   }
 
-  /* central: campo clay, núcleo (paper + grade, com o wordmark IRON AI) no meio, 11
-     áreas no anel ligadas a ele por traços em tinta e o rótulo "Qualquer setor" no alto */
-  function drawCentro(sc, shift) {
+  /* central: campo clay, núcleo (paper + grade, com o wordmark IRON AI) no meio, os 6
+     módulos ligados a ele por traços em tinta e o rótulo "Qualquer setor" no alto.
+     names: desenhar os nomes dos módulos (só quando nenhum rótulo de fora está na tela,
+     para nada se repetir na vista) */
+  function drawCentro(sc, shift, names) {
     var r = centerRect(sc, shift);
     var ux = function (u) { return r.x + u * r.w; }, vy = function (v) { return r.y + v * r.h; };
     var t1 = Math.max(1, Math.round(M.dpr)), k = sc / CEN.S;
@@ -461,18 +510,18 @@
       for (a = Math.ceil((ny0 - cys) / pitch); cys + a * pitch < ny1; a++) ctx.fillRect(NX0, Math.round((cys + a * pitch) * M.dpr), NX1 - NX0, t1);
     }
     var lw = Math.max(1, Math.round(2 * k)), fpx = CEN.cardFont * k;
-    /* um só tamanho de rótulo para as 11 áreas: o maior em que todos os nomes cabem
-       inteiros, com 12 px ou mais; se algum não couber, nenhum nome é desenhado (os
-       cartões nunca aparecem uns com nome e outros vazios) */
-    var fzAll = sc >= CEN.S - 1e-6 ? Math.floor(fpx + 1e-6) : 0, linesOf = [];
+    /* nome de cada módulo numa etiqueta paper dentro do bloco: um só tamanho para os 6,
+       o maior em que todos cabem inteiros com 12 px ou mais; se algum não couber,
+       nenhum é desenhado (nunca uns com nome e outros sem) */
+    var fzAll = names ? Math.floor(fpx + 1e-6) : 0, linesOf = [], insOf = function (c) { return Math.max(2, Math.round(0.06 * c.h * r.h)); };
     for (; fzAll >= 12; fzAll--) {
-      tagFont(fzAll, 0.05);
+      tagFont(fzAll, 0.06);
       var lhA = Math.round(fzAll * 1.2), okAll = true;
       linesOf = CEN.cards.map(function (c) {
-        var w = (c.w * r.w) - 2 * Math.max(4, 0.4 * fzAll), h = (c.h * r.h);
+        var ins = insOf(c), w = c.w * r.w - 2 * ins - 2 * Math.max(3, 0.25 * fzAll), h = c.h * r.h - 2 * ins;
         var L = wrap(c.name.toUpperCase(), w), wm = 0;
         L.forEach(function (t) { wm = Math.max(wm, ctx.measureText(t).width / M.dpr); });
-        if (L.length * lhA > h - 6 || wm > c.w * r.w - 6 || L.length > 2) okAll = false;
+        if (L.length * lhA > h - 4 || wm > w || L.length > 2) okAll = false;
         return L;
       });
       if (okAll) break;
@@ -486,33 +535,45 @@
         R(mx - h2, ny1, mx + h2, y0);
       } else if (c.u > 0.5) R(nx1, my - h2, x0, my + h2);
       else R(x1, my - h2, nx0, my + h2);
-      ctx.fillStyle = C.paper; if (!R(x0, y0, x1, y1)) return;
+      ctx.fillStyle = C[c.field]; if (!R(x0, y0, x1, y1)) return;
       if (!inside(x0, y0, x1, y1)) return;                    /* nome inteiro ou nada */
       var lines = fzAll >= 12 ? linesOf[ci] : null, lh = Math.round(fzAll * 1.2);
       if (lines) {
-        tagFont(fzAll, 0.05);
+        var ins = insOf(c);
+        ctx.fillStyle = C.paper; R(x0 + ins, y0 + ins, x1 - ins, y1 - ins);
+        tagFont(fzAll, 0.06);
         ctx.fillStyle = C.text; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         lines.forEach(function (t, i) { ctx.fillText(t, Math.round(mx * M.dpr), Math.round((my + (i - (lines.length - 1) / 2) * lh) * M.dpr)); });
         ctx.textAlign = 'left';
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
       }
     });
-    /* o núcleo leva o wordmark IRON AI (como a laje do hero), do tamanho que couber
-       com 12 px ou mais; o rótulo do painel fica sempre "Qualquer setor" */
-    var fw = Math.min(28, Math.max(12, (nx1 - nx0) * 0.07));
-    /* só enquanto o canto do núcleo está dentro da área visível: quando o núcleo
-       cobre a tela ele já saiu pela borda e nunca fica por cima dos casos */
-    if ((nx1 - nx0) >= fw * 6.5 && nx0 > 8 && ny0 > EDGE.t + 8 && inside(nx0, ny0, nx0 + fw * 6, ny0 + fw * 2)) {
-      ctx.fillStyle = C.text; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    /* o núcleo leva o wordmark IRON AI (como a laje do hero), do maior tamanho que
+       couber inteiro, com 12 px ou mais (medido); só enquanto o canto do núcleo está na
+       área visível: quando o núcleo cobre a tela ele já saiu pela borda e nunca fica
+       por cima dos casos */
+    var cw0 = nx1 - nx0, chh = ny1 - ny0;
+    function wmWidth(fw) {
       if ('letterSpacing' in ctx) ctx.letterSpacing = (0.1 * fw * M.dpr).toFixed(2) + 'px';
-      ctx.font = '500 ' + Math.round(fw * M.dpr) + 'px ' + FONT;
-      var bx = Math.round((nx0 + fw * 0.9) * M.dpr), by = Math.round((ny0 + fw * 1.8) * M.dpr);
-      ctx.fillText('IRON', bx, by);
-      var wI = ctx.measureText('IRON').width;
-      ctx.font = '800 ' + Math.round(fw * M.dpr) + 'px ' + FONT;
-      ctx.fillText('AI', bx + wI + Math.round(fw * 0.32 * M.dpr), by);
-      if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+      ctx.font = '500 ' + Math.round(fw * M.dpr) + 'px ' + FONT; var a1 = ctx.measureText('IRON').width;
+      ctx.font = '800 ' + Math.round(fw * M.dpr) + 'px ' + FONT; var a2 = ctx.measureText('AI').width;
+      return { iron: a1, w: (a1 + a2) / M.dpr + fw * 0.32 };
     }
+    var fw = Math.min(28, Math.max(12, Math.floor(cw0 * 0.07))), pad = 0, wm = null;
+    for (; fw >= 12; fw--) {
+      wm = wmWidth(fw); pad = Math.max(4, Math.round(fw * 0.4));
+      if (wm.w + 2 * pad <= cw0 && fw * 1.9 <= chh * 0.45) break;
+    }
+    if (fw >= 12 && wm && nx0 > 8 && ny0 > EDGE.t + 8 && inside(nx0, ny0, nx0 + wm.w + 2 * pad, ny0 + fw * 2)) {
+      ctx.fillStyle = C.text; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+      wmWidth(fw);
+      var bx = Math.round((nx0 + pad) * M.dpr), by = Math.round((ny0 + pad + fw * 0.9) * M.dpr);
+      ctx.font = '500 ' + Math.round(fw * M.dpr) + 'px ' + FONT;
+      ctx.fillText('IRON', bx, by);
+      ctx.font = '800 ' + Math.round(fw * M.dpr) + 'px ' + FONT;
+      ctx.fillText('AI', bx + wm.iron + Math.round(fw * 0.32 * M.dpr), by);
+    }
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
     /* eixo do núcleo: no clímax as ligações chegam a um nó central em clay */
     if (sc >= CEN.S - 1e-6) {
       var hcx = ux(0.5), hcy = vy(0.5), hl = Math.max(1, Math.round(2 * k)) / 2;
@@ -523,13 +584,13 @@
       ctx.fillStyle = C.clay; R(hcx - hn, hcy - hn, hcx + hn, hcy + hn);
     }
     var lab = [CEN.label];
-    var f = 12 * (1 + 0.3 * (sc - 1)), z = chipSize(lab, f);
+    var f = 12 * (1 + 0.3 * (sc - 1)), ls = 0.13, z = chipSize(lab, f, ls);
+    if (z.w > r.w - 8) { ls = 0.06; z = chipSize(lab, f, ls); }
     var cx0 = ux(0.5) - z.w / 2, cy0 = vy(0.15) - z.h / 2;
     ctx.fillStyle = C.text; R(ux(0.5) - lw / 2, cy0 + z.h, ux(0.5) + lw / 2, ny0);
-    chip(lab, cx0, cy0, f);
+    chip(lab, cx0, cy0, f, null, ls);
     return r;
   }
-
   /* acabamento das bordas da área visível: uma faixa de menos de 8 px colada no header
      ou nas laterais é coberta pelo bloco que vem logo depois dela (só cor de token; a
      grade de hairlines fica) */
@@ -578,9 +639,13 @@
     var vTop = Math.max(0, M.hdr - rise), vBot = Math.min(M.sh, M.H - rise);
     EDGE.t = vTop; EDGE.b = vBot; EDGE.l = 0; EDGE.r = M.sw;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = C['surface-2']; ctx.fillRect(0, 0, canvas.width, canvas.height);  /* vãos em surface-2: profundidade */
-    for (var i = PANELS.length - 2; i >= 0; i--) drawNeighbor(PANELS[i], zs.s[i], zs.sc, shift, vTop, vBot);  /* rápidos atrás */
-    var c = drawCentro(zs.sc, shift);
+    /* chão: band, fundo de seção (a camada do zoom se distingue da esteira em paper);
+       depois do começo da divergência ele só aparece nos vãos */
+    ctx.fillStyle = C.band; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    var labelsOut = 0;
+    for (var i = 0; i < PANELS.length - 1; i++) if (drawNeighbor(PANELS[i], zs.s[i], zs.sc, shift, vTop, vBot, zs.q)) labelsOut++;
+    /* os nomes dos módulos só aparecem quando nenhum rótulo de fora está na tela */
+    var c = drawCentro(zs.sc, shift, labelsOut === 0 && zs.q > 0.5);
     /* perto de cobrir: uma sobra menor que 18 px entre o central e a borda vira campo
        campo do central (sem lasca do fundo ou de painel de fora) */
     var T = 18, ml = c.x, mr = M.sw - (c.x + c.w), mt = c.y - vTop, mb = vBot - (c.y + c.h);
@@ -622,7 +687,7 @@
     metrics: function () { return JSON.parse(JSON.stringify(M)); },
     zoomP: function () { return zoomP(S.scrollY()); },
     zoomState: function (p) { return zoomState(p === undefined ? zoomP(S.scrollY()) : p); },
-    panelRects: function (p) { var zs = zoomState(p === undefined ? zoomP(S.scrollY()) : p); return PANELS.map(function (pn, i) { var r = pn === CEN ? centerRect(zs.sc, 0) : geomOf(pn, zs.s[i], zs.sc, 0).V; return { kind: pn.kind, label: pn.label, S: pn === CEN ? CEN.Send : pn.S, x: r.x, y: r.y, w: r.w, h: r.h, s: zs.s[i] }; }); },
+    panelRects: function (p) { var zs = zoomState(p === undefined ? zoomP(S.scrollY()) : p); return PANELS.map(function (pn, i) { var r = pn === CEN ? centerRect(zs.sc, 0) : geomOf(pn, zs.s[i], zs.sc, 0, zs.q).V; return { kind: pn.kind, label: pn.label, S: pn === CEN ? CEN.Send : pn.S, x: r.x, y: r.y, w: r.w, h: r.h, s: zs.s[i] }; }); },
     stack: function () {
       return cards.map(function (c, i) {
         var r = c.getBoundingClientRect();

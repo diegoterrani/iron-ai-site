@@ -575,16 +575,16 @@
     /* A leitura acontece com a folha já encaixada (quadro parado, depois da passagem
        hero -> manifesto): de manTop (folha no topo) até manTop + D, a frente avança
        linha a linha e, dentro de cada linha, palavra a palavra, presa à rolagem. A
-       frase fica abaixo dos dois dados, perto do meio da tela. D é o trecho em que a
-       frase continua inteira na tela antes de a camada dos pilares chegar a ela
-       (no máximo 40% da altura da tela). Antes de encaixar, tudo apagado; subir
-       apaga de volta. Na última linha a frente anda as palavras e a própria largura. */
+       frase fica perto do meio da tela. A camada dos pilares só chega depois de uma
+       pausa (margem superior dela, site.css: o mesmo D mais 30% da tela), para a frase
+       ficar inteira e acesa com o quadro parado antes de ser coberta. Antes de
+       encaixar, tudo apagado; subir apaga de volta. Na última linha a frente anda as
+       palavras e a própria largura. */
     var D = 300;
     function sizeD() {
-      var H = window.innerHeight, mr = manifesto ? manifesto.getBoundingClientRect() : null, er = el.getBoundingClientRect();
-      var relBottom = mr ? er.bottom - mr.top : H * 0.6;          /* base da frase na tela, com a folha no topo */
+      var H = window.innerHeight, mr = manifesto ? manifesto.getBoundingClientRect() : null;
       var extra = mr ? Math.max(0, mr.height - H) : 0;            /* rolagem da folha até travar pela base */
-      D = U.clamp(H - relBottom - 24 + extra, 120, H * 0.4);
+      D = U.clamp(Math.round(H * 0.42), 220, 380) + extra;        /* = clamp(220px, 42vh, 380px) do CSS */
     }
     function frontIndex(y) {
       if (!lines.length) return 0;
