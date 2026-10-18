@@ -367,6 +367,7 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   /* os dois dados lado a lado também no celular: a frase fica abaixo deles, perto do
      meio da tela quando a folha encaixa (mecanismo 2) */
   .manifesto__title { margin-top: 38px; }          /* space-6 no mobile: 38px */
+
   .datum { padding: 18px 14px; min-height: 0; }
 }
 
@@ -375,6 +376,10 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 }
 
 /* 10. Movimento reduzido: sem rolagem travada, sem coreografia ------------ */
+@media (prefers-reduced-motion: reduce) {
+  /* sem encaixe de folha: a seção tem a altura do conteúdo e o padding normal */
+  .manifesto { min-height: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
   .site-header { --y: 0px; --rule: 1; will-change: auto; }
   /* sem coreografia o header não viaja na folha: padding de seção normal */
@@ -515,8 +520,6 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 /* na faixa o texto vem primeiro: o cartão seguinte sobe por cima do visual, e o nome,
    a entrega e o preço do cartão assentado ficam inteiros */
 .stack[data-mode^="band"] .stack__body { order: -1; }
-.stack[data-mode^="band"] .stack__card[data-covered="1"] { background: var(--kraft); }
-.stack[data-mode^="band"] .stack__card[data-covered="2"] { background: var(--clay); }
 .stack[data-mode^="band"] .stack__body { justify-content: flex-start; gap: 18px; padding: var(--space-4); }
 .stack[data-mode^="band"] .stack__number { top: 26px; right: 30px; }
 .stack[data-mode="band2"] .stack__body {
@@ -539,9 +542,11 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 /* cartões cobertos: o campo do visual desce de valor a cada cartão por cima (manilla
    -> kraft -> clay), em degraus de token; as bordas empilhadas leem como cartões
    distintos (p2.js: data-covered="1" ou "2") e o corpo passa a surface */
-.stack__card[data-covered] { background: var(--surface); }
-.stack__card[data-covered="1"] .stack__visual, .stack__card[data-covered="1"] .v-f { background: var(--kraft); fill: var(--kraft); }
-.stack__card[data-covered="2"] .stack__visual, .stack__card[data-covered="2"] .v-f { background: var(--clay); fill: var(--clay); }
+/* os degraus ficam dentro de cada papel: o visual (ilustração) desce de manilla para
+   kraft; o corpo (interface) desce de paper para surface e surface-2 */
+.stack__card[data-covered="1"] { background: var(--surface); }
+.stack__card[data-covered="2"] { background: var(--surface-2); }
+.stack__card[data-covered] .stack__visual, .stack__card[data-covered] .v-f { background: var(--kraft); fill: var(--kraft); }
 
 /* Regras públicas da oferta: só os títulos, em linha de três divididas por line */
 .rules {
@@ -623,4 +628,12 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 }
 @media (prefers-reduced-motion: reduce) and (max-width: 640px) {
   .layer, .casos { padding-top: var(--space-7); }
+}
+
+/* janelas baixas: os dados ficam compactos, para a frase ficar perto do meio da tela
+   quando a folha encaixa (mecanismo 2) */
+@media (max-height: 700px) {
+  .datum { min-height: 0; padding: 14px 16px; }
+  .datum__label { margin-top: 14px; }
+  .manifesto__title { margin-top: 38px; }
 }
