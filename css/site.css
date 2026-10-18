@@ -293,35 +293,45 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
    Padding inferior space-8 (mobile: space-7). Movimento reduzido: padding normal. */
 .manifesto {
   position: relative; z-index: 2;
+  display: flex; flex-direction: column;
   background: var(--paper);
   padding: calc(var(--header-h) + var(--space-4)) var(--gutter) var(--space-8);
   /* a folha tem pelo menos a altura da tela: ela encaixa no topo cobrindo o hero
      inteiro e só então trava pela base, e a frase acende com o quadro parado */
   min-height: 100vh;
 }
-.manifesto__inner { max-width: var(--page-max); margin: 0 auto; }
+/* composição da folha (design-system.md, "Folha do manifesto"): o eyebrow na borda
+   que entra, a frase no meio do espaço que sobra (é o assunto do quadro e a frente
+   da leitura fica perto do meio da tela) e os dois dados embaixo */
+.manifesto__inner { display: flex; flex-direction: column; flex: 1 0 auto; width: 100%; max-width: var(--page-max); margin: 0 auto; }
+.manifesto__eyebrow { margin-bottom: var(--space-3); }
+/* sobra da folha dividida 4:1 acima e abaixo da frase: o centro dela fica perto do
+   meio da tela, com os dados no pé da folha */
+.manifesto__inner::before { content: ''; order: 1; flex: 4 1 0; }
+.manifesto__inner::after { content: ''; order: 3; flex: 1 1 0; }
 /* h2 section-title em serifa (Source Serif 4, 400, tracking -0,02em), uma expressão em <i> accent */
 .manifesto__title {
-  margin: var(--space-6) 0 0;
+  order: 2; margin: 0;
   max-width: 18.6em;
   font-family: var(--font-serif); font-optical-sizing: auto;
   font-size: var(--manifesto-size); font-weight: 400; line-height: 1.1; letter-spacing: -.02em;
   color: var(--text);
 }
-.manifesto__title i { font-style: normal; color: var(--accent); }
 /* leitura (home.js; design-system.md, Movimento, "texto que acende"): cada palavra
-   tem um de três estados, todos em cor de token — apagada (subtle) -> frente (muted)
-   -> acesa (text; só o <i> acende em accent). O estado é função direta da posição
-   da rolagem, recalculado a cada quadro, sem transição por tempo. */
+   tem um de três estados, todos em cor de token e cada um mais escuro que o
+   anterior — apagada (faint, 3,2:1, só em texto grande) -> frente (subtle) -> acesa
+   (text, 16,8:1). A frase não tem destaque em accent: a própria leitura é o
+   destaque. O estado é função direta da posição da rolagem, sem transição por tempo. */
 .manifesto__title .w { display: inline; }
-.manifesto__title .w.is-off { color: var(--subtle); }
-.manifesto__title .w.is-front { color: var(--muted); }
+.manifesto__title .w.is-off { color: var(--faint); }
+.manifesto__title .w.is-front { color: var(--subtle); }
 /* StatGrid: stat 53px/700/-0,06em em accent, rótulo 13px 700, legenda (fonte do dado)
    como `.stat-grid small` do bundle — Manrope 12px/400, sem maiúsculas nem tracking —
    em subtle (design-system.md, esclarecimento abaixo da tabela de papéis de cor) */
 .manifesto__data {
+  order: 4;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-3);
+  width: 100%; max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-6);
   border-top: 1px solid var(--line); border-left: 1px solid var(--line);
 }
 .datum {
@@ -364,9 +374,8 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   .site-header__cta { padding: 0 14px; }
   .home-hero__actions { margin-top: 12px; }
   .manifesto { padding: calc(var(--header-h) + var(--space-3)) var(--gutter) var(--space-7); }
-  /* os dois dados lado a lado também no celular: a frase fica abaixo deles, perto do
-     meio da tela quando a folha encaixa (mecanismo 2) */
-  .manifesto__title { margin-top: 38px; }          /* space-6 no mobile: 38px */
+  /* os dois dados lado a lado também no celular, abaixo da frase */
+  .manifesto__data { margin-top: 38px; }           /* space-6 no mobile: 38px */
 
   .datum { padding: 18px 14px; min-height: 0; }
 }
@@ -538,6 +547,13 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .stack[data-tight] .stack__body { padding: var(--space-4); }
 .stack[data-tight] .stack__number { top: 26px; right: 30px; }
 .stack[data-tight] .stack__price { font-size: 17px; }
+/* corpo estreito (cartão lado a lado em telas até 1100 px): o número fica no canto,
+   acima da primeira linha do nome, para uma palavra longa ("Autodiagnóstico",
+   "Implementação") não encostar nele */
+@media (max-width: 1100px) {
+  .stack[data-mode="side"] .stack__number { top: 14px; right: 16px; }
+  .stack[data-mode="side"] .stack__intro { padding-right: 0; }
+}
 .esteira__more { margin-top: var(--space-5); }
 /* cores da ilustração (tokens; design-system.md, "Ilustração e mídia em código") */
 /* paleta de ilustração no estilo do Claude.ai (design-system.md, regra 4): campo
@@ -644,9 +660,18 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 @media (max-height: 700px) {
   .datum { min-height: 0; padding: 14px 16px; }
   .datum__label { margin-top: 14px; }
-  /* em janela baixa a frase vem logo depois do eyebrow e os dados ficam embaixo dela:
-     com os dados em cima, a frase cairia no terço de baixo da tela */
-  .manifesto__inner { display: flex; flex-direction: column; }
-  .manifesto__title { order: 1; margin-top: var(--space-3); }
-  .manifesto__data { order: 2; margin-top: 38px; }
+  .manifesto { padding-bottom: var(--space-7); }
+  .manifesto__data { margin-top: 38px; }
 }
+
+/* Movimento reduzido: sem a pausa da folha do manifesto (a regra da pausa vem antes
+   no arquivo e venceria a do bloco de movimento reduzido da seção 10) */
+@media (prefers-reduced-motion: reduce) {
+  .pilares { margin-top: 0; }
+}
+/* janelas baixas (menos de 700 px de altura) com o cartão lado a lado: o corpo usa o
+   padding de cartão do mobile, 32 px (design-system.md, "Pilha da esteira") */
+@media (max-height: 700px) and (min-width: 641px) {
+  .stack[data-mode="side"] .stack__body { padding: var(--space-4); }
+}
+

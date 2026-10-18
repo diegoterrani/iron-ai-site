@@ -108,7 +108,11 @@
     var staticRect = null;
     var sim = null, world = null;
     var labelW10 = 0;
-    var z0 = 1, zg0 = 1;
+    var z0 = 1, zg0 = 1, zFloor = Infinity;
+    function capZoom(zfit, area, w0r, h0r) {
+      if (!area || zFloor === Infinity) return zfit;
+      return Math.min(zfit, Math.max(Math.sqrt(0.40 * w0r * h0r / area), zFloor));
+    }
 
     /* ---------- simulação (independente do enquadramento) ---------- */
     function initSim() {
@@ -213,11 +217,11 @@
       } else if (land) {
         /* paisagem estreita: espinha compacta, para a câmera de repouso mostrar os
            rótulos com 12 px ou mais e as colunas ficarem fora da janela inicial */
-        csw = 224; ch = 52;
+        csw = W < 760 ? 200 : 224; ch = 52;
         sw = U.clamp(W * 0.28, 180, 260); sh = U.clamp(H * 0.11, 60, 90);
         gi = 12; gs = 7;
       } else {
-        csw = U.clamp(W * 0.62, 224, 320); ch = U.clamp(H * 0.065, 52, 60);
+        csw = U.clamp(W * 0.62, 224, 320); ch = layout === 'short' ? 46 : U.clamp(H * 0.065, 52, 60);
         /* 'tiny': núcleo um pouco mais estreito que a espinha — a câmera de repouso
            fica mais perto e 01/DRE podem ficar mais perto dele sem entrar na janela */
         sw = layout === 'tiny' ? Math.round(csw * 0.82) : csw;
@@ -232,7 +236,11 @@
       var w0r = start.w * W, h0r = start.h * H;
       var restH = layout === 'tiny' ? sh : (layout === 'short' || layout === 'colsShort') ? 2 * ch + 2 * gi + sh : 4 * ch + 2 * gi + 2 * gs + sh;
       var restW = layout === 'tiny' ? sw : iw;
-      var zr = U.clamp(Math.min((w0r - 24) / restW, (h0r - 24) / restH), 0.5, 1.8);
+      /* área ocupada pelo conjunto de repouso (unidades do mundo): a câmera de repouso
+         não o amplia além de ~40% da janela (regra 4: pelo menos metade do campo
+         vazia), sem deixar os rótulos abaixo de 12,5 px (zFloor, medido no resize) */
+      w.restArea = layout === 'tiny' ? sw * sh : (layout === 'short' || layout === 'colsShort') ? 2 * csw * ch + sw * sh : 4 * csw * ch + sw * sh;
+      var zr = capZoom(U.clamp(Math.min((w0r - 24) / restW, (h0r - 24) / restH), 0.5, 1.8), w.restArea, w0r, h0r);
       var vh = (h0r / 2) / zr;
       if (layout === 'tiny') gi = Math.max(gi, vh + 8 - sh / 2);
       if (layout === 'short' || layout === 'colsShort' || layout === 'tiny') gs = Math.max(gs, vh + 8 - sh / 2 - gi - ch);
@@ -294,6 +302,13 @@
         var xL = padP + cwp / 2, xR = W - padP - cwp / 2;
         var tight = layout !== 'portrait';
         var chp = ch, sp = tight ? 10 : 40, rg = tight ? 12 : 18;
+        /* telas baixas: as duas fileiras de cada ponta precisam caber entre a borda (8 px)
+           e a espinha com o respiro rg entre elas; se não couberem, os cartões de fora
+           ficam mais baixos (nunca colados uns nos outros) */
+        if (tight) {
+          var availT = spine.E.y - sp - 8, availB = H - 8 - (spine.F.y + ch + sp);
+          chp = Math.max(40, Math.min(ch, Math.floor((Math.min(availT, availB) - rg) / 2)));
+        }
         var top0 = tight ? chp / 2 + 8 : Math.max(chp / 2 + 10, H * 0.065), top1 = Math.min(spine.E.y - sp - chp / 2, top0 + chp + rg);
         var bot1 = tight ? H - chp / 2 - 8 : Math.min(H - chp / 2 - 10, H * 0.935), bot0 = Math.max(spine.F.y + ch + sp + chp / 2, bot1 - chp - rg);
         top0 += tune.t0; top1 += tune.t1; bot0 += tune.b0; bot1 += tune.b1;
@@ -361,8 +376,9 @@
       /* câmera em repouso: enquadra o conjunto de repouso inteiro dentro da janela
          inicial, com 12 px de folga em cada lado */
       var fit = function () {
-        return U.clamp(Math.min((w0 - 24) / world.inner.w, (h0 - 24) / world.inner.h), 0.5, 1.8);
+        return capZoom(U.clamp(Math.min((w0 - 24) / world.inner.w, (h0 - 24) / world.inner.h), 0.5, 1.8), world.restArea, w0, h0);
       };
+      zFloor = Infinity;
       /* composição base por orientação; se o conjunto de repouso só coubesse com
          rótulos abaixo de 12 px, ela se adapta (menos cartões em repouso) */
       var chain = portrait ? ['portrait', 'short', 'tiny'] : ['cols', 'colsShort'];
@@ -372,6 +388,11 @@
         world = buildWorld();
         if (fit() * world.fs >= 12) break;
       }
+      /* segunda passada: com o corpo dos rótulos conhecido, a câmera de repouso pode
+         recuar até os rótulos ficarem com 12,5 px, para o campo ficar mais vazio */
+      zFloor = 12.5 / world.fs;
+      Object.keys(tune).forEach(function (k) { tune[k] = 0; slideF[k] = 1; });
+      world = buildWorld();
       z0 = fit();
       zg0 = 1 + (z0 - 1) * 0.5;
       if (!opts.still) alignEntries();
@@ -725,7 +746,9 @@
       var sl = world.slab, NX = sim.NX, NY = sim.NY;
       var P = Math.min(sl.w / (NX + 1), sl.h / (NY + 1));
       var x0 = sl.x + (sl.w - (NX - 1) * P) / 2, y0 = sl.y + (sl.h - (NY - 1) * P) / 2;
-      ctx.fillStyle = U.css(C.paper);
+      /* o núcleo é o ponto focal da mídia: campo kraft (o valor mais forte da cena,
+         acima dos cartões paper e do DRE em branco), com o wordmark em text */
+      ctx.fillStyle = U.css(C.kraft);
       rectW(sl.x, sl.y, sl.w, sl.h);
       /* wordmark do núcleo */
       var fsW = U.clamp(P * 0.95, 11, 24), lx = x0 - P * 0.15, ly = y0 + fsW * 0.36;
@@ -739,45 +762,22 @@
       var w2 = ctx.measureText('AI').width;
       spacing(0);
       deviceSpace();
-      var labelEnd = lx + w1 + w2 + fsW * 0.3 + P * 0.6;
-      var dot = Math.max(2.5, P * 0.16);
-      for (var j = 0; j < NY; j++) {
-        var y = y0 + j * P;
-        for (var i = 0; i < NX; i++) {
-          var x = x0 + i * P;
-          if (x < labelEnd && y < ly + fsW * 0.3 + dot) continue;
-          var I = 0, d, q;
-          for (q = 0; q < sim.agents.length; q++) {
-            d = Math.abs(sim.agents[q].x - i) + Math.abs(sim.agents[q].y - j);
-            if (d < 2.6) I = Math.max(I, 1 - d / 2.6);
-          }
-          for (q = 0; q < sim.flashes.length; q++) {
-            var age = t - sim.flashes[q].t0;
-            if (age < 0 || age > 1.3) continue;
-            var port = null;
-            for (var pi = 0; pi < world.ports.length; pi++) if (world.ports[pi].i === sim.flashes[q].c) { port = world.ports[pi]; break; }
-            if (!port) continue;
-            d = (Math.abs(port.x - x) + Math.abs(port.y - y)) / P;
-            var ring = 1 - Math.abs(d - (0.5 + age * 5.2)) / 1.1;
-            if (ring > 0) I = Math.max(I, ring * (1 - age / 1.3));
-          }
-          if (I <= 0.5) continue;
-          var sz = dot * 2;
-          ctx.fillStyle = U.css(C.accent);
-          rectW(x - sz / 2, y - sz / 2, sz, sz);
-        }
-      }
-      var as = Math.max(7, P * 0.5);
-      ctx.fillStyle = U.css(C.accentText);
+      /* estilo minimalista: sem pontos acesos em volta dos agentes (liam como falha
+         de desenho); o núcleo mostra só os agentes e as portas */
+      /* agentes: quadrados paper com o rastro em accent-text sobre o kraft */
+      var as = Math.max(9, P * 0.62);
       var ta = lwDev(Math.max(1, P * 0.07) * SN.z);
       for (var a = 0; a < sim.agents.length; a++) {
         var ag = sim.agents[a];
         var axp = x0 + ag.x * P, ayp = y0 + ag.y * P;
         var pts = [{ x: axp, y: ayp }, { x: x0 + ag.fx * P, y: y0 + ag.fy * P }];
         for (var tr = 0; tr < ag.trail.length; tr++) pts.push({ x: x0 + ag.trail[tr].gx * P, y: y0 + ag.trail[tr].gy * P });
+        ctx.fillStyle = U.css(C.accentText);
         for (var pp = 1; pp < pts.length; pp++) segW(pts[pp - 1].x, pts[pp - 1].y, pts[pp].x, pts[pp].y, ta, true);
+        ctx.fillStyle = U.css(C.paper);
         nodeW(axp - as / 2, ayp - as / 2, as, as);
       }
+      ctx.fillStyle = U.css(C.accentText);
       world.ports.forEach(function (pt) { nodeW(pt.x - 4.5, pt.y - 4.5, 9, 9); });
     }
 
@@ -788,7 +788,7 @@
     function drawCard(c, t) {
       var on = t - sim.nodeFlash[c.i] < 1.1;
       var mirror = c.side === 'left';
-      ctx.fillStyle = U.css(c.dre ? C.kraft : (on ? C.white : C.paper));
+      ctx.fillStyle = U.css(c.dre || on ? C.white : C.paper);
       rectW(c.x, c.y, c.w, c.h);
       ctx.fillStyle = U.css(on ? C.accent : C.line);
       var sx = mirror ? c.x + c.padX * 0.8 : c.x + c.w - c.status - c.padX * 0.8;
