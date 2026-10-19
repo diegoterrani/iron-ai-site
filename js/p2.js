@@ -134,7 +134,7 @@
     /* breakpoint do design system (640): acima, visual e texto lado a lado (o visual
        fica com a altura toda do cartão e se lê a 2x -> 1x); até 640, faixa com o texto
        antes do visual */
-    if (M.W > 640) tries.push(['side', 62, false], ['side', 58, false], ['side', 52, false], ['side', 50, true]);
+    if (M.W > 640) tries.push(['side', 62, false], ['side', 58, false], ['side', 52, false], ['side', 48, false], ['side', 44, false], ['side', 44, true]);
     else tries.push(['band1', 0, false], ['band1', 0, true]);
     var pick = null, best = null;
     function tryMode(mode, fr, tight) {
@@ -143,11 +143,14 @@
       list.style.setProperty('--vis-a', (fr || 58) + 'fr'); list.style.setProperty('--vis-b', (100 - (fr || 58)) + 'fr');
       var need = 0;
       cards.forEach(function (c) { need = Math.max(need, Math.ceil(bodyNeed(c, mode)) + 2); });
+      /* o nome inteiro cabe na coluna: a palavra mais longa ("Autodiagnóstico",
+         "Implementação") nunca passa da borda do cartão */
+      var namesFit = cards.every(function (c) { var n = c.querySelector('.stack__name'); return n.scrollWidth <= n.clientWidth + 1; });
       var h, band, ok;
       /* altura mínima do ProductCard (420, ds/components/ProductCard) sempre que couber */
       var minH = Math.min(420, maxH);
       if (mode === 'side') {
-        h = Math.min(Math.max(prefer, need, minH), 700); band = h; ok = need <= Math.min(maxH, 700);
+        h = Math.min(Math.max(prefer, need, minH), 700); band = h; ok = need <= Math.min(maxH, 700) && namesFit;
         h = Math.min(Math.max(h, need), maxH);
       } else {
         var minBand = Math.max(100, Math.round(0.26 * prefer));
@@ -257,7 +260,7 @@
        central); S: escala final; e: expoente do ritmo (<= 1,3, o do central: nunca mais
        lento que ele); k: ritmo em que o vão abre; chip: canto do rótulo (o interno) */
     PANELS = [
-      { kind: 'hotel', field: 'manilla', label: 'Hotelaria', side: 'top', S: 4.6, e: 1.0, k: 1.4, chip: 'br',
+      { kind: 'hotel', field: 'kraft', label: 'Hotelaria', side: 'top', S: 4.6, e: 1.0, k: 1.4, chip: 'br',
         nat: [-g2 - w.ho, -g2, top, ty], a: [-g2, ty] },
       { kind: 'restaurante', field: 'oat', label: 'Restaurantes', side: 'top', S: 6.2, e: 0.9, k: 2.4, chip: 'bl',
         nat: [g2, g2 + w.re, top + dT, ty], a: [g2, ty] },
@@ -267,7 +270,7 @@
         nat: [sx, sx + w.ig, -hy, hy], a: [sx, 0] },
       { kind: 'fintech', field: 'manilla', label: 'Fintech', side: 'bot', S: 8, e: 1.05, k: 1.7, chip: 'tr',
         nat: [-g2 - w.fi, -g2, by, bot - dB], a: [-g2, by] },
-      { kind: 'saude', field: 'oat', label: 'Saúde', side: 'bot', S: 9, e: 0.85, k: 0.6, chip: 'tl',
+      { kind: 'saude', field: 'kraft', label: 'Saúde', side: 'bot', S: 9, e: 0.85, k: 0.6, chip: 'tl',
         nat: [g2, g2 + w.sa, by, bot], a: [g2, by] }
     ];
     /* as costuras entre os dois painéis de cima e os dois de baixo derivam em sentidos
@@ -328,7 +331,7 @@
     if (pn.side === 'top' || pn.side === 'bot') {
       var g = gapPx(pn, q, M.ha / 2 - cyp);
       Ay = pn.side === 'top' ? cy - cyp - g : cy + cyp + g;
-      var seam = (pn.side === 'top' ? M.seamT : M.seamB) * q * M.sw, gs = M.G0 * (1 + 1.6 * q) / 2;
+      var seam = (pn.side === 'top' ? M.seamT : M.seamB) * q * M.sw, gs = M.G0 * (1 + 3 * q) / 2;
       Ax = M.ox + seam + (a[0] < 0 ? -gs : gs);
     } else {
       var g2 = gapPx(pn, q, M.sw / 2 - cxp);
@@ -342,7 +345,7 @@
       v.y = y0; v.h = Math.max(0, y1 - y0);
     }
     var gg = (pn.side === 'top' || pn.side === 'bot') ? g : g2;
-    return { R: r, V: v, ov: Math.max(0, -gg), gw: Math.round(M.G0 * (1 + 0.6 * q)) };
+    return { R: r, V: v, ov: Math.max(0, -gg), gw: Math.round(M.G0 * (1 + 2.5 * q)) };
   }
   function centerRect(sc, shift) {
     var cy = M.oy - (shift || 0);
@@ -424,8 +427,14 @@
     /* laterais: um vão em band acima e abaixo, por cima da borda das faixas de cima e
        de baixo (que passam por baixo delas nos cantos) */
     if (side) { ctx.fillStyle = C.band; R(v.x, v.y - g.gw, v.x + v.w, v.y); R(v.x, v.y + v.h, v.x + v.w, v.y + v.h + g.gw); }
-    ctx.fillStyle = C[pn.field] || C.manilla;                 /* campo do painel: tom claro (o central em clay fica à frente) */
+    ctx.fillStyle = C[pn.field] || C.manilla;                 /* campo do painel: tons alternados entre vizinhos */
     if (!R(v.x, v.y, v.x + v.w, v.y + v.h)) return false;
+    /* borda do painel em accent-text (traço, engrossa com o painel): separa os painéis
+       entre si e do chão, como os vãos escuros da referência */
+    var tb = Math.max(1, Math.round(2 * Math.sqrt(s) * M.dpr)) / M.dpr;
+    ctx.fillStyle = C['accent-text'];
+    R(v.x, v.y, v.x + v.w, v.y + tb); R(v.x, v.y + v.h - tb, v.x + v.w, v.y + v.h);
+    R(v.x, v.y, v.x + tb, v.y + v.h); R(v.x + v.w - tb, v.y, v.x + v.w, v.y + v.h);
     ctx.save();
     var X0 = Math.round(Math.max(v.x, 0) * M.dpr), Y0 = Math.round(Math.max(v.y, vTop) * M.dpr);
     var X1 = Math.round(Math.min(v.x + v.w, M.sw) * M.dpr), Y1 = Math.round(Math.min(v.y + v.h, vBot) * M.dpr);
@@ -500,7 +509,7 @@
     ctx.restore();
     /* rótulo no canto interno, fora da parte que o central cobre (ov); cresce pouco com
        o painel (até 1,35x) para não disputar com o central */
-    var f = 12 * Math.min(1.35, 1 + 0.12 * (s - 1)), off = Math.round(8 * f / 12), ov = g.ov;
+    var f = 12 * Math.min(1.5, 1 + 0.18 * (s - 1)), off = Math.round(8 * f / 12) + Math.ceil(tb), ov = g.ov;
     var vv = { x: v.x, y: v.y, w: v.w, h: v.h };
     if (pn.side === 'top') vv.h -= ov; else if (pn.side === 'bot') { vv.y += ov; vv.h -= ov; }
     else if (pn.side === 'l') vv.w -= ov; else { vv.x += ov; vv.w -= ov; }
@@ -520,15 +529,29 @@
      módulos ligados a ele por traços em tinta e o rótulo "Qualquer setor" no alto.
      names: desenhar os nomes dos módulos (só quando nenhum rótulo de fora está na tela,
      para nada se repetir na vista) */
-  function drawCentro(sc, shift, names) {
+  function drawCentro(sc, shift, names, p) {
     var r = centerRect(sc, shift);
     var ux = function (u) { return r.x + u * r.w; }, vy = function (v) { return r.y + v * r.h; };
     var t1 = Math.max(1, Math.round(M.dpr)), k = sc / CEN.S;
     ctx.fillStyle = C.clay; R(r.x, r.y, r.x + r.w, r.y + r.h);           /* campo do central: clay, o mais forte */
+    /* borda do central em text (traço sobre clay): o plano da frente, nítido sobre os
+       de fora; sai quando o central chega a menos de 18 px de cobrir a área visível
+       (no clímax não há moldura: mecanismo 7) */
+    var mgn = Math.min(r.x, M.sw - (r.x + r.w), r.y - EDGE.t, EDGE.b - (r.y + r.h));
+    if (mgn >= 18) {
+      var tc = Math.max(1, Math.round(3 * M.dpr)) / M.dpr;
+      ctx.fillStyle = C.text;
+      R(r.x, r.y, r.x + r.w, r.y + tc); R(r.x, r.y + r.h - tc, r.x + r.w, r.y + r.h);
+      R(r.x, r.y, r.x + tc, r.y + r.h); R(r.x + r.w - tc, r.y, r.x + r.w, r.y + r.h);
+    }
     var nx0 = ux(CEN.nu[0]), nx1 = ux(CEN.nu[1]), ny0 = vy(CEN.nv[0]), ny1 = vy(CEN.nv[1]);
     ctx.fillStyle = C.paper; R(nx0, ny0, nx1, ny1);
     ctx.fillStyle = C.line;
-    var pitch = (G / CEN.Send) * sc, cxs = M.ox, cys = M.oy - shift;
+    /* a grade do núcleo é a própria grade dos casos vista por uma janela: passo de 48
+       px na tela (não amplia), colunas em W/2 + k·48 e, quando a camada dos casos sobe
+       (p > pc), as linhas sobem junto com ela; assim, na borda da camada, as duas
+       grades coincidem e o núcleo vira o fundo da seção seguinte (mecanismo 4) */
+    var pitch = G, cxs = M.ox, cys = M.oy - shift - Math.max(0, (p || 0) - (M.pc || 1)) * M.zoomLen;
     var NX0 = Math.round(nx0 * M.dpr), NX1 = Math.round(nx1 * M.dpr), NY0 = Math.round(ny0 * M.dpr), NY1 = Math.round(ny1 * M.dpr);
     if (pitch >= 3) {
       var a;
@@ -607,24 +630,31 @@
     var hcx = ux(0.5), hcy = vy(0.5), hl = Math.max(1, Math.round(2 * k)) / 2;
     var cwN = nx1 - nx0, chN = ny1 - ny0, ps = Math.max(4, Math.round(lw * 2.5));
     var wmBottom = (fw >= 12 && wm) ? ny0 + pad + fw * 1.2 : ny0;
-    ctx.fillStyle = C.text;
+    /* dentro do núcleo (paper) os traços são accent-text, como nas figuras; o núcleo
+       tem o contorno accent-text das figuras (regra 4) */
+    ctx.fillStyle = C['accent-text'];
+    var tcN = Math.max(1, Math.round(2 * Math.sqrt(k) * M.dpr)) / M.dpr;
+    R(nx0, ny0, nx1, ny0 + tcN); R(nx0, ny1 - tcN, nx1, ny1); R(nx0, ny0, nx0 + tcN, ny1); R(nx1 - tcN, ny0, nx1, ny1);
     if (M.orient === 'paisagem') {
       var lefts = CEN.cards.filter(function (c) { return c.u < 0.5; }), rights = CEN.cards.filter(function (c) { return c.u > 0.5; });
       [[lefts, nx0, nx0 + 0.16 * cwN], [rights, nx1, nx1 - 0.16 * cwN]].forEach(function (grp) {
         var cs = grp[0], edge = grp[1], bx = grp[2];
         var ys = cs.map(function (c) { return vy(c.v); }), y0b = Math.min.apply(null, ys), y1b = Math.max.apply(null, ys);
         if (y0b - ps < wmBottom + 4 && edge === nx0) { R(Math.min(edge, hcx), hcy - hl, Math.max(edge, hcx), hcy + hl); return; }
-        ys.forEach(function (yy) { R(Math.min(edge, bx), yy - hl, Math.max(edge, bx), yy + hl); R(edge - ps / 2, yy - ps / 2, edge + ps / 2, yy + ps / 2); });
+        ys.forEach(function (yy) {
+          R(Math.min(edge, bx), yy - hl, Math.max(edge, bx), yy + hl);
+          if (edge === nx0) R(edge, yy - ps / 2, edge + ps, yy + ps / 2); else R(edge - ps, yy - ps / 2, edge, yy + ps / 2);   /* porta, por dentro do núcleo */
+        });
         R(bx - hl, y0b - hl, bx + hl, y1b + hl);
         R(Math.min(bx, hcx), hcy - hl, Math.max(bx, hcx), hcy + hl);
       });
     } else {
       var yb = ny1 - 0.14 * chN, xs = [ux(0.3), ux(0.7)];
-      xs.forEach(function (xx) { R(xx - hl, yb, xx + hl, ny1); R(xx - ps / 2, ny1 - ps / 2, xx + ps / 2, ny1 + ps / 2); });
+      xs.forEach(function (xx) { R(xx - hl, yb, xx + hl, ny1); R(xx - ps / 2, ny1 - ps, xx + ps / 2, ny1); });
       R(xs[0] - hl, yb - hl, xs[1] + hl, yb + hl);
       R(hcx - hl, hcy, hcx + hl, yb);
     }
-    R(hcx - ps / 2, ny0 - ps / 2, hcx + ps / 2, ny0 + ps / 2);    /* porta do rótulo no alto */
+    R(hcx - ps / 2, ny0, hcx + ps / 2, ny0 + ps);    /* porta do rótulo no alto, por dentro do núcleo */
     var hn = Math.max(4, Math.round(Math.min(cwN, chN) * 0.09)), hi = Math.max(2, Math.round(hn * 0.4));
     ctx.fillStyle = C.clay; R(hcx - hn, hcy - hn, hcx + hn, hcy + hn);
     ctx.fillStyle = C.paper; R(hcx - hi, hcy - hi, hcx + hi, hcy + hi);
@@ -692,7 +722,7 @@
        central por cima de todos */
     [0, 1, 4, 5, 2, 3].forEach(function (i) { if (drawNeighbor(PANELS[i], zs.s[i], zs.sc, shift, vTop, vBot, zs.q)) labelsOut++; });
     /* os nomes dos módulos só aparecem quando nenhum rótulo de fora está na tela */
-    var c = drawCentro(zs.sc, shift, labelsOut === 0 && zs.q > 0.5);
+    var c = drawCentro(zs.sc, shift, labelsOut === 0 && zs.q > 0.5, zs.p);
     /* perto de cobrir: uma sobra menor que 18 px entre o central e a borda vira campo
        campo do central (sem lasca do fundo ou de painel de fora) */
     var T = 18, ml = c.x, mr = M.sw - (c.x + c.w), mt = c.y - vTop, mb = vBot - (c.y + c.h);

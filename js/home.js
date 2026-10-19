@@ -506,14 +506,24 @@
      ela ocupa sempre a largura toda e a sua base fica sempre sob a folha.
      Ligado à rolagem (scrub), reversível. Coberta, o canvas para.
      --------------------------------------------------------------------- */
+  /* o deslocamento é aplicado em px inteiros (power1.out escrito à mão): com um
+     translate fracionário o canvas era reamostrado e as hairlines de 1 px do campo
+     viravam faixas de 2 px em cores fora dos tokens */
   if (manifesto) {
-    gsap.fromTo(stage, { yPercent: 0 }, {
-      yPercent: -4, ease: 'power1.out',
-      scrollTrigger: {
-        trigger: manifesto, start: 'top bottom', end: 'top top', scrub: true,
-        onLeave: function () { hero.visible = false; },
-        onEnterBack: function () { hero.visible = true; }
-      }
+    var passTy = null;
+    var setPass = function (prog) {
+      var e = 1 - Math.pow(1 - U.clamp(prog, 0, 1), 2);
+      var ty = Math.round(-0.04 * stage.offsetHeight * e);
+      if (ty === passTy) return;
+      passTy = ty;
+      stage.style.transform = ty ? 'translate3d(0,' + ty + 'px,0)' : '';
+    };
+    ST.create({
+      trigger: manifesto, start: 'top bottom', end: 'top top',
+      onUpdate: function (self) { setPass(self.progress); },
+      onRefresh: function (self) { passTy = null; setPass(self.progress); },
+      onLeave: function () { hero.visible = false; },
+      onEnterBack: function () { hero.visible = true; }
     });
   }
 

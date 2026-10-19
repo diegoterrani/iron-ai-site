@@ -547,13 +547,6 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .stack[data-tight] .stack__body { padding: var(--space-4); }
 .stack[data-tight] .stack__number { top: 26px; right: 30px; }
 .stack[data-tight] .stack__price { font-size: 17px; }
-/* corpo estreito (cartão lado a lado em telas até 1100 px): o número fica no canto,
-   acima da primeira linha do nome, para uma palavra longa ("Autodiagnóstico",
-   "Implementação") não encostar nele */
-@media (max-width: 1100px) {
-  .stack[data-mode="side"] .stack__number { top: 14px; right: 16px; }
-  .stack[data-mode="side"] .stack__intro { padding-right: 0; }
-}
 .esteira__more { margin-top: var(--space-5); }
 /* cores da ilustração (tokens; design-system.md, "Ilustração e mídia em código") */
 /* paleta de ilustração no estilo do Claude.ai (design-system.md, regra 4): campo
@@ -571,6 +564,8 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
    kraft; o corpo (interface) desce de paper para surface e surface-2 */
 .stack__card[data-covered="1"] { background: var(--surface); }
 .stack__card[data-covered="2"] { background: var(--surface-2); }
+/* no cartão coberto o número passa a muted: subtle teria 4,3:1 sobre surface-2 */
+.stack__card[data-covered] .stack__number { color: var(--muted); }
 .stack__card[data-covered] .stack__visual, .stack__card[data-covered] .v-f { background: var(--kraft); fill: var(--kraft); }
 
 /* Regras públicas da oferta: só os títulos, em linha de três divididas por line */
@@ -609,6 +604,8 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   background-image: linear-gradient(to right, var(--line) 0 1px, transparent 1px), linear-gradient(to bottom, var(--line) 0 1px, transparent 1px);
   background-size: var(--grid, 48px) var(--grid, 48px);
   background-position: var(--grid-x, 50vw) var(--grid-y, 0px);
+  /* a grade conta a partir da borda de cima (a hairline), como a do núcleo do zoom */
+  background-origin: border-box;
 }
 .cases {
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));

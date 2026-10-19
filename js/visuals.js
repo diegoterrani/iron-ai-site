@@ -762,9 +762,32 @@
       var w2 = ctx.measureText('AI').width;
       spacing(0);
       deviceSpace();
-      /* estilo minimalista: sem pontos acesos em volta dos agentes (liam como falha
-         de desenho); o núcleo mostra só os agentes e as portas */
-      /* agentes: quadrados paper com o rastro em accent-text sobre o kraft */
+      /* circuito do núcleo: cada porta segue, em ângulo reto, até um barramento abaixo
+         do wordmark, que leva ao nó central (clay com miolo paper). Uma porta cujo
+         caminho cruzaria o wordmark fica só na borda. O núcleo lê como um processador,
+         não como um retângulo vazio */
+      var wb = { x0: lx - 4, x1: lx + w1 + w2 + fsW * 0.3 + 4, y0: ly - fsW, y1: ly + fsW * 0.35 };
+      var ym = sl.y + sl.h * 0.64, xl = sl.x + sl.w * 0.06, xr = sl.x + sl.w * 0.94, hubX = sl.x + sl.w / 2;
+      var tw = lwDev(Math.max(1, 1.6) * SN.z), bx0 = hubX, bx1 = hubX;
+      var crosses = function (x, ya, yb) { return x >= wb.x0 && x <= wb.x1 && Math.max(ya, yb) >= wb.y0 && Math.min(ya, yb) <= wb.y1; };
+      ctx.fillStyle = U.css(C.accentText);
+      world.ports.forEach(function (pt) {
+        var top = Math.abs(pt.y - sl.y) < 1, bot = Math.abs(pt.y - (sl.y + sl.h)) < 1, left = Math.abs(pt.x - sl.x) < 1;
+        if (top || bot) {
+          if (crosses(pt.x, pt.y, ym)) return;
+          segW(pt.x, pt.y, pt.x, ym, tw, true); bx0 = Math.min(bx0, pt.x); bx1 = Math.max(bx1, pt.x);
+        } else {
+          var xb = left ? xl : xr;
+          if (crosses(xb, pt.y, ym) || (pt.y >= wb.y0 && pt.y <= wb.y1 && Math.min(pt.x, xb) <= wb.x1)) return;
+          segW(pt.x, pt.y, xb, pt.y, tw, true); segW(xb, pt.y, xb, ym, tw, true);
+          bx0 = Math.min(bx0, xb); bx1 = Math.max(bx1, xb);
+        }
+      });
+      segW(bx0, ym, bx1, ym, tw, true);
+      var hs = Math.max(14, sl.h * 0.22), hi = hs * 0.42;
+      ctx.fillStyle = U.css(C.accent); rectW(hubX - hs / 2, ym - hs / 2, hs, hs);
+      ctx.fillStyle = U.css(C.paper); rectW(hubX - hi / 2, ym - hi / 2, hi, hi);
+      /* agentes: quadrados paper que andam pela grade do núcleo, sobre o kraft */
       var as = Math.max(9, P * 0.62);
       var ta = lwDev(Math.max(1, P * 0.07) * SN.z);
       for (var a = 0; a < sim.agents.length; a++) {
@@ -772,8 +795,7 @@
         var axp = x0 + ag.x * P, ayp = y0 + ag.y * P;
         var pts = [{ x: axp, y: ayp }, { x: x0 + ag.fx * P, y: y0 + ag.fy * P }];
         for (var tr = 0; tr < ag.trail.length; tr++) pts.push({ x: x0 + ag.trail[tr].gx * P, y: y0 + ag.trail[tr].gy * P });
-        ctx.fillStyle = U.css(C.accentText);
-        for (var pp = 1; pp < pts.length; pp++) segW(pts[pp - 1].x, pts[pp - 1].y, pts[pp].x, pts[pp].y, ta, true);
+        /* sem rastro: os traços soltos liam como falha de desenho */
         ctx.fillStyle = U.css(C.paper);
         nodeW(axp - as / 2, ayp - as / 2, as, as);
       }
@@ -788,7 +810,9 @@
     function drawCard(c, t) {
       var on = t - sim.nodeFlash[c.i] < 1.1;
       var mirror = c.side === 'left';
-      ctx.fillStyle = U.css(c.dre || on ? C.white : C.paper);
+      /* o DRE é o único cartão em branco (design-system.md, "Núcleo do hero"); uma
+         área que recebe um pacote acende só o quadrado de status */
+      ctx.fillStyle = U.css(c.dre ? C.white : C.paper);
       rectW(c.x, c.y, c.w, c.h);
       ctx.fillStyle = U.css(on ? C.accent : C.line);
       var sx = mirror ? c.x + c.padX * 0.8 : c.x + c.w - c.status - c.padX * 0.8;
