@@ -20,7 +20,7 @@
   var tsError = document.getElementById('turnstile-erro');
 
   /* ---------- regras (espelho do servidor) ---------- */
-  var MOTIVOS = ['Sessão executiva gratuita', 'Deep-dive ou implementação', 'Parceria', 'Outro assunto'];
+  var MOTIVOS = ['Sessão executiva', 'Deep-dive ou implementação', 'Parceria', 'Outro assunto'];
   var PORTES = ['até 49 pessoas', '50 a 249', '250 a 999', '1.000 ou mais'];
   var EMAIL_RE = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\.[A-Za-z]{2,63}$/;
   var PHONE_RE = /^[0-9+().\s-]{8,30}$/;

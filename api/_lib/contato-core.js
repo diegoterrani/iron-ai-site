@@ -9,7 +9,7 @@ export const MAX_BODY_BYTES = 10 * 1024;
 export const EXTERNAL_TIMEOUT_MS = 5000;
 
 export const MOTIVOS = Object.freeze([
-  'Sessão executiva gratuita',
+  'Sessão executiva',
   'Deep-dive ou implementação',
   'Parceria',
   'Outro assunto'

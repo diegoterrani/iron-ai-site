@@ -897,3 +897,13 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 @media (prefers-reduced-motion: reduce) {
   .path, .field__control, .site-footer li a { transition: none; }
 }
+
+/* Esteira na home: convite comercial sob a pilha (decisão do cliente: sem preços) */
+.esteira__cta {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 32px;
+  padding: var(--space-4) 0; margin-bottom: var(--space-4);
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.esteira__pitch { max-width: 36em; font-size: 17px; line-height: 1.75; color: var(--muted); }
+/* uma regra só: a lista encolhe ao conteúdo, sem hairline sobrando à direita */
+.rules:has(> li:only-child) { grid-template-columns: minmax(0, max-content); width: fit-content; max-width: 100%; }

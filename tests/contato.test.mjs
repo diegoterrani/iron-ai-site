@@ -19,7 +19,7 @@ const ENV = {
 };
 
 const valid = () => ({
-  motivo: 'Sessão executiva gratuita',
+  motivo: 'Sessão executiva',
   nome: 'Maria Souza',
   cargo: 'CEO',
   empresa: 'Rede Exemplo',
@@ -128,7 +128,7 @@ test('pedido válido: verifica o Turnstile, envia pelo Resend e responde 200', a
   assert.equal(p.from, ENV.CONTACT_FROM);
   assert.deepEqual(p.to, ['contato@iron-ai.example']);
   assert.equal(p.reply_to, 'maria@rede-exemplo.com.br');
-  assert.equal(p.subject, '[IRON AI] Sessão executiva gratuita — Rede Exemplo');
+  assert.equal(p.subject, '[IRON AI] Sessão executiva — Rede Exemplo');
   assert.ok(p.text.includes('Mensagem:\nQueremos entender'));
   assert.equal(p.html, undefined);
   assertNoPii();
