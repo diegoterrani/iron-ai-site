@@ -131,6 +131,11 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
   display: flex; align-items: center; gap: 34px;
   height: 100%; padding: 0 var(--gutter);
 }
+/* sobre o hero em repouso o header usa as bordas do conteúdo do hero (medidas em home.js);
+   ao viajar na folha do manifesto volta ao container da página. O botão do header some
+   nesse estado (a ação é a do hero), então a navegação termina na borda do hero. */
+.site-header.is-wide .site-header__inner { padding-left: var(--hx-l, var(--gutter)); padding-right: var(--hx-r, var(--gutter)); }
+.site-header.is-wide .site-header__cta { display: none; }
 .site-nav { display: flex; align-items: center; gap: 34px; margin-left: auto; }
 .site-nav a { font: 700 13px/1 var(--font-sans); color: var(--nav-text); transition: color .2s; }
 .site-nav a:hover { color: var(--accent-text); }
