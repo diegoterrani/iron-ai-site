@@ -77,8 +77,6 @@
 
       <div class="contato-grid">
           <form class="form" id="contato-form" action="/api/contato" method="post" novalidate data-contato-form>
-            <div class="form__alert" role="alert" data-form-alert hidden></div>
-
             <fieldset class="form__group">
               <legend class="form__legend"><span class="form__index">01</span>Sobre o caso</legend>
               <div class="form__grid">
@@ -175,6 +173,9 @@
                 <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="light" data-language="pt-br" data-size="flexible"></div>
                 <p class="field__error" id="turnstile-erro" hidden></p>
               </div>
+
+              <!-- erro geral: logo acima do botão, onde o visitante está; recebe o foco ao aparecer -->
+              <div class="form__alert" role="alert" tabindex="-1" data-form-alert hidden></div>
 
               <div class="form__submit">
                 <button class="button button-primary" type="submit" data-submit>

@@ -28,8 +28,8 @@ async function fillValid(page) {
   });
 }
 
-async function scenario(browser, { status, body }) {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+async function scenario(browser, { status, body, network, viewport = { width: 1440, height: 900 } }) {
+  const page = await browser.newPage({ viewport });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.route('**/challenges.cloudflare.com/**', (r) => r.abort());
@@ -37,14 +37,18 @@ async function scenario(browser, { status, body }) {
   await page.route('**/api/contato', async (r) => {
     posted = JSON.parse(r.request().postData());
     await new Promise((res) => setTimeout(res, 150));   /* deixa o estado "Enviando…" aparecer */
+    if (network) return r.abort('internetdisconnected');
     await r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
   });
   await page.goto(`${BASE}/contato.html`);
+  /* dublê do widget: conta os reset() */
+  await page.evaluate(() => { window.__resets = 0; window.turnstile = { reset: () => { window.__resets++; } }; });
   await fillValid(page);
   await page.click('[data-submit]');
   await page.getByText('Enviando…').waitFor({ state: 'visible', timeout: 2000 });
-  await page.waitForResponse('**/api/contato');
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(network ? 400 : 0);
+  if (!network) await page.waitForResponse('**/api/contato');
+  await page.waitForTimeout(700);                       /* rolagem suave até o alerta */
   return { page, errors, posted };
 }
 
@@ -71,8 +75,12 @@ await check('envio 200: formulário some, "Pedido recebido." visível e com foco
   await page.close();
 });
 
-await check('envio 500: botão volta a habilitado, alerta visível, formulário mantido', async () => {
-  const { page, errors } = await scenario(browser, { status: 500, body: { ok: false, error: 'Serviço indisponível no momento.' } });
+const MSG_RETRY = 'Não foi possível enviar agora. Os seus dados continuam aqui: tente de novo em alguns minutos.';
+const MSG_TURNSTILE = 'Não conseguimos confirmar a verificação anti-robô. Refaça a verificação e envie de novo.';
+
+/* erro geral: alerta visível na tela, com o foco, logo acima do botão; o Tab
+   seguinte cai num controle do formulário, não no header */
+async function assertErrorState(page, errors, message) {
   const btn = page.locator('[data-submit]');
   assert.equal(await btn.isEnabled(), true);
   assert.equal(await btn.getAttribute('aria-busy'), 'false');
@@ -80,10 +88,39 @@ await check('envio 500: botão volta a habilitado, alerta visível, formulário 
   const alert = page.locator('[data-form-alert]');
   assert.equal(await alert.isVisible(), true);
   assert.equal(await alert.getAttribute('role'), 'alert');
-  assert.equal((await alert.textContent()).trim(), 'Serviço indisponível no momento.');
+  assert.equal((await alert.textContent()).trim(), message);
+  const box = await alert.evaluate((el) => { const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, vh: innerHeight }; });
+  assert.ok(box.top >= 0 && box.bottom <= box.vh, `alerta fora da tela: ${JSON.stringify(box)}`);
+  assert.equal(await alert.evaluate((el) => el === document.activeElement), true, 'foco não está no alerta');
+  await page.keyboard.press('Tab');
+  const next = await page.evaluate(() => {
+    const a = document.activeElement;
+    return { inForm: !!a.closest('[data-contato-form]'), inHeader: !!a.closest('.site-header'), tag: a.tagName, submit: a.hasAttribute('data-submit') };
+  });
+  assert.ok(next.inForm && !next.inHeader, `Tab foi para ${JSON.stringify(next)}`);
   assert.equal(await page.locator('[data-contato-form]').isVisible(), true);
   assert.equal(await page.locator('[data-form-success]').isVisible(), false);
+  assert.ok(await page.evaluate(() => window.__resets) >= 1, 'Turnstile não foi reiniciado');
   assert.deepEqual(errors, []);
+}
+
+for (const vp of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+  await check(`envio 500 (${vp.width}): alerta na tela com foco, botão habilitado, Tab no formulário`, async () => {
+    const { page, errors } = await scenario(browser, { status: 500, body: { ok: false, error: 'Serviço indisponível no momento.' }, viewport: vp });
+    await assertErrorState(page, errors, MSG_RETRY);
+    await page.close();
+  });
+
+  await check(`falha de rede (${vp.width}): alerta na tela com foco, botão habilitado, Tab no formulário`, async () => {
+    const { page, errors } = await scenario(browser, { network: true, viewport: vp });
+    await assertErrorState(page, errors, MSG_RETRY);
+    await page.close();
+  });
+}
+
+await check('envio 403 (anti-robô): mensagem própria e widget reiniciado', async () => {
+  const { page, errors } = await scenario(browser, { status: 403, body: { ok: false, error: 'x' } });
+  await assertErrorState(page, errors, MSG_TURNSTILE);
   await page.close();
 });
 

@@ -134,9 +134,17 @@
   }
 
   /* ---------- estados ---------- */
-  function showAlert(msg) {
+  var MSG_RETRY = 'Não foi possível enviar agora. Os seus dados continuam aqui: tente de novo em alguns minutos.';
+  var MSG_TURNSTILE = 'Não conseguimos confirmar a verificação anti-robô. Refaça a verificação e envie de novo.';
+  /* o alerta fica logo acima do botão; com focus=true recebe o foco (o botão
+     estava desabilitado durante o envio) e entra na tela */
+  function showAlert(msg, focus) {
     alertBox.textContent = msg;
     alertBox.hidden = false;
+    if (focus) {
+      alertBox.focus({ preventScroll: true });
+      alertBox.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+    }
   }
   function clearAlert() { alertBox.hidden = true; alertBox.textContent = ''; }
   function setBusy(on) {
@@ -175,7 +183,7 @@
     }
 
     if (firstInvalid) { firstInvalid.focus(); return; }
-    if (!token) { showAlert(tsError.textContent); return; }
+    if (!token) { showAlert(tsError.textContent, true); return; }
 
     var body = {
       motivo: motivoEl.value,
@@ -217,15 +225,19 @@
             if (!first) first = el;
           }
         });
-        showAlert(data.error || 'Não foi possível enviar agora. Tente de novo em alguns minutos.');
-        resetTurnstile();
+        var status = r.res.status;
+        var msg = status === 403 ? MSG_TURNSTILE
+          : (status === 400 || status === 413 || status === 415) && data.error ? data.error
+          : MSG_RETRY;
+        resetTurnstile();                /* token de uso único: o widget recomeça */
         setBusy(false);
+        showAlert(msg, !first);
         if (first) first.focus();
       })
       .catch(function () {
-        showAlert('Não foi possível enviar agora. Confira a conexão e tente de novo.');
         resetTurnstile();
         setBusy(false);
+        showAlert(MSG_RETRY, true);
       })
       .then(function () { if (timer) clearTimeout(timer); });
   });
