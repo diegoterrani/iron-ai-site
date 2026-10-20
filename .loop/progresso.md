@@ -1,6 +1,9 @@
 # Progresso — loop de design, rodada 33
 
-Rodadas globais executadas: 1
+Rodadas globais executadas: 3 (rodada 4 em construção)
+
+R3 (parte D, após remover preços): Briefing APROVADO · Sistema REPROVADO (dois botões cta-bg na mesma vista no fim da esteira) · Visual REPROVADO (faixa "A esteira começa aqui" no contato sem título, cards 15px).
+Ressalva do briefing para a parte A: "Retorno mínimo de 3× em 12 meses" sem fonte; home sem rodapé.
 
 | Parte | Estado | Briefing | Sistema | Visual | Maior lacuna (histórico) |
 | --- | --- | --- | --- | --- | --- |
