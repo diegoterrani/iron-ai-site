@@ -750,9 +750,14 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .path__text { margin-bottom: var(--space-4); }
 
 /* formulário + coluna lateral */
+/* intro e formulário num ritmo único: a intro não tem padding inferior e a seção
+   do formulário não tem hairline; entre a base dos caminhos e o eyebrow ficam só
+   os space-8 (120px; mobile space-7, 78px) do topo do formulário */
+.page-contato .page-intro { padding-bottom: 0; }
+.page-contato .contato-form { border-top: 0; }
 .contato-grid {
-  display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-6);
-  margin-top: var(--space-6); align-items: start;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7);
+  margin-top: var(--space-6);
 }
 .form {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 24px;
@@ -840,11 +845,17 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .form-success:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 /* coluna lateral: as três primeiras etapas, divididas por line */
-.contato-aside { padding-top: 2px; }
-.steps-mini { margin: 14px 0 var(--space-4); padding: 0; list-style: none; border-top: 1px solid var(--line); }
+/* etapas iniciais: faixa de três colunas sob o formulário, divididas pela mesma
+   hairline (como .rules); o formulário ocupa a largura toda, sem coluna vazia */
+.contato-aside { min-width: 0; }
+.steps-mini {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0 var(--space-4); padding: 0; list-style: none;
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
 .steps-mini li {
   display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 8px;
-  padding: 16px 0; border-bottom: 1px solid var(--line);
+  padding: 20px 24px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
 }
 .steps-mini__n { grid-row: span 2; font: 400 12px/1.9 var(--font-mono); color: var(--subtle); }
 .steps-mini__name { font-size: 15px; font-weight: 700; line-height: 1.5; color: var(--text); }
@@ -867,13 +878,16 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 [data-pendente] { padding: 0 4px; background: var(--manilla); color: var(--text); font-family: var(--font-mono); font-size: .9em; }
 
 @media (max-width: 980px) {
-  .contato-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
-  .contato-aside { max-width: 560px; }
+  .steps-mini li { padding: 18px 20px; }
 }
 @media (max-width: 640px) {
   .page-intro { padding: var(--space-6) var(--gutter) var(--space-7); }
   .page-section { padding: var(--space-7) var(--gutter); }
   .paths, .contato-grid { margin-top: 38px; }
+  .page-contato .page-intro { padding-bottom: 0; }
+  .contato-grid { gap: var(--space-6); }
+  .contato-aside { min-width: 0; }
+  .steps-mini { grid-template-columns: minmax(0, 1fr); }
   .paths { grid-template-columns: minmax(0, 1fr); }
   .path { padding: var(--space-4); }
   .form { grid-template-columns: minmax(0, 1fr); gap: 22px; }
