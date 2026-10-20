@@ -25,18 +25,16 @@
 <header class="site-header" data-header>
   <div class="site-header__inner">
     <a class="brand" href="index.html" aria-label="IRON AI, página inicial"><img src="img/logo-lockup.svg" alt="" width="147" height="44"></a>
+    <!-- botão antes da nav no DOM: aberto o menu, o próximo Tab entra nos itens; a posição visual vem de order -->
+    <button class="site-header__menu" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menu" data-menu-toggle>
+      <svg class="ico ico-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="ico ico-x" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
     <nav class="site-nav" id="site-nav" aria-label="Principal">
       <a href="esteira.html">Esteira</a>
       <a href="casos-de-uso.html">Casos de uso</a>
       <a href="contato.html" aria-current="page">Contato</a>
     </nav>
-    <a class="button button-primary site-header__cta" href="contato.html">Agendar diagnóstico
-      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-    </a>
-    <button class="site-header__menu" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menu" data-menu-toggle>
-      <svg class="ico ico-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      <svg class="ico ico-x" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
-    </button>
   </div>
 </header>
 
@@ -198,7 +196,7 @@
         <ul aria-labelledby="ft-ironai">
           <li><a href="esteira.html">Esteira</a></li>
           <li><a href="casos-de-uso.html">Casos de uso</a></li>
-          <li><a href="contato.html">Contato</a></li>
+          <li><a href="contato.html" aria-current="page">Contato</a></li>
         </ul>
       </div>
       <div class="site-footer__col">
