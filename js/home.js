@@ -198,9 +198,18 @@
     stage.style.setProperty('--m-h', px(h0));
     heroStart = { w: w0 / W, h: h0 / H, cy: (y0 + h0 / 2) / H, cx: (x0 + w0 / 2) / W };
     geo = { ctaRight: ctaRight, W: W, H: H, mode: mode, flank: mode === 'flank', band: mode === 'band', narrow: false, hdr: hdr, R0: { x: x0, y: y0, w: w0, h: h0 }, eyTop0: eyebrow.offsetTop, aTop0: halfA.offsetTop };
+    /* bordas laterais do conteúdo do hero em repouso (left/right computados não
+       dependem do transform): o header usa essas bordas enquanto está sobre o hero */
+    var hl = parseFloat(getComputedStyle(halfA).left), hr = parseFloat(getComputedStyle(halfB).right);
+    if (siteHeader && isFinite(hl) && isFinite(hr)) {
+      siteHeader.style.setProperty('--hx-l', Math.max(hl, 16) + 'px');
+      siteHeader.style.setProperty('--hx-r', Math.max(hr, 16) + 'px');
+    }
     return heroStart;
   }
+  var siteHeader = document.querySelector('.site-header');
   measureHero();
+  if (siteHeader) siteHeader.classList.add('is-wide');   /* hero em repouso: alinhado ao conteúdo dele */
 
   var vis = (canvas && window.IronVisuals) ? window.IronVisuals.createAILayer(canvas, {
     startRect: function () { return heroStart; },
@@ -239,6 +248,7 @@
       var show = r.bottom <= hh;                   /* a ação do hero já passou sob o header */
       if (hdrCtaS && show !== ctaShown) {
         ctaShown = show;
+        if (siteHeader) siteHeader.classList.toggle('is-wide', !show);
         hdrCtaS.style.visibility = show ? '' : 'hidden';
         if (show) hdrCtaS.removeAttribute('tabindex'); else hdrCtaS.setAttribute('tabindex', '-1');
         hdrCtaS.setAttribute('aria-hidden', show ? 'false' : 'true');
@@ -264,6 +274,7 @@
   function setHeaderCta(show) {
     if (!hdrCta || hdrState.cta === show) return;
     hdrState.cta = show;
+    if (siteHeader) siteHeader.classList.toggle('is-wide', !show);
     hdrCta.style.visibility = show ? '' : 'hidden';
     if (show) hdrCta.removeAttribute('tabindex'); else hdrCta.setAttribute('tabindex', '-1');
     hdrCta.setAttribute('aria-hidden', show ? 'false' : 'true');
