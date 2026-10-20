@@ -61,7 +61,8 @@
     },
     consentimento: function (_, el) { return el.checked ? '' : 'Marque a autorização para podermos responder.'; }
   };
-  var ORDER = ['motivo', 'nome', 'cargo', 'empresa', 'email', 'telefone', 'porte', 'mensagem', 'consentimento'];
+  /* ordem do DOM: o foco vai ao primeiro campo inválido na ordem de leitura */
+  var ORDER = ['motivo', 'porte', 'mensagem', 'nome', 'cargo', 'empresa', 'email', 'telefone', 'consentimento'];
 
   function field(name) { return form.elements[name]; }
   function errorEl(name) { return document.getElementById(field(name).id + '-erro'); }
@@ -86,14 +87,13 @@
     return !msg;
   }
 
-  /* depois do primeiro erro, o campo é revalidado a cada mudança */
+  /* validação no envio; depois do primeiro erro, o campo é revalidado a cada
+     mudança. Sem validar no blur: a mensagem que surgiria deslocaria o botão
+     de envio no meio do clique. */
   ORDER.forEach(function (name) {
     var el = field(name);
     var ev = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input';
     el.addEventListener(ev, function () { if (el.getAttribute('aria-invalid') === 'true') check(name); });
-    el.addEventListener('blur', function () {
-      if (el.type !== 'checkbox' && el.tagName !== 'SELECT' && el.value !== '') check(name);
-    });
   });
 
   /* ---------- contador da mensagem ---------- */

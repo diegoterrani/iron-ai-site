@@ -79,72 +79,79 @@
           <form class="form" id="contato-form" action="/api/contato" method="post" novalidate data-contato-form>
             <div class="form__alert" role="alert" data-form-alert hidden></div>
 
-            <div class="field field--full">
-              <label class="field__label" for="f-motivo">Motivo do contato</label>
-              <div class="field__select">
-                <select class="field__control" id="f-motivo" name="motivo" required aria-describedby="f-motivo-erro">
-                  <option value="">Selecione</option>
-                  <option>Sessão executiva</option>
-                  <option>Deep-dive ou implementação</option>
-                  <option>Parceria</option>
-                  <option>Outro assunto</option>
-                </select>
-                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            <fieldset class="form__group">
+              <legend class="form__legend"><span class="form__index">01</span>Sobre o caso</legend>
+              <div class="form__grid">
+                <div class="field">
+                  <label class="field__label" for="f-motivo">Motivo do contato</label>
+                  <div class="field__select">
+                    <select class="field__control" id="f-motivo" name="motivo" required aria-describedby="f-motivo-erro">
+                      <option value="">Selecione</option>
+                      <option>Sessão executiva</option>
+                      <option>Deep-dive ou implementação</option>
+                      <option>Parceria</option>
+                      <option>Outro assunto</option>
+                    </select>
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                  <p class="field__error" id="f-motivo-erro" hidden></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="f-porte">Porte da empresa</label>
+                  <div class="field__select">
+                    <select class="field__control" id="f-porte" name="porte" required aria-describedby="f-porte-erro">
+                      <option value="">Selecione</option>
+                      <option>até 49 pessoas</option>
+                      <option>50 a 249</option>
+                      <option>250 a 999</option>
+                      <option>1.000 ou mais</option>
+                    </select>
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                  <p class="field__error" id="f-porte-erro" hidden></p>
+                </div>
+                <div class="field field--full">
+                  <div class="field__head">
+                    <label class="field__label" for="f-mensagem">Mensagem <span class="field__optional">(opcional)</span></label>
+                    <span class="field__count" data-count aria-hidden="true">0 / 1.000</span>
+                  </div>
+                  <textarea class="field__control field__control--area" id="f-mensagem" name="mensagem" rows="5" maxlength="1000" aria-describedby="f-mensagem-dica f-mensagem-erro"></textarea>
+                  <p class="field__hint" id="f-mensagem-dica">Até 1.000 caracteres.</p>
+                  <p class="field__error" id="f-mensagem-erro" hidden></p>
+                </div>
               </div>
-              <p class="field__error" id="f-motivo-erro" hidden></p>
-            </div>
+            </fieldset>
 
-            <div class="field">
-              <label class="field__label" for="f-nome">Nome</label>
-              <input class="field__control" id="f-nome" name="nome" type="text" autocomplete="name" required minlength="2" maxlength="100" aria-describedby="f-nome-erro">
-              <p class="field__error" id="f-nome-erro" hidden></p>
-            </div>
-            <div class="field">
-              <label class="field__label" for="f-cargo">Cargo</label>
-              <input class="field__control" id="f-cargo" name="cargo" type="text" autocomplete="organization-title" required minlength="2" maxlength="100" aria-describedby="f-cargo-erro">
-              <p class="field__error" id="f-cargo-erro" hidden></p>
-            </div>
-
-            <div class="field">
-              <label class="field__label" for="f-empresa">Empresa</label>
-              <input class="field__control" id="f-empresa" name="empresa" type="text" autocomplete="organization" required minlength="2" maxlength="120" aria-describedby="f-empresa-erro">
-              <p class="field__error" id="f-empresa-erro" hidden></p>
-            </div>
-            <div class="field">
-              <label class="field__label" for="f-email">E-mail corporativo</label>
-              <input class="field__control" id="f-email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" required maxlength="254" aria-describedby="f-email-erro">
-              <p class="field__error" id="f-email-erro" hidden></p>
-            </div>
-
-            <div class="field">
-              <label class="field__label" for="f-telefone">Telefone <span class="field__optional">(opcional)</span></label>
-              <input class="field__control" id="f-telefone" name="telefone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" aria-describedby="f-telefone-erro">
-              <p class="field__error" id="f-telefone-erro" hidden></p>
-            </div>
-            <div class="field">
-              <label class="field__label" for="f-porte">Porte da empresa</label>
-              <div class="field__select">
-                <select class="field__control" id="f-porte" name="porte" required aria-describedby="f-porte-erro">
-                  <option value="">Selecione</option>
-                  <option>até 49 pessoas</option>
-                  <option>50 a 249</option>
-                  <option>250 a 999</option>
-                  <option>1.000 ou mais</option>
-                </select>
-                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            <fieldset class="form__group">
+              <legend class="form__legend"><span class="form__index">02</span>Sobre você</legend>
+              <div class="form__grid">
+                <div class="field">
+                  <label class="field__label" for="f-nome">Nome</label>
+                  <input class="field__control" id="f-nome" name="nome" type="text" autocomplete="name" required minlength="2" maxlength="100" aria-describedby="f-nome-erro">
+                  <p class="field__error" id="f-nome-erro" hidden></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="f-cargo">Cargo</label>
+                  <input class="field__control" id="f-cargo" name="cargo" type="text" autocomplete="organization-title" required minlength="2" maxlength="100" aria-describedby="f-cargo-erro">
+                  <p class="field__error" id="f-cargo-erro" hidden></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="f-empresa">Empresa</label>
+                  <input class="field__control" id="f-empresa" name="empresa" type="text" autocomplete="organization" required minlength="2" maxlength="120" aria-describedby="f-empresa-erro">
+                  <p class="field__error" id="f-empresa-erro" hidden></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="f-email">E-mail corporativo</label>
+                  <input class="field__control" id="f-email" name="email" type="email" autocomplete="email" inputmode="email" spellcheck="false" required maxlength="254" aria-describedby="f-email-erro">
+                  <p class="field__error" id="f-email-erro" hidden></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="f-telefone">Telefone <span class="field__optional">(opcional)</span></label>
+                  <input class="field__control" id="f-telefone" name="telefone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" aria-describedby="f-telefone-erro">
+                  <p class="field__error" id="f-telefone-erro" hidden></p>
+                </div>
               </div>
-              <p class="field__error" id="f-porte-erro" hidden></p>
-            </div>
-
-            <div class="field field--full">
-              <div class="field__head">
-                <label class="field__label" for="f-mensagem">Mensagem <span class="field__optional">(opcional)</span></label>
-                <span class="field__count" data-count aria-hidden="true">0 / 1.000</span>
-              </div>
-              <textarea class="field__control field__control--area" id="f-mensagem" name="mensagem" rows="5" maxlength="1000" aria-describedby="f-mensagem-dica f-mensagem-erro"></textarea>
-              <p class="field__hint" id="f-mensagem-dica">Até 1.000 caracteres.</p>
-              <p class="field__error" id="f-mensagem-erro" hidden></p>
-            </div>
+            </fieldset>
 
             <!-- honeypot: fora da tela e do fluxo de leitura; pessoas não o veem nem chegam a ele pelo teclado -->
             <div class="hp" aria-hidden="true">
@@ -152,27 +159,29 @@
               <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
             </div>
 
-            <div class="field field--full field--check">
-              <div class="check">
-                <input class="check__box" id="f-consentimento" name="consentimento" type="checkbox" required aria-describedby="f-consentimento-erro">
-                <label class="check__label" for="f-consentimento">Li a <a href="politica-de-privacidade.html">política de privacidade</a> e autorizo o uso destes dados para retorno do contato.</label>
+            <div class="form__group form__group--end">
+              <div class="field field--full field--check">
+                <div class="check">
+                  <input class="check__box" id="f-consentimento" name="consentimento" type="checkbox" required aria-describedby="f-consentimento-erro">
+                  <label class="check__label" for="f-consentimento">Li a <a href="politica-de-privacidade.html">política de privacidade</a> e autorizo o uso destes dados para retorno do contato.</label>
+                </div>
+                <p class="field__error" id="f-consentimento-erro" hidden></p>
               </div>
-              <p class="field__error" id="f-consentimento-erro" hidden></p>
-            </div>
 
-            <div class="field field--full">
-              <!-- Turnstile: chave de TESTE da Cloudflare (sempre passa). Em produção, troque
-                   data-sitekey pela site key do widget criado no painel Cloudflare > Turnstile;
-                   a secret key correspondente vai em TURNSTILE_SECRET_KEY na Vercel. -->
-              <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="light" data-language="pt-br" data-size="flexible"></div>
-              <p class="field__error" id="turnstile-erro" hidden></p>
-            </div>
+              <div class="field field--full">
+                <!-- Turnstile: chave de TESTE da Cloudflare (sempre passa). Em produção, troque
+                     data-sitekey pela site key do widget criado no painel Cloudflare > Turnstile;
+                     a secret key correspondente vai em TURNSTILE_SECRET_KEY na Vercel. -->
+                <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-theme="light" data-language="pt-br" data-size="flexible"></div>
+                <p class="field__error" id="turnstile-erro" hidden></p>
+              </div>
 
-            <div class="form__submit field--full">
-              <button class="button button-primary" type="submit" data-submit>
-                <span data-submit-label>Enviar pedido</span>
-                <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-              </button>
+              <div class="form__submit">
+                <button class="button button-primary" type="submit" data-submit>
+                  <span data-submit-label>Enviar pedido</span>
+                  <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+                </button>
+              </div>
             </div>
           </form>
 

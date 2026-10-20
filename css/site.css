@@ -369,6 +369,13 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   /* menu aberto: ui 13px/700 em nav-text, como no desktop; área de toque >= 48px */
   .site-nav a { display: flex; align-items: center; min-height: 48px; padding: 0; border-bottom: 1px solid var(--line); }
   .site-header.nav-open .site-nav { display: flex; }
+  /* menu aberto: painel que cobre toda a tela abaixo do header, com rolagem própria;
+     a página fica travada (site.js: html.nav-locked, Lenis parado, main/footer inert) */
+  .site-header.nav-open .site-nav {
+    height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h));
+    overflow-y: auto; overscroll-behavior: contain; border-bottom: 0;
+  }
+  html.nav-locked, html.nav-locked body { overflow: hidden; }
   .site-header.nav-open { background: var(--band); }
 }
 
@@ -766,15 +773,27 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .page-contato .page-intro { padding-bottom: 0; }
 .page-contato .contato-form { border-top: 0; }
 .contato-grid { margin-top: var(--space-6); }
-.form {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 24px;
+/* formulário em grupos (barra: mecanismo 7, até 6 itens por título): 01 "Sobre o
+   caso" (abre com o motivo, mecanismo 3), 02 "Sobre você", e o fecho (aceite,
+   anti-robô e envio). No desktop ocupa até 2/3 do container, à esquerda. */
+.form { display: flex; flex-direction: column; gap: var(--space-5); max-width: calc(var(--page-max) * 2 / 3); }
+.form__group { margin: 0; padding: 0; border: 0; min-width: 0; }
+.form__group ~ .form__group { padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.form__group--end { display: flex; flex-direction: column; gap: 26px; }
+/* legend em card-title (20px/700) com índice mono; float tira a legend da borda */
+.form__legend {
+  float: left; width: 100%; display: flex; align-items: baseline; gap: 14px;
+  margin: 0 0 22px; padding: 0;
+  font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text);
 }
+.form__index { font: 400 12px/1.5 var(--font-mono); letter-spacing: normal; color: var(--subtle); }
+.form__grid { clear: both; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 24px; }
 .field { display: flex; flex-direction: column; min-width: 0; }
 .field--full { grid-column: 1 / -1; }
 .field__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .field__label { display: block; margin-bottom: 8px; font: 700 13px/1.4 var(--font-sans); color: var(--text); }
 .field__optional { font-weight: 500; color: var(--subtle); }
-.field__count { font: 400 12px/1.4 var(--font-mono); color: var(--subtle); }
+.field__count { font: 600 12px/1.4 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle); }
 .field__count.is-near { color: var(--text); }
 .field__control {
   width: 100%; min-height: var(--control-height); margin: 0; padding: 0 14px;
@@ -836,13 +855,14 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .form__submit { display: flex; align-items: center; gap: 18px; }
 .form__submit .button[disabled] { cursor: progress; background: var(--cta-hover); transform: none; }
 .form__alert {
-  grid-column: 1 / -1; display: flex; gap: 12px; padding: 14px 18px;
+  display: flex; gap: 12px; padding: 14px 18px;
   border: 1px solid var(--field-error); background: var(--modal-bg);
   font: 600 14px/1.6 var(--font-sans); color: var(--field-error);
 }
 .form__alert[hidden] { display: none; }
 
 .form-success {
+  max-width: calc(var(--page-max) * 2 / 3);
   padding: var(--space-5); border: 1px solid var(--line); background: var(--modal-bg);
 }
 .form-success[hidden] { display: none; }
@@ -854,7 +874,7 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 /* coluna lateral: as três primeiras etapas, divididas por line */
 /* 14. Páginas legais ------------------------------------------------------- */
 .legal { max-width: 44em; margin-top: var(--space-6); }
-.legal__meta { margin-top: var(--space-3); font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
+.legal__meta { margin-top: var(--space-3); font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle); }
 .legal__section + .legal__section { margin-top: var(--space-5); }
 .legal h2 {
   margin: 0 0 14px; font-family: var(--font-serif); font-optical-sizing: auto;
@@ -875,7 +895,9 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   .page-contato .page-intro { padding-bottom: 0; }
   .paths { grid-template-columns: minmax(0, 1fr); }
   .path { padding: var(--space-4); }
-  .form { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .form { gap: var(--space-4); }
+  .form__grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .form__group--end { gap: 22px; }
   .form-success { padding: var(--space-4); }
   .legal h2 { font-size: 26px; }
 }

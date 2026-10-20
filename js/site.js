@@ -124,7 +124,8 @@
       if (headerEl) headerEl.style.setProperty('--rule', v.toFixed(3));
     },
     height: function () { return headerEl ? headerEl.offsetHeight : 0; },
-    closeMenu: function () {}
+    closeMenu: function () {},
+    isMenuOpen: function () { return false; }
   };
 
   if (headerEl) {
@@ -132,22 +133,67 @@
     if (document.body.getAttribute('data-header-mode') !== 'overlay') header.setSolid(true);
 
     var toggle = headerEl.querySelector('[data-menu-toggle]');
-    if (toggle) {
-      var setOpen = function (open) {
-        headerEl.classList.toggle('nav-open', open);
-        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        toggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    var navEl = headerEl.querySelector('.site-nav');
+    if (toggle && navEl) {
+      /* Menu aberto (<= 760px): painel que cobre a tela abaixo do header (CSS),
+         página travada (overflow + Lenis parado + guarda de roda que vem antes
+         das guardas do hero), conteúdo de trás inerte e foco preso no header. */
+      var menuOpen = false;
+      var backdrop = function () {
+        return Array.prototype.slice.call(document.querySelectorAll('body > main, body > footer, body > .skip-link'));
       };
-      toggle.addEventListener('click', function () {
-        setOpen(!headerEl.classList.contains('nav-open'));
-      });
-      header.closeMenu = function () { if (headerEl.classList.contains('nav-open')) setOpen(false); };
+      var SCROLL_KEYS = { ArrowDown: 1, ArrowUp: 1, PageDown: 1, PageUp: 1, Home: 1, End: 1, ' ': 1 };
+      navEl.setAttribute('data-lenis-prevent', '');   /* rolagem nativa dentro do painel */
+
+      var setOpen = function (open) {
+        menuOpen = !!open;
+        headerEl.classList.toggle('nav-open', menuOpen);
+        root.classList.toggle('nav-locked', menuOpen);
+        toggle.setAttribute('aria-expanded', menuOpen ? 'true' : 'false');
+        toggle.setAttribute('aria-label', menuOpen ? 'Fechar menu' : 'Abrir menu');
+        backdrop().forEach(function (el) {
+          if (menuOpen) el.setAttribute('inert', ''); else el.removeAttribute('inert');
+        });
+        if (lenis) { if (menuOpen) lenis.stop(); else lenis.start(); }
+        if (menuOpen) navEl.scrollTop = 0;
+      };
+      /* registrada antes das guardas de home.js: com o menu aberto, nenhuma roda
+         chega ao hero nem ao Lenis (o painel rola de forma nativa) */
+      wheelGuards.unshift(function () { return !menuOpen; });
+
+      toggle.addEventListener('click', function () { setOpen(!menuOpen); });
+      header.closeMenu = function () { if (menuOpen) setOpen(false); };
+      header.isMenuOpen = function () { return menuOpen; };
+
+      /* captura: teclas de rolagem não chegam aos ouvintes da página (hero) */
+      window.addEventListener('keydown', function (e) {
+        if (menuOpen && SCROLL_KEYS[e.key] && !(e.target && e.target.closest && e.target.closest('input, textarea, select'))) {
+          e.stopPropagation();
+        }
+      }, true);
       document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && headerEl.classList.contains('nav-open')) { setOpen(false); toggle.focus(); }
+        if (!menuOpen) return;
+        if (e.key === 'Escape') { setOpen(false); toggle.focus(); return; }
+        if (e.key !== 'Tab') return;
+        /* foco preso no header + menu */
+        var items = Array.prototype.filter.call(
+          headerEl.querySelectorAll('a[href], button:not([disabled])'),
+          function (el) { return el.offsetParent !== null || el === toggle; }
+        );
+        if (!items.length) return;
+        var first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        else if (!headerEl.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
       });
       headerEl.querySelectorAll('.site-nav a').forEach(function (a) {
         a.addEventListener('click', function () { setOpen(false); });
       });
+      /* a tela passou a mostrar a nav inteira: fecha o painel e destrava */
+      var mqMenu = window.matchMedia('(max-width: 760px)');
+      var onMenuMq = function () { if (!mqMenu.matches && menuOpen) setOpen(false); };
+      if (mqMenu.addEventListener) mqMenu.addEventListener('change', onMenuMq);
+      else if (mqMenu.addListener) mqMenu.addListener(onMenuMq);
     }
   }
 
