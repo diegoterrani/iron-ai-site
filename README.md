@@ -21,6 +21,8 @@ Configure na Vercel (Project > Settings > Environment Variables, ambientes Produ
 | `CONTACT_FROM` | sim | Remetente em domínio verificado no Resend (ex.: `IRON AI <site@dominio>`). |
 | `CONTACT_TO` | sim | Destinatário(s), separados por vírgula. |
 
+Teste de navegador do formulário (fora do `npm test`): com o site servido em `http://localhost:8765` (ou `E2E_BASE_URL`), rode `NODE_PATH="$(npm root -g)" npm run test:e2e`. Precisa do Playwright com o Chromium (`npm i -g playwright && npx playwright install chromium`). O script simula `/api/contato` (200 e 500) e o Turnstile.
+
 Em `contato.html`, troque `data-sitekey` (hoje a chave de teste `1x00000000000000000000AA`) pela site key do widget de produção. Se faltar alguma variável obrigatória, a função responde 500 e registra `config_missing` com o nome da variável (nunca o valor).
 
 A CSP de `/contato.html` é a única que libera `https://challenges.cloudflare.com` (script e iframe do Turnstile); a regra global de `vercel.json` exclui essa página para as duas políticas não se somarem.

@@ -146,6 +146,7 @@
     form.setAttribute('aria-busy', on ? 'true' : 'false');
   }
   function showSuccess() {
+    setBusy(false);                    /* botão e aria-busy limpos antes de esconder */
     form.hidden = true;
     success.hidden = false;
     success.focus();
