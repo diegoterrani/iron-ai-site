@@ -65,11 +65,9 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 .container { width: min(var(--page-max), 100% - 48px); margin-inline: auto; }
 
 /* 4. Componentes (padrões de ds/components/bundle.css) ------------------- */
-.brand {
-  display: inline-flex; align-items: baseline; gap: .32em;
-  font: 500 14px/1 var(--font-sans); letter-spacing: .1em; white-space: nowrap; color: var(--text);
-}
-.brand b { font-weight: 800; }
+.brand { display: inline-flex; align-items: center; color: var(--text); }
+.brand img { display: block; height: 44px; width: auto; }
+@media (max-width: 640px) { .brand img { height: 36px; } }
 
 .button {
   display: inline-flex; align-items: center; justify-content: center; gap: 12px;
