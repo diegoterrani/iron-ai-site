@@ -670,3 +670,216 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   .stack[data-mode="side"] .stack__body { padding: var(--space-4); }
 }
 
+
+/* 11. Rodapé compartilhado (todas as páginas; barra: mecanismo 5) ---------
+   Colunas de links em 13px, rótulo de coluna em IBM Plex Mono subtle, linha
+   final com o wordmark e o copyright. Fundo footer-bg, hairline no topo, sem
+   ícones nem caixas. Marcação: ver o <footer class="site-footer"> de contato.html. */
+.site-footer {
+  position: relative; z-index: 7;
+  padding: var(--space-7) var(--gutter) var(--space-4);
+  background: var(--footer-bg);
+  border-top: 1px solid var(--hairline);
+}
+.site-footer__inner { max-width: var(--page-max); margin: 0 auto; }
+.site-footer__cols {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 200px)); gap: var(--space-4) var(--space-5);
+}
+.site-footer__label {
+  margin: 0 0 14px;
+  font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase;
+  color: var(--subtle);
+}
+.site-footer ul { margin: 0; padding: 0; list-style: none; }
+.site-footer li + li { margin-top: 4px; }
+/* área de toque >= 24px (WCAG 2.5.8) mantendo o texto em 13px */
+.site-footer li a {
+  display: inline-flex; align-items: center; min-height: 28px;
+  font: 500 13px/1.4 var(--font-sans); color: var(--muted);
+  transition: color .2s;
+}
+.site-footer li a:hover { color: var(--accent-text); }
+.site-footer__base {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 24px;
+  margin-top: var(--space-6); padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.site-footer__base p { font-size: 13px; line-height: 1.5; color: var(--subtle); }
+/* wordmark (brand): "IRON" 500 + "AI" 800, 14px, tracking 0,1em */
+.wordmark { font: 500 14px/1 var(--font-sans); letter-spacing: .1em; color: var(--text); }
+.wordmark b { font-weight: 800; }
+@media (max-width: 640px) {
+  .site-footer { padding: var(--space-6) var(--gutter) var(--space-4); }
+  .site-footer__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); }
+  .site-footer__base { margin-top: var(--space-5); flex-direction: column; align-items: flex-start; }
+}
+
+/* 12. Páginas internas (contato, política): título de página e seção --------
+   Header fixo e opaco desde o início; o conteúdo começa abaixo dele. */
+.page-inner main { padding-top: var(--header-h); }
+.page-intro { padding: var(--space-7) var(--gutter) var(--space-8); }
+.page-section { padding: var(--space-8) var(--gutter); border-top: 1px solid var(--line); }
+/* h1 de página: serifa 400, maior que o section-title da mesma largura (48 -> 80) */
+.page-h1 {
+  margin: var(--space-3) 0 0; max-width: 14em;
+  font-family: var(--font-serif); font-optical-sizing: auto;
+  font-size: clamp(48px, 5.6vw, 80px); font-weight: 400; line-height: 1.02; letter-spacing: -.025em;
+  color: var(--text);
+}
+.page-h1 em { font-style: normal; color: var(--accent); }
+.page-inner [id] { scroll-margin-top: calc(var(--header-h) + var(--space-3)); }
+
+/* 13. Contato -------------------------------------------------------------- */
+/* Dois caminhos por perfil (barra: mecanismo 3): cards lado a lado que dividem a
+   mesma hairline; tag mono, card-title 20px/700, uma frase e a ação */
+.paths {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.path {
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: var(--space-5); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  transition: background .25s;
+}
+.path:hover { background: var(--deep-2); }
+.path__tag { margin: 0; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
+.path__title { margin: 10px 0 12px; font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
+.path__text { max-width: 30em; font-size: 15px; line-height: 1.7; color: var(--muted); }
+.path__action { margin-top: auto; }
+.path__text { margin-bottom: var(--space-4); }
+
+/* formulário + coluna lateral */
+.contato-grid {
+  display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-6);
+  margin-top: var(--space-6); align-items: start;
+}
+.form {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 24px;
+}
+.field { display: flex; flex-direction: column; min-width: 0; }
+.field--full { grid-column: 1 / -1; }
+.field__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.field__label { display: block; margin-bottom: 8px; font: 700 13px/1.4 var(--font-sans); color: var(--text); }
+.field__optional { font-weight: 500; color: var(--subtle); }
+.field__count { font: 400 12px/1.4 var(--font-mono); color: var(--subtle); }
+.field__count.is-near { color: var(--text); }
+.field__control {
+  width: 100%; min-height: var(--control-height); margin: 0; padding: 0 14px;
+  font: 400 15px/1.5 var(--font-sans); color: var(--text);
+  background: var(--modal-bg); border: 1px solid var(--field-line); border-radius: var(--radius-none);
+  -webkit-appearance: none; appearance: none;
+  transition: border-color .2s;
+}
+.field__control:hover { border-color: var(--muted); }
+.field__control:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: var(--text); }
+.field__control--area { min-height: 140px; padding: 12px 14px; resize: vertical; line-height: 1.6; }
+.field__control[aria-invalid="true"] { border-color: var(--field-error); }
+.field__select { position: relative; }
+.field__select .field__control { padding-right: 44px; cursor: pointer; }
+.field__select .ico { position: absolute; top: 50%; right: 14px; margin-top: -9px; color: var(--text); pointer-events: none; }
+.field__hint { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--subtle); }
+.field__error {
+  display: flex; gap: 8px; margin-top: 8px;
+  font: 600 13px/1.5 var(--font-sans); color: var(--field-error);
+}
+.field__error::before {
+  content: ""; flex: none; width: 8px; height: 8px; margin-top: 6px; background: var(--field-error);
+}
+.field__error[hidden] { display: none; }
+
+/* checkbox quadrado, borda field-line, marcado em cta-bg com o traço check em cta-text */
+.check { display: flex; align-items: flex-start; gap: 14px; }
+.check__box {
+  flex: none; width: 22px; height: 22px; margin: 1px 0 0;
+  background: var(--modal-bg) center / 18px 18px no-repeat;
+  border: 1px solid var(--field-line); border-radius: var(--radius-none);
+  -webkit-appearance: none; appearance: none; cursor: pointer;
+}
+.check__box:checked {
+  background-color: var(--cta-bg); border-color: var(--cta-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23faf9f5' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 4 4L19 6'/%3E%3C/svg%3E");
+}
+.check__box:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.check__box[aria-invalid="true"] { border-color: var(--field-error); }
+.check__label { font-size: 14px; line-height: 1.6; color: var(--muted); cursor: pointer; }
+.check__label a, .form__alert a, .legal a:not(.button):not(.text-link) {
+  color: var(--link); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+
+/* honeypot: fora da tela, do fluxo de leitura e do teclado */
+.hp { position: absolute !important; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+
+/* Turnstile: reserva a altura do widget (65px) para não haver salto; antes de
+   carregar, mostra só um rótulo mono sobre a hairline */
+.cf-turnstile { min-height: 65px; }
+.cf-turnstile:empty {
+  display: flex; align-items: center; max-width: 300px; padding: 0 16px;
+  border: 1px solid var(--line);
+}
+.cf-turnstile:empty::before {
+  content: "Verificação anti-robô"; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle);
+}
+
+.form__submit { display: flex; align-items: center; gap: 18px; }
+.form__submit .button[disabled] { cursor: progress; background: var(--cta-hover); transform: none; }
+.form__alert {
+  grid-column: 1 / -1; display: flex; gap: 12px; padding: 14px 18px;
+  border: 1px solid var(--field-error); background: var(--modal-bg);
+  font: 600 14px/1.6 var(--font-sans); color: var(--field-error);
+}
+.form__alert[hidden] { display: none; }
+
+.form-success {
+  padding: var(--space-5); border: 1px solid var(--line); background: var(--modal-bg);
+}
+.form-success[hidden] { display: none; }
+.form-success .ico { width: 20px; height: 20px; color: var(--icon-ink); }
+.form-success__title { margin: 18px 0 8px; font-family: var(--font-serif); font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.015em; color: var(--text); }
+.form-success p { font-size: 15px; line-height: 1.7; color: var(--muted); }
+.form-success:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* coluna lateral: as três primeiras etapas, divididas por line */
+.contato-aside { padding-top: 2px; }
+.steps-mini { margin: 14px 0 var(--space-4); padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.steps-mini li {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 8px;
+  padding: 16px 0; border-bottom: 1px solid var(--line);
+}
+.steps-mini__n { grid-row: span 2; font: 400 12px/1.9 var(--font-mono); color: var(--subtle); }
+.steps-mini__name { font-size: 15px; font-weight: 700; line-height: 1.5; color: var(--text); }
+.steps-mini__price { font-size: 14px; line-height: 1.6; color: var(--muted); }
+
+/* 14. Páginas legais ------------------------------------------------------- */
+.legal { max-width: 44em; margin-top: var(--space-6); }
+.legal__meta { margin-top: var(--space-3); font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
+.legal__section + .legal__section { margin-top: var(--space-5); }
+.legal h2 {
+  margin: 0 0 14px; font-family: var(--font-serif); font-optical-sizing: auto;
+  font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.015em; color: var(--text);
+}
+.legal p, .legal li { font-size: 15px; line-height: 1.75; color: var(--muted); }
+.legal p + p, .legal p + ul, .legal ul + p { margin-top: 12px; }
+.legal ul { margin: 0; padding-left: 20px; }
+.legal li + li { margin-top: 4px; }
+.legal strong { color: var(--text); font-weight: 700; }
+/* pendência visível para revisão: o texto "[a definir]" sobre manilla */
+[data-pendente] { padding: 0 4px; background: var(--manilla); color: var(--text); font-family: var(--font-mono); font-size: .9em; }
+
+@media (max-width: 980px) {
+  .contato-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+  .contato-aside { max-width: 560px; }
+}
+@media (max-width: 640px) {
+  .page-intro { padding: var(--space-6) var(--gutter) var(--space-7); }
+  .page-section { padding: var(--space-7) var(--gutter); }
+  .paths, .contato-grid { margin-top: 38px; }
+  .paths { grid-template-columns: minmax(0, 1fr); }
+  .path { padding: var(--space-4); }
+  .form { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .form-success { padding: var(--space-4); }
+  .legal h2 { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .path, .field__control, .site-footer li a { transition: none; }
+}

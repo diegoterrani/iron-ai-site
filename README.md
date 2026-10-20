@@ -5,3 +5,22 @@ Site estático da IRON AI (spin-off de IA do Grupo IRON). HTML/CSS/JS sem build;
 - Deploy: Vercel (projeto `iron-ai`, time Iron Security), saída estática da raiz.
 - Cabeçalhos de segurança em `vercel.json`: CSP restrita (`'self'` apenas), HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer/Permissions-Policy, COOP/CORP e `X-Robots-Tag: noindex` enquanto o site estiver em construção.
 - Em construção (loop de design): home P1 (topo) fechado, P2 (pilares, esteira, zoom, casos) em correção; P3 e páginas internas pendentes.
+
+## Formulário de contato (`/api/contato`)
+
+`contato.html` envia JSON para a função serverless `api/contato.js` (Node 20, sem dependências), que valida os campos, confere o Cloudflare Turnstile no servidor e envia o pedido por e-mail via Resend. A lógica pura fica em `api/_lib/contato-core.js`; testes com `npm test` (`node --test`).
+
+Configure na Vercel (Project > Settings > Environment Variables, ambientes Production e Preview). Nomes em `.env.example`:
+
+| Variável | Obrigatória | Conteúdo |
+| --- | --- | --- |
+| `ALLOWED_ORIGINS` | sim | Origens aceitas, separadas por vírgula (ex.: o domínio de produção e o de preview). |
+| `TURNSTILE_SECRET_KEY` | sim | Secret key do widget Turnstile. |
+| `TURNSTILE_EXPECTED_HOSTNAME` | não | Se definida, o hostname devolvido pelo Turnstile precisa ser igual. |
+| `RESEND_API_KEY` | sim | Chave da API do Resend (só permissão de envio). |
+| `CONTACT_FROM` | sim | Remetente em domínio verificado no Resend (ex.: `IRON AI <site@dominio>`). |
+| `CONTACT_TO` | sim | Destinatário(s), separados por vírgula. |
+
+Em `contato.html`, troque `data-sitekey` (hoje a chave de teste `1x00000000000000000000AA`) pela site key do widget de produção. Se faltar alguma variável obrigatória, a função responde 500 e registra `config_missing` com o nome da variável (nunca o valor).
+
+A CSP de `/contato.html` é a única que libera `https://challenges.cloudflare.com` (script e iframe do Turnstile); a regra global de `vercel.json` exclui essa página para as duas políticas não se somarem.
