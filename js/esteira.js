@@ -161,8 +161,9 @@
           var hh = S.header.height(), free = window.innerHeight - hh - stage.offsetHeight;
           return 'top ' + Math.round(hh + Math.max(24, free / 2)) + 'px';
         },
-        /* 60% da altura da tela de rolagem por etapa */
-        end: function () { return '+=' + Math.round(window.innerHeight * 0.6 * N); },
+        /* 1,05 × a altura da tela de rolagem por etapa: um PageDown/PageUp (< 1 tela)
+           nunca pula uma etapa */
+        end: function () { return '+=' + Math.round(window.innerHeight * 1.05 * N); },
         pin: true,
         pinSpacing: true,
         anticipatePin: 1,
