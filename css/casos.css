@@ -53,22 +53,27 @@ html.js .sector__head:not(:has(.sector__seal)) { display: none; }
 html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; }
 .sector__num { color: var(--accent-text); font-weight: 600; }
 .sector__tag { font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
-/* selo "Prova entregue": tag com contorno accent-text e o ícone check */
+/* selo "Prova entregue": link para a seção Prova (aponta, não repete), no estilo de
+   tag com contorno accent-text e o ícone arrow no fim, como os links de texto */
 .sector__seal {
-  display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px 5px 8px;
+  display: inline-flex; align-items: center; gap: 8px; padding: 5px 8px 5px 10px;
+  transition: background-color .2s;
   border: 1px solid var(--accent-text);
   font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--accent-text);
 }
-.sector__seal .ico { width: 16px; height: 16px; }
+.sector__seal .ico { width: 17px; height: 17px; }
+.sector__seal:hover, .sector__seal:focus-visible { background: var(--surface); }
 .sector__name {
   margin: 14px 0 0; font-family: var(--font-serif); font-optical-sizing: auto;
   font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.02em; color: var(--text);
 }
-.sector__facts { display: flex; flex-direction: column; gap: 22px; margin: 26px 0 0; }
+/* lado a lado (cartão com a altura da figura ou da moldura): os três blocos se
+   distribuem na altura, sem vazio no pé do cartão mais curto ("Seu setor") */
+.sector__facts { display: flex; flex-direction: column; flex: 1 0 auto; justify-content: space-between; gap: 22px; margin: 26px 0 0; }
 .sector__fact { padding-top: 16px; border-top: 1px solid var(--line); }
 .sector__fact dt { font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle); }
 .sector__fact dd { margin: 10px 0 0; }
-.sector__leak { max-width: 34em; font-size: 15px; line-height: 1.7; color: var(--muted); }
+.sector__leak { max-width: 34em; font-size: 15px; line-height: 1.75; color: var(--muted); }
 .sector__levers { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; }
 .sector__levers li { display: flex; gap: 10px; font-size: 14px; line-height: 1.5; color: var(--text); }
 .sector__levers li:only-child { grid-column: 1 / -1; }
@@ -133,7 +138,6 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
 .is-pinned .sector__field { position: relative; min-height: 0; }
 /* no palco a figura se ajusta ao campo nas duas direções (viewBox em "meet") */
 .is-pinned .sector__svg { position: absolute; inset: var(--space-4); width: calc(100% - 2 * var(--space-4)); height: calc(100% - 2 * var(--space-4)); max-width: none; }
-.is-pinned .sector__leak { font-size: 17px; line-height: 1.75; }
 .is-pinned .sector__facts { gap: 28px; margin-top: 30px; }
 
 /* 5b. Índice compacto (sem palco fixo: < 980px, movimento reduzido, janela baixa).
@@ -169,7 +173,8 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
 .cv-word { font: 500 15px var(--font-sans); letter-spacing: .1em; fill: var(--text); text-anchor: middle; }
 .cv-word__b { font-weight: 800; fill: var(--accent-text); }
 
-/* 7. Prova: texto aprovado e o link para a esteira */
+/* 7. Prova: texto aprovado (body 15px) e o link para a esteira */
+.casos-prova__text { margin: 18px 0 0; max-width: 40em; font-size: 15px; line-height: 1.75; color: var(--muted); }
 .casos-prova__more { margin-top: var(--space-4); }
 
 /* 8. CTA final em faixa band, centralizado (barra: mecanismo 4) ----------- */
@@ -208,5 +213,5 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
 
 /* 10. Movimento reduzido: tudo estático e completo (o JS não fixa o palco) ---- */
 @media (prefers-reduced-motion: reduce) {
-  .sx-mini__fill { transition: none; }
+  .sx-mini__fill, .sector__seal { transition: none; }
 }

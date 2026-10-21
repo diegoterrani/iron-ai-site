@@ -3,8 +3,8 @@
    Aprimora a versão empilhada do HTML; sem este arquivo tudo continua legível.
    1. Um só botão primário por vista: o CTA do header some enquanto o do topo
       ou o do fim está na tela (como setHeaderCta de home.js, sem depender dele).
-   2. Movimento (só sem prefers-reduced-motion e com GSAP):
-      - títulos e blocos [data-rise] entram de baixo, uma vez;
+   2. Movimento (só sem prefers-reduced-motion e com GSAP). Nada entra por
+      animação (design system: fora das camadas que cobrem, nada anima):
       - setores num palco fixo (pin) acima de 980 px: a rolagem escolhe o setor
         ativo (um só), a linha do índice se preenche e o painel novo sobe e
         cobre o anterior em 550 ms; o índice troca quando o painel novo cobre
@@ -12,7 +12,9 @@
         índice leva a rolagem até o seu setor, assentado.
    3. Sem palco fixo (< 980 px, movimento reduzido, janela baixa): índice compacto
       preso sob o header enquanto os cartões passam ("0N / 06 · Setor" e linha de
-      progresso); o cartão que cruza o meio da tela é o ativo (aria-current).
+      progresso); o cartão que cruza o meio da tela é o ativo.
+   Em todos os modos há um só aria-current="true" num artigo de setor: o do setor
+   ativo, trocado no mesmo ponto em que o índice troca (setCurrent).
    Usa window.IronSite (site.js): GSAP, ScrollTrigger e o Lenis já criados.
    ========================================================================= */
 (function () {
@@ -51,8 +53,17 @@
     }
   }
 
-  /* ---------- 3. Índice compacto (funciona também com movimento reduzido) ---------- */
+  /* ---------- aria-current: um só artigo de setor ---------- */
   var sectorsBox = document.querySelector('[data-sectors]');
+  var allCards = sectorsBox ? Array.prototype.slice.call(sectorsBox.querySelectorAll('[data-sector]')) : [];
+  function setCurrent(k) {
+    allCards.forEach(function (c, i) {
+      if (i === k) c.setAttribute('aria-current', 'true'); else c.removeAttribute('aria-current');
+    });
+  }
+  var miniRefresh = function () {};
+
+  /* ---------- 3. Índice compacto (funciona também com movimento reduzido) ---------- */
   var mini = document.querySelector('[data-sx-mini]');
   if (sectorsBox && mini) {
     var cards = Array.prototype.slice.call(sectorsBox.querySelectorAll('[data-sector]'));
@@ -61,13 +72,10 @@
     var mFill = mini.querySelector('[data-sx-mini-fill]');
     var miniIdx = -1;
     var setMini = function (k) {
-      if (k === miniIdx || k < 0) return;
+      /* no palco fixo quem decide é o índice lateral (mark) */
+      if (k === miniIdx || k < 0 || sectorsBox.classList.contains('is-pinned')) return;
       miniIdx = k;
-      var pinned = sectorsBox.classList.contains('is-pinned');
-      cards.forEach(function (c, i) {
-        /* no palco fixo o ativo é marcado pelo índice lateral */
-        if (i === k && !pinned) c.setAttribute('aria-current', 'true'); else c.removeAttribute('aria-current');
-      });
+      setCurrent(k);
       mNum.textContent = String(k + 1).padStart(2, '0');
       var t = cards[k].querySelector('.sector__name');
       mName.textContent = t ? t.textContent : '';
@@ -92,7 +100,26 @@
     window.addEventListener('scroll', onMiniScroll, { passive: true });
     if (S.onScroll) S.onScroll(onMiniScroll);
     window.addEventListener('resize', onMiniScroll);
-    setMini(0);
+    miniRefresh = function () { miniIdx = -1; onMiniScroll(); };
+    /* foco por teclado dentro de um cartão: a rolagem leva o topo do cartão até a linha
+       do meio (na hora), e ele passa a ser o ativo da faixa e do aria-current */
+    sectorsBox.addEventListener('focusin', function (e) {
+      if (sectorsBox.classList.contains('is-pinned')) return;
+      var c = e.target.closest && e.target.closest('[data-sector]');
+      if (!c) return;
+      requestAnimationFrame(function () {
+        var mid = window.innerHeight / 2, top = c.getBoundingClientRect().top;
+        var k = cards.indexOf(c), next = cards[k + 1];
+        var dy = 0;
+        if (top > mid) dy = top - mid + 2;
+        else if (next && next.getBoundingClientRect().top <= mid) dy = next.getBoundingClientRect().top - mid - 2;
+        if (dy) {
+          if (S.lenis) S.lenis.scrollTo(window.scrollY + dy, { immediate: true, force: true });
+          else window.scrollBy(0, dy);
+        }
+        onMiniScroll();
+      });
+    });
     onMiniScroll();
     mini.hidden = false;
   }
@@ -102,19 +129,6 @@
   if (S.reducedMotion || !S.hasGsap || !gsap || !ST) return;
 
   var EASE = 'power2.out';
-
-  /* títulos e blocos: de baixo, uma vez (vizinhos que entram juntos, em sequência curta) */
-  var rise = gsap.utils.toArray('[data-rise]');
-  if (rise.length) {
-    gsap.set(rise, { y: 28, opacity: 0 });
-    ST.batch(rise, {
-      start: 'top 90%',
-      once: true,
-      onEnter: function (batch) {
-        gsap.to(batch, { y: 0, opacity: 1, duration: 0.6, ease: EASE, stagger: 0.06, overwrite: true });
-      }
-    });
-  }
 
   /* ---------- setores: palco fixo ---------- */
   var sectorsEl = sectorsBox;
@@ -162,6 +176,7 @@
         a.classList.toggle('is-active', on);
         if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
       });
+      setCurrent(j);
     }
     /* todos os painéis ficam na árvore de leitura (sem inert): o leitor de tela lê os
        seis em sequência; o foco por teclado leva a rolagem ao setor (onFocus) */
@@ -248,6 +263,7 @@
       if (fill) fill.style.transform = '';
       frame.style.removeProperty('--frame-h');
       sectorsEl.classList.remove('is-pinned');
+      miniRefresh();
     };
   }
 
