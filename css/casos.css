@@ -24,7 +24,7 @@
 .page-casos .page-section { padding: var(--rhythm-half) var(--gutter); }
 .casos-hero { padding-bottom: var(--rhythm-half); }
 /* foco e âncoras nunca sob o header (a faixa compacta soma a sua altura nos cartões) */
-html { scroll-padding-top: calc(var(--header-height) + var(--space-3)); }
+html { scroll-padding-top: calc(var(--header-height) + var(--space-3)); scroll-padding-bottom: var(--space-3); }
 .casos-hero__actions {
   display: flex; flex-wrap: wrap; align-items: center; gap: 18px 28px;
   margin-top: var(--space-4);
@@ -111,7 +111,7 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
    itens, quebra natural), sob a hairline do bloco; sem caixa por item */
 .sector__kpis {
   margin: 0; padding: 0; list-style: none;
-  font: 600 12px/1.9 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text);
+  font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text);
 }
 .sector__kpis li { display: inline; }
 .sector__kpis li + li::before { content: " · "; color: var(--subtle); }
@@ -174,9 +174,8 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   will-change: transform;
 }
 .is-pinned .sector__body { overflow: hidden; }
-/* painel que fica por baixo durante a troca: só o fundo e a figura; o texto não aparece
-   cortado pela borda do painel que passa por cima (casos.js grava .is-under) */
-.is-pinned .sector.is-under .sector__body { visibility: hidden; }
+/* o painel que entra tem fundo opaco e cobre o anterior por inteiro; o texto de baixo
+   continua no lugar (e na ordem de foco: o selo do iGaming é alcançável por Tab) */
 .is-pinned .sector__field { position: relative; min-height: 0; }
 /* no palco a figura se ajusta ao campo nas duas direções (viewBox em "meet") */
 .is-pinned .sector__svg { position: absolute; inset: var(--space-4); width: calc(100% - 2 * var(--space-4)); height: calc(100% - 2 * var(--space-4)); max-width: none; }
@@ -192,6 +191,8 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   padding: 12px 0 0; background: var(--paper);
 }
 .is-pinned .sx-mini { display: none; }
+/* depois do último cartão a faixa sai (casos.js grava .is-past) */
+.sx-mini.is-past { visibility: hidden; }
 .sx-mini__text { padding-bottom: 12px; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text); }
 .sx-mini__num { color: var(--accent-text); }
 .sx-mini__of { color: var(--subtle); }
@@ -223,12 +224,12 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   background: var(--band); border-top: 1px solid var(--hairline);
   text-align: center;
 }
-.casos-cta__inner { max-width: 760px; margin: 0 auto; }
+.casos-cta__inner { max-width: 980px; margin: 0 auto; }
 /* título na escala dos h2 (section-title 36 -> 61, via .section-h2), centrado */
 .casos-cta__title { margin: var(--space-3) auto 0; }
 .casos-cta__eyebrow { justify-content: center; }
 .casos-cta__title i { font-style: normal; color: var(--accent); }
-.casos-cta__text { max-width: 36em; margin: 20px auto 0; text-wrap: balance; font-size: 17px; line-height: 1.75; color: var(--muted); }
+.casos-cta__text { max-width: 58em; margin: 20px auto 0; text-wrap: balance; font-size: 17px; line-height: 1.75; color: var(--muted); }
 .casos-cta .button { margin-top: var(--space-4); }
 
 /* 9. Responsivo ----------------------------------------------------------- */

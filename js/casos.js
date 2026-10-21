@@ -93,6 +93,8 @@
       var p = (mid - r.top) / Math.max(1, r.height);
       p = p < 0 ? 0 : p > 1 ? 1 : p;
       mFill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      /* a faixa solta ao fim dos cartões: quando o último já passou do meio da tela */
+      mini.classList.toggle('is-past', r.bottom < mid);
       /* ativo = o cartão que cruza a linha do meio da tela; antes do primeiro, o
          primeiro; depois do último, o último (vale também para saltos de rolagem) */
       var k = 0;
@@ -196,10 +198,6 @@
         if (k === mover) return;
         gsap.set(p, { yPercent: k <= j ? 0 : 100 });
       });
-      /* durante a troca, o painel que fica por baixo mostra só o fundo e a figura: o
-         texto dele nunca aparece cortado pela borda do que passa por cima. Ao assentar,
-         todos voltam ao normal (os seis seguem legíveis para o leitor de tela). */
-      panels.forEach(function (p, k) { p.classList.toggle('is-under', k !== mover && k <= j); });
       var marked = false;
       gsap.to(panels[mover], {
         yPercent: mover === j ? 0 : 100, duration: DUR, ease: EASE,
@@ -207,10 +205,7 @@
           /* ratio = posição já com a curva: o índice troca com metade coberta */
           if (!marked && this.ratio >= 0.5) { marked = true; mark(j); }
         },
-        onComplete: function () {
-          if (!marked) mark(j);
-          panels.forEach(function (p) { p.classList.remove('is-under'); });
-        }
+        onComplete: function () { if (!marked) mark(j); }
       });
     }
 
@@ -267,7 +262,7 @@
       });
       sectorsEl.removeEventListener('focusin', onPanelFocus);
       st.kill(true);
-      panels.forEach(function (p) { gsap.killTweensOf(p); p.classList.remove('is-under'); });
+      panels.forEach(function (p) { gsap.killTweensOf(p); });
       gsap.set(panels, { clearProps: 'transform,zIndex' });
       if (fill) fill.style.transform = '';
       frame.style.removeProperty('--frame-h');
