@@ -50,10 +50,11 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   content: ""; position: absolute; z-index: 1; left: 0; top: 0;
   width: 10px; height: 10px; background: var(--accent-text); border: 1px solid var(--accent-text);
 }
-.es-line__item a { display: flex; flex-direction: column; gap: 8px; color: var(--text); transition: color .2s; }
-.es-line__item a:hover { color: var(--accent-text); }
+/* número + verbo da etapa, em Plex Mono 12px maiúsculo; não interativo (o índice
+   das etapas é a única navegação 01–05) */
+.es-line__step { display: flex; flex-direction: column; gap: 8px; }
 .es-line__num { font: 400 12px/1.5 var(--font-mono); color: var(--accent-text); }
-.es-line__name { font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -.02em; }
+.es-line__verb { font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text); }
 /* estado parcial (só com esteira.js): nó e número apagados até a linha chegar */
 .es-line.is-live .es-line__item:not(.is-on)::before { background: var(--soft); border-color: var(--field-line); }
 .es-line.is-live .es-line__item:not(.is-on) .es-line__num { color: var(--subtle); }
@@ -75,7 +76,6 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .es-mini__label .es-mini__num { color: var(--accent-text); }
-.es-mini__label span:last-child { color: var(--text); }
 .es-mini__bar { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
 .es-mini__fill {
   position: absolute; inset: 0; background: var(--accent-text);
@@ -83,8 +83,10 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 }
 .is-pinned .es-mini { display: none; }
 /* número do cartão: com o índice compacto ativo, só o cartão ativo fica em accent-text */
-.es-panels.is-tracked .es-panel__index span { color: var(--subtle); }
-.es-panels.is-tracked .es-panel[aria-current="step"] .es-panel__index span { color: var(--accent-text); }
+/* com um índice visível (lateral no palco preso, faixa compacta na lista) o cartão
+   não repete "0N / 05": o número fica num lugar só. Sem JS o cartão mantém o seu. */
+.es-panels.is-tracked .es-panel__index, .is-pinned .es-panel__index { display: none; }
+.is-pinned .es-panel__body { padding-top: var(--space-5); }
 /* movimento reduzido: o texto atualiza; sem a linha de progresso */
 @media (prefers-reduced-motion: reduce) { .es-mini__bar { display: none; } }
 .es-index { display: none; }
@@ -127,10 +129,9 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle);
 }
 .es-field dd { margin: 5px 0 0; max-width: 34em; font-size: 15px; line-height: 1.6; color: var(--muted); }
-/* a decisão é o fecho de cada etapa: serifa 24px em text */
+/* a decisão é o fecho de cada etapa: card-title (20px/700) em text */
 .es-field--decision dd {
-  font-family: var(--font-serif); font-optical-sizing: auto;
-  font-size: 24px; line-height: 1.25; letter-spacing: -.015em; color: var(--text);
+  font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); /* card-title */
 }
 /* o link vem logo após a decisão, no ritmo dos campos (sem vão até a base do painel) */
 .es-panel__more { padding-top: var(--space-3); border-top: 1px solid var(--line); }
@@ -243,6 +244,11 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .es-final__text { margin-top: 18px; max-width: 34em; font-size: 17px; line-height: 1.75; color: var(--muted); }
 .es-final .button { margin-top: var(--space-4); }
 
+/* Escala do sistema nesta página: links de texto no peso do label (12px/700) e
+   links do rodapé no peso da navegação do header (13px/700) */
+.page-esteira .text-link { font-weight: 700; }
+.page-esteira .site-footer li a { font-weight: 700; }
+
 /* Responsivo --------------------------------------------------------------- */
 @media (max-width: 980px) {
   /* etapas como cartões: índice e ilustração acima do texto */
@@ -257,7 +263,6 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   .es-panel__body { padding: var(--space-4); }
   .es-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .es-grid--3 { grid-template-columns: minmax(0, 1fr); }
-  .es-line__name { font-size: 15px; }
   .es-line__item { padding-right: 14px; }
 }
 @media (max-width: 640px) {
@@ -266,14 +271,13 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   .es-panel__index { padding: var(--space-3) var(--space-3) 12px; }
   .es-panel__visual { aspect-ratio: 4 / 3; }
   .es-panel__body { padding: var(--space-3) var(--space-3) var(--space-4); }
-  .es-panel__name { font-size: 26px; margin-bottom: 18px; }
-  .es-field--decision dd { font-size: 22px; }
+  .es-panel__name { margin-bottom: 18px; }
   .es-grid--4 { grid-template-columns: minmax(0, 1fr); }
   .es-card { padding: 26px 22px 22px; }
   .page-esteira .es-hero { padding-bottom: 39px; }
   .page-esteira .page-section { padding-top: 39px; padding-bottom: 39px; }
   /* a linha do tempo vertical termina com a área de toque (12px) do último link */
-  .page-esteira .es-overview { padding-bottom: 15px; }
+  .page-esteira .es-overview { padding-bottom: 9px; }
   .es-card h3 { margin-top: 20px; }
   /* linha do tempo vertical: trilho à esquerda, preenchimento de cima para baixo */
   .es-line { grid-template-columns: minmax(0, 1fr); margin-top: 38px; }
@@ -284,14 +288,13 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   }
   .es-line__item { padding: 0 0 0 34px; }
   .es-line__item::before { top: 6px; }
-  .es-line__item a { flex-direction: row; align-items: baseline; gap: 14px; min-height: 48px; padding: 2px 0 12px; }
-  .es-line__name { font-size: 17px; }
-  .es-q summary { font-size: 18px; min-height: 64px; }
+  .es-line__step { flex-direction: row; align-items: baseline; gap: 14px; min-height: 48px; padding: 2px 0 12px; }
+  .es-q summary { min-height: 64px; }
   .es-q > p { padding-right: 0; }
   .es-final { padding: 39px var(--gutter) var(--space-7); }
 }
 
 /* Movimento reduzido: tudo empilhado e completo, sem transições ------------- */
 @media (prefers-reduced-motion: reduce) {
-  .es-q summary, .es-index a, .es-line__item a { transition: none; }
+  .es-q summary, .es-index a { transition: none; }
 }

@@ -70,12 +70,13 @@
       <p class="eyebrow" data-reveal><span></span>Como funciona</p>
       <h2 class="section-h2" id="visao-title" data-reveal>Uma etapa, <i>uma decisão</i>.</h2>
       <p class="section-lead" data-reveal>Nada começa grande. Primeiro medimos, depois priorizamos, depois provamos com os seus dados. A implementação só começa com um business case aprovado por você.</p>
-      <ol class="es-line" data-line>
-        <li class="es-line__item"><a href="#etapa-01"><span class="es-line__num">01</span><span class="es-line__name">Autodiagnóstico</span></a></li>
-        <li class="es-line__item"><a href="#etapa-02"><span class="es-line__num">02</span><span class="es-line__name">Sessão executiva</span></a></li>
-        <li class="es-line__item"><a href="#etapa-03"><span class="es-line__num">03</span><span class="es-line__name">Deep-dive com dados</span></a></li>
-        <li class="es-line__item"><a href="#etapa-04"><span class="es-line__num">04</span><span class="es-line__name">Implementação em ondas</span></a></li>
-        <li class="es-line__item"><a href="#etapa-05"><span class="es-line__num">05</span><span class="es-line__name">Operação contínua</span></a></li>
+      <!-- só indicador (não é navegação: a única navegação 01–05 é o índice das etapas) -->
+      <ol class="es-line" data-line aria-label="Medir, priorizar, provar, implementar, operar">
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">01</span><span class="es-line__verb">Medir</span></span></li>
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">02</span><span class="es-line__verb">Priorizar</span></span></li>
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">03</span><span class="es-line__verb">Provar</span></span></li>
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">04</span><span class="es-line__verb">Implementar</span></span></li>
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">05</span><span class="es-line__verb">Operar</span></span></li>
       </ol>
     </div>
   </section>
@@ -93,7 +94,7 @@
         <!-- índice compacto (esteira.js, quando o palco não fica preso: < 980px ou tela baixa):
              preso sob o header enquanto a lista de etapas está na tela; sem JS continua oculto -->
         <div class="es-mini" data-mini hidden>
-          <p class="es-mini__label" aria-live="polite"><span class="es-mini__num" data-mini-num>01</span> / 05 · <span data-mini-name>Autodiagnóstico</span></p>
+          <p class="es-mini__label" aria-live="polite"><span class="es-mini__num" data-mini-num>01</span> / 05<span class="visually-hidden"> · <span data-mini-name>Autodiagnóstico</span></span></p>
           <span class="es-mini__bar" aria-hidden="true"><span class="es-mini__fill" data-mini-fill></span></span>
         </div>
         <nav class="es-index" aria-label="Etapas da esteira" data-index>
