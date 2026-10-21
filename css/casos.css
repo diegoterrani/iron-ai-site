@@ -95,7 +95,7 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
 .sector__seal:hover, .sector__seal:focus-visible { background: var(--surface); }
 .sector__name {
   margin: 14px 0 0; font-family: var(--font-serif); font-optical-sizing: auto;
-  font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.02em; color: var(--text);
+  font-size: 30px; font-weight: 400; line-height: 1.1; letter-spacing: -.02em; color: var(--text);
 }
 /* blocos com o espaço do próprio conteúdo (sem distribuir a altura do cartão) */
 .sector__facts { display: flex; flex-direction: column; gap: 22px; margin: 26px 0 0; }
@@ -215,12 +215,15 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
 
 /* 7. Prova: texto aprovado (body 15px) e o link para a esteira */
 .casos-prova__text { margin: 18px 0 0; max-width: 40em; font-size: 15px; line-height: 1.75; color: var(--muted); }
-.casos-prova__more { margin-top: var(--space-6); }
+/* o link segue o parágrafo (não é conteúdo após o título): 24px abaixo dele; a linha
+   do link tem a altura dele (flex), então o pé da seção mede como nas outras transições */
+.casos-prova__more { display: flex; margin-top: 24px; }
 
 /* 8. CTA final em faixa band, centralizado (barra: mecanismo 4) ----------- */
 .casos-cta {
   position: relative; z-index: 1;
-  padding: var(--rhythm-half) var(--gutter);
+  /* abre com o meio-ritmo; fecha com space-8 do botão ao fim da faixa, como .es-final */
+  padding: var(--rhythm-half) var(--gutter) var(--space-8);
   background: var(--band); border-top: 1px solid var(--hairline);
   text-align: center;
 }
@@ -247,8 +250,8 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   .sector__levers { grid-template-columns: minmax(0, 1fr); }
   .sector__field { padding: var(--space-3) 14px; }
   .sector__svg { max-width: 300px; }
-  .chips, .casos-prova__more { margin-top: 38px; }      /* space-6 no mobile */
-  .casos-cta { padding: calc(var(--space-7) / 2) var(--gutter); }
+  .chips { margin-top: 38px; }      /* space-6 no mobile */
+  .casos-cta { padding: calc(var(--space-7) / 2) var(--gutter) var(--space-7); }
 }
 
 /* 10. Movimento reduzido: tudo estático e completo (o JS não fixa o palco) ---- */
