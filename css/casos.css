@@ -19,8 +19,8 @@
 /* 2. Ritmo e topo ---------------------------------------------------------
    Entre a base visível do conteúdo de uma seção e o topo do texto do eyebrow da
    seguinte: 104–120px (mobile 78px de caixa), metade de cada lado da borda da seção.
-   --rhythm-half = 52px (space-6 − 8px; as caixas somam 104 e a entrelinha completa). */
-.page-casos { --rhythm-half: calc(var(--space-6) - 8px); }
+   --rhythm-half = 56px, como na Esteira (caixas somam ~113; visível ~114–118). */
+.page-casos { --rhythm-half: 56px; }
 .page-casos .page-section { padding: var(--rhythm-half) var(--gutter); }
 .casos-hero { padding-bottom: var(--rhythm-half); }
 /* foco e âncoras nunca sob o header (a faixa compacta soma a sua altura nos cartões) */
