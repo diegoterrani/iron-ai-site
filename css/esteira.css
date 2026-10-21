@@ -10,6 +10,11 @@
 /* Ritmo de fundos: paper (topo) · soft (visão geral) · paper (etapas) · soft
    (segurança) · paper (pré-requisitos, perguntas) · band (CTA final) */
 .es-overview, .es-security { background: var(--soft); }
+/* a linha do tempo fecha a seção: base em 96px (mínimo do ritmo da barra) */
+.es-overview { padding-bottom: 96px; }
+
+/* foco por teclado nunca fica sob o header fixo (rolagem nativa do foco) */
+html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 
 /* 1. Topo ---------------------------------------------------------------- */
 .es-hero .section-lead { margin-top: var(--space-3); }
@@ -96,7 +101,8 @@
   font-family: var(--font-serif); font-optical-sizing: auto;
   font-size: 24px; line-height: 1.25; letter-spacing: -.015em; color: var(--text);
 }
-.es-panel__more { margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--line); }
+/* o link vem logo após a decisão, no ritmo dos campos (sem vão até a base do painel) */
+.es-panel__more { padding-top: var(--space-3); border-top: 1px solid var(--line); }
 
 /* campos da ilustração (design-system.md, "Ilustração em código"): tons diferentes
    em painéis vizinhos; figuras paper/branco/band; destaque clay pequeno; traços
@@ -148,6 +154,9 @@
   will-change: transform;
 }
 .is-pinned .es-panel:first-child { border-top: 0; }
+/* foco no painel (escolhido pelo índice): anel por dentro, a janela corta o de fora */
+.is-pinned .es-panel:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.is-pinned .es-panel:focus:not(:focus-visible) { outline: none; }
 
 /* 4–5. Grades de garantias e de pré-requisitos ---------------------------- */
 .es-grid {
@@ -156,11 +165,17 @@
 }
 .es-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .es-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.es-card { padding: 32px 28px 34px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.es-card { display: flex; flex-direction: column; padding: 32px 28px 26px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .es-security .es-card { background: var(--paper); }
 .es-card .ico { width: 20px; height: 20px; color: var(--icon-ink); }
 .es-card h3 { margin: 26px 0 10px; font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
 .es-card p { font-size: 14px; line-height: 1.7; color: var(--muted); }
+/* linha de metadado (barra: mecanismo 6): quando a garantia vale, mono 12px subtle sobre hairline */
+.es-card .es-card__meta {
+  margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line);
+  font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle);
+}
+.es-card p:has(+ .es-card__meta) { margin-bottom: 22px; }
 
 /* 6. Perguntas ------------------------------------------------------------ */
 .es-faq__list { max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-6); border-top: 1px solid var(--line); }
@@ -175,7 +190,8 @@
 .es-q summary::-webkit-details-marker { display: none; }
 .es-q summary:hover { color: var(--accent-text); }
 .es-q summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.es-q summary .ico { width: 20px; height: 20px; color: var(--accent-text); transition: transform .3s var(--ease-out); }
+/* aberto: o chevron aponta para baixo, sem transição (nada gira na tela) */
+.es-q summary .ico { width: 20px; height: 20px; color: var(--accent-text); }
 .es-q[open] summary .ico { transform: rotate(90deg); }
 .es-q > p { max-width: 40em; padding: 0 44px 0 0; font-size: 15px; line-height: 1.75; color: var(--muted); }
 .es-q > p:last-child { padding-bottom: 26px; }
@@ -184,6 +200,7 @@
 /* 7. CTA final em faixa band ---------------------------------------------- */
 .es-final { padding: var(--space-8) var(--gutter); background: var(--band); border-top: 1px solid var(--line); text-align: center; }
 .es-final__inner { max-width: var(--page-max); margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+.es-final__eyebrow { justify-content: center; margin-bottom: var(--space-3); }
 .es-final__title {
   margin: 0; max-width: 16em;
   font-family: var(--font-serif); font-optical-sizing: auto;
@@ -220,7 +237,8 @@
   .es-panel__name { font-size: 26px; margin-bottom: 18px; }
   .es-field--decision dd { font-size: 22px; }
   .es-grid--4 { grid-template-columns: minmax(0, 1fr); }
-  .es-card { padding: 26px 22px 28px; }
+  .es-card { padding: 26px 22px 22px; }
+  .es-overview { padding-bottom: var(--space-7); }
   .es-card h3 { margin-top: 20px; }
   /* linha do tempo vertical: trilho à esquerda, preenchimento de cima para baixo */
   .es-line { grid-template-columns: minmax(0, 1fr); margin-top: 38px; }
@@ -240,5 +258,5 @@
 
 /* Movimento reduzido: tudo empilhado e completo, sem transições ------------- */
 @media (prefers-reduced-motion: reduce) {
-  .es-q summary, .es-q summary .ico, .es-index a, .es-line__item a { transition: none; }
+  .es-q summary, .es-index a, .es-line__item a { transition: none; }
 }

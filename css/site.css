@@ -923,3 +923,25 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .esteira__pitch { max-width: 36em; font-size: 17px; line-height: 1.75; color: var(--muted); }
 /* uma regra só: a lista encolhe ao conteúdo, sem hairline sobrando à direita */
 .rules:has(> li:only-child) { grid-template-columns: minmax(0, max-content); width: fit-content; max-width: 100%; }
+
+/* 15. Menu sem JS (aprimoramento progressivo; todas as páginas) ----------------
+   site.js põe .js no <html> ao iniciar. Sem .js, abaixo do breakpoint do menu
+   (760px), o botão de menu (que não abriria) some e a nav vira uma linha de links
+   sob a barra do logo, com alvo de 44px; o header deixa de ser fixo e passa a
+   ocupar o próprio espaço no fluxo. O CTA da nav (menu aberto) não aparece: no
+   641–760 o botão do header continua na barra. Com .js nada muda. */
+@media (max-width: 760px) {
+  html:not(.js) .site-header { position: relative; height: auto; transform: none; }
+  html:not(.js) .site-header__inner { flex-wrap: wrap; row-gap: 0; height: auto; }
+  html:not(.js) .site-header__inner > .brand { min-height: var(--header-h); }
+  html:not(.js) .site-header__menu { display: none; }
+  html:not(.js) .site-nav {
+    position: static; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;
+    order: 3; width: 100%; gap: 0 24px; margin: 0; padding: 0 0 8px;
+    height: auto; overflow: visible; background: transparent; border: 0;
+  }
+  html:not(.js) .site-nav a { min-height: 44px; border-bottom: 0; }
+  html:not(.js) .site-nav .site-nav__cta { display: none; }
+  /* header no fluxo: o conteúdo não precisa mais descontar a altura dele */
+  html:not(.js) .page-inner main { padding-top: 0; }
+}

@@ -46,9 +46,9 @@
   if (S.reducedMotion || !S.hasGsap) return;
   var gsap = S.gsap, ST = S.ScrollTrigger;
 
-  function scrollToY(y) {
-    if (S.lenis) S.lenis.scrollTo(y, { duration: 0.9 });
-    else window.scrollTo({ top: y, behavior: 'smooth' });
+  function scrollToY(y, done) {
+    if (S.lenis) S.lenis.scrollTo(y, { duration: 0.9, onComplete: done });
+    else { window.scrollTo({ top: y, behavior: 'smooth' }); if (done) setTimeout(done, 900); }
   }
 
   /* 2. Palco das cinco etapas ------------------------------------------------ */
@@ -72,6 +72,9 @@
     /* painéis até o ativo ficam em 0 (os de baixo cobertos pelo de cima, que vem
        depois no DOM); os seguintes ficam abaixo da janela (yPercent 100) */
     panels.forEach(function (p, k) {
+      /* só o painel ativo é focável e lido; os cobertos (e os que ainda vão subir)
+         ficam inert. O índice continua navegável e leva a cada etapa. */
+      if (k === i) p.removeAttribute('inert'); else p.setAttribute('inert', '');
       var target = k <= i ? 0 : 100;
       if (instant) { gsap.set(p, { yPercent: target }); return; }
       if (gsap.getProperty(p, 'yPercent') === target) return;
@@ -88,6 +91,8 @@
     var mm = gsap.matchMedia();
     mm.add('(min-width: 981px) and (min-height: 720px)', function () {
       stage.classList.add('is-pinned');
+      /* alvo de foco do painel ao escolher a etapa pelo índice */
+      panels.forEach(function (p) { p.setAttribute('tabindex', '-1'); });
       active = -1;
       setActive(0, true);
       pin = ST.create({
@@ -116,6 +121,7 @@
         gsap.killTweensOf(panels);
         gsap.set(panels, { clearProps: 'transform' });
         links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        panels.forEach(function (p) { p.removeAttribute('inert'); p.removeAttribute('tabindex'); });
         if (fill) fill.style.removeProperty('--p');
       };
     });
@@ -128,14 +134,29 @@
       var k = panels.findIndex(function (p) { return '#' + p.id === a.getAttribute('href'); });
       if (k < 0) return;
       e.preventDefault();
-      scrollToY(stepY(k));
+      /* chegando à etapa, o foco passa ao painel: o próximo Tab entra nos links dele */
+      scrollToY(stepY(k), function () {
+        if (pin && active === k) panels[k].focus({ preventScroll: true });
+      });
     });
-    /* teclado: o foco num link de um painel coberto leva a rolagem até ele */
+    /* teclado: foco dentro de um painel (Tab ou Shift+Tab vindo de fora do palco)
+       leva a rolagem à posição em que esse painel é o ativo e está assentado — não
+       à posição do elemento no DOM, que o navegador usaria. O painel é assentado na
+       hora (sem a cobertura animada) e a rolagem é refeita no quadro seguinte, depois
+       da rolagem nativa do foco. */
+    var settleOn = function (k) {
+      if (!pin) return;
+      var y = Math.round(stepY(k));
+      if (S.lenis) S.lenis.scrollTo(y, { immediate: true, force: true });
+      else window.scrollTo(0, y);
+      setActive(k, true);
+      ST.update();
+    };
     panels.forEach(function (p, k) {
       p.addEventListener('focusin', function () {
-        if (!pin || k === active) return;
-        var y = stepY(k);
-        if (S.lenis) S.lenis.scrollTo(y, { immediate: true }); else window.scrollTo(0, y);
+        if (!pin) return;
+        settleOn(k);
+        requestAnimationFrame(function () { settleOn(k); });
       });
     });
   }
