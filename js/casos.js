@@ -8,7 +8,7 @@
       - setores num palco fixo (pin) acima de 980 px: a rolagem escolhe o setor
         ativo (um só), a linha do índice se preenche e o painel novo sobe e
         cobre o anterior em 550 ms; o índice troca quando o painel novo cobre
-        metade; painéis que não são o ativo ficam inert; focar um item do
+        metade; focar um item do
         índice leva a rolagem até o seu setor, assentado.
    3. Sem palco fixo (< 980 px, movimento reduzido, janela baixa): índice compacto
       preso sob o header enquanto os cartões passam ("0N / 06 · Setor" e linha de
@@ -163,15 +163,9 @@
         if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
       });
     }
-    /* só o painel ativo fica na árvore de foco e de leitura; os cobertos ou fora do
-       quadro ficam inert */
-    function setInert(j) {
-      panels.forEach(function (p, k) {
-        if (k === j) p.removeAttribute('inert'); else p.setAttribute('inert', '');
-      });
-    }
+    /* todos os painéis ficam na árvore de leitura (sem inert): o leitor de tela lê os
+       seis em sequência; o foco por teclado leva a rolagem ao setor (onFocus) */
     mark(0);
-    setInert(0);
 
     /* j > atual: o painel j sobe e cobre; j < atual: o de cima desce e revela j.
        O índice troca quando a troca passa da metade. */
@@ -179,7 +173,6 @@
       if (j === current) return;
       var from = current;
       current = j;
-      setInert(j);
       var mover = j > from ? j : from;
       panels.forEach(function (p, k) {
         gsap.killTweensOf(p);
@@ -233,14 +226,24 @@
       if (Math.abs(y - yFor(k)) > (st.end - st.start) / n / 2) scrollToSector(k, false);
     }
     items.forEach(function (a) { a.addEventListener('click', onItem); a.addEventListener('focus', onFocus); });
+    /* qualquer elemento focável que venha a existir dentro de um painel: a rolagem vai
+       na hora até o setor dele, com o painel na frente e assentado */
+    function onPanelFocus(e) {
+      var p = e.target.closest && e.target.closest('[data-sector]');
+      var k = p ? panels.indexOf(p) : -1;
+      if (k < 0 || k === current) return;
+      scrollToSector(k, false);
+    }
+    sectorsEl.addEventListener('focusin', onPanelFocus);
 
     return function cleanup() {
       items.forEach(function (a) {
         a.removeEventListener('click', onItem); a.removeEventListener('focus', onFocus);
         a.classList.remove('is-active'); a.removeAttribute('aria-current');
       });
+      sectorsEl.removeEventListener('focusin', onPanelFocus);
       st.kill(true);
-      panels.forEach(function (p) { gsap.killTweensOf(p); p.removeAttribute('inert'); });
+      panels.forEach(function (p) { gsap.killTweensOf(p); });
       gsap.set(panels, { clearProps: 'transform,zIndex' });
       if (fill) fill.style.transform = '';
       frame.style.removeProperty('--frame-h');
