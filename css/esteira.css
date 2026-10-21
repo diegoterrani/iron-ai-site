@@ -264,10 +264,8 @@ html.es-tracked { scroll-padding-top: calc(var(--header-h) + 48px + var(--space-
 .es-final__text { margin-top: 18px; max-width: 34em; font-size: 17px; line-height: 1.75; color: var(--muted); }
 .es-final .button { margin-top: var(--space-4); }
 
-/* Escala do sistema nesta página: links de texto no peso do label (12px/700) e
-   links do rodapé no peso da navegação do header (13px/700) */
+/* Escala do sistema nesta página: links de texto no peso do label (12px/700) */
 .page-esteira .text-link { font-weight: 700; }
-.page-esteira .site-footer li a { font-weight: 700; }
 
 /* Responsivo --------------------------------------------------------------- */
 @media (max-width: 980px) {

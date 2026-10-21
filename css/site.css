@@ -953,3 +953,16 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
    com body.has-hero-cta o botão do header fica oculto (a ação está no topo e no
    CTA final). Contato e política não são marcadas e mantêm o botão. */
 html:not(.js) .has-hero-cta .site-header__cta { display: none; }
+
+/* 17. Rodapé sobre paper (todas as páginas) ---------------------------------
+   O rodapé passa de footer-bg (#f0efe6, quase igual a band #f0eee6) para paper:
+   a faixa band do CTA final fica entre a página e o rodapé e se lê como faixa
+   terminal. A hairline do topo continua. Textos do rodapé sobre paper: muted
+   10,3:1, subtle 5,1:1, accent-text 5,26:1.
+   Escala do sistema no CSS compartilhado: navegação no peso ui (700), text-link
+   no peso do label (700, não 800) e entrelinha 1,2 em text-link e botão. */
+.site-footer { background: var(--paper); }
+.site-footer li a { font-weight: 700; }   /* escala ui: 13px/700, como a navegação do header */
+.site-nav a { font-weight: 700; }
+.text-link { font-weight: 700; line-height: 1.2; }
+.button, .site-nav .site-nav__cta { line-height: 1.2; }
