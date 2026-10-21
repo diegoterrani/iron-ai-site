@@ -21,8 +21,8 @@
 html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 /* com a faixa compacta das etapas ativa (esteira.js), soma a faixa (48px) */
 html.es-tracked { scroll-padding-top: calc(var(--header-h) + 48px + var(--space-3)); }
-/* sem JS até 760px o header fica no fluxo (site.css, seção 15): recuo só de 22px */
-@media (max-width: 760px) { html:not(.js) { scroll-padding-top: var(--space-3); } }
+/* sem JS até 760px o header fica no fluxo (site.css, seção 15): recuo só de 8px, para cartões de até 836px caberem inteiros a 844 */
+@media (max-width: 760px) { html:not(.js) { scroll-padding-top: 8px; } }
 
 /* 1. Topo ---------------------------------------------------------------- */
 .es-hero .section-lead { margin-top: var(--space-3); }
