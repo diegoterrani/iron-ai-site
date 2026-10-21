@@ -63,11 +63,18 @@
         mOn = on;
         mini.hidden = !on;
         miniList.classList.toggle('is-tracked', on);
+        document.documentElement.classList.toggle('es-tracked', on);
         if (!on) { cards.forEach(function (c) { c.removeAttribute('aria-current'); }); mActive = -1; }
       }
       if (!on) return;
       var mid = window.innerHeight / 2, k = 0;
       for (var i = 0; i < cards.length; i++) if (cards[i].getBoundingClientRect().top <= mid) k = i;
+      /* foco de teclado num cartão visível: o estado é o desse cartão */
+      var fc = document.activeElement && document.activeElement.closest ? document.activeElement.closest('[data-panel]') : null;
+      if (fc) {
+        var fr = fc.getBoundingClientRect();
+        if (fr.bottom > 0 && fr.top < window.innerHeight) k = cards.indexOf(fc);
+      }
       if (k !== mActive) {
         mActive = k;
         cards.forEach(function (c, j) { if (j === k) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current'); });
@@ -81,6 +88,24 @@
     };
     S.onScroll(miniUpdate);
     window.addEventListener('resize', U.debounce(miniUpdate, 120));
+    /* foco de teclado: nada fica sob o header + faixa presa (depois da rolagem nativa
+       do foco, corrige o que ainda ficou coberto) e o estado passa ao cartão focado */
+    document.addEventListener('focusin', function (e) {
+      if (!mOn) return;
+      var el = e.target;
+      requestAnimationFrame(function () {
+        if (document.activeElement !== el) return;
+        var hh = S.header.height(), mr = mini.getBoundingClientRect();
+        var stuck = !mini.hidden && mr.top <= hh + 1 && mr.bottom > hh;
+        var limit = (stuck ? mr.bottom : hh) + 22;
+        var r = el.getBoundingClientRect();
+        if (r.top < limit && r.bottom > 0) {
+          var y = Math.round(S.scrollY() - (limit - r.top));
+          if (S.lenis) S.lenis.scrollTo(y, { immediate: true, force: true }); else window.scrollTo(0, y);
+        }
+        miniUpdate();
+      });
+    });
     miniUpdate();
     /* troca de modo (palco preso <-> lista) sem rolagem */
     if (window.MutationObserver) new MutationObserver(miniUpdate).observe(miniStage, { attributes: true, attributeFilter: ['class'] });

@@ -19,6 +19,8 @@
 
 /* foco por teclado nunca fica sob o header fixo (rolagem nativa do foco) */
 html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
+/* com a faixa compacta das etapas ativa (esteira.js), soma a faixa (48px) */
+html.es-tracked { scroll-padding-top: calc(var(--header-h) + 48px + var(--space-3)); }
 
 /* 1. Topo ---------------------------------------------------------------- */
 .es-hero .section-lead { margin-top: var(--space-3); }
@@ -128,7 +130,7 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .es-panel__name {
   margin: 0 0 var(--space-3);
   font-family: var(--font-serif); font-optical-sizing: auto;
-  font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.02em; color: var(--text);
+  font-size: 30px; font-weight: 400; line-height: 1.1; letter-spacing: -.02em; color: var(--text);
 }
 .es-fields { margin: 0; }
 .es-field { padding: 13px 0 14px; border-top: 1px solid var(--line); }
@@ -159,6 +161,8 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .ev-line { stroke: var(--accent-text); }
 .ev-line-dark { stroke: var(--text); }
 .ev-dash { stroke-dasharray: 4 6; }
+/* marcador de lista: quadrado branco com contorno fino accent-text (sem massa em accent) */
+.ev-box { stroke: var(--accent-text); stroke-width: 1.5; }
 
 /* Palco preso (esteira.js). Altura = a do conteúdo (painel mais alto, --panel-h),
    preso centrado sob o header; o índice à esquerda, o painel à direita numa janela
