@@ -946,3 +946,10 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   /* header no fluxo: o conteúdo não precisa mais descontar a altura dele */
   html:not(.js) .page-inner main { padding-top: 0; }
 }
+
+/* 16. Sem JS: um botão primário por vista nas páginas com CTA no topo ------------
+   Com JS, home.js/esteira.js/casos.js escondem o botão do header enquanto o CTA do
+   hero (ou o final) está na tela. Sem JS não há esse controle: nas páginas marcadas
+   com body.has-hero-cta o botão do header fica oculto (a ação está no topo e no
+   CTA final). Contato e política não são marcadas e mantêm o botão. */
+html:not(.js) .has-hero-cta .site-header__cta { display: none; }

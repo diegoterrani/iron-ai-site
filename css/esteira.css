@@ -10,14 +10,12 @@
 /* Ritmo de fundos: paper (topo) · soft (visão geral) · paper (etapas) · soft
    (segurança) · paper (pré-requisitos, perguntas) · band (CTA final) */
 .es-overview, .es-security { background: var(--soft); }
-/* Ritmo vertical (barra: mecanismo 7): 120px (mobile 78px) do fim do conteúdo de uma
-   seção ao eyebrow da seguinte, divididos ao meio em volta da hairline (60 + 60;
-   mobile 39 + 39), para o fundo soft não terminar rente ao conteúdo; o CTA final
-   abre a 60px da hairline, no mesmo ritmo. */
-.page-esteira .es-hero { padding-bottom: 60px; }
-.page-esteira .page-section { padding-top: 60px; padding-bottom: 60px; }
-/* palco preso: o quadro já guarda 32px sob o painel; a seção desconta (32 + 28 + 60 = 120) */
-.page-esteira .es-steps:has(.es-stage.is-pinned) { padding-bottom: 28px; }
+/* Ritmo vertical (barra: mecanismo 7): ~114px (mobile ~80px) da base visível do
+   conteúdo de uma seção ao topo do texto do eyebrow seguinte, divididos ao meio em
+   volta da hairline (56 + 56; mobile 39 + 39), para o fundo soft não terminar rente
+   ao conteúdo; o CTA final abre a 56px da hairline, no mesmo ritmo. */
+.page-esteira .es-hero { padding-bottom: 56px; }
+.page-esteira .page-section { padding-top: 56px; padding-bottom: 56px; }
 
 /* foco por teclado nunca fica sob o header fixo (rolagem nativa do foco) */
 html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
@@ -154,12 +152,12 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .ev-line-dark { stroke: var(--text); }
 .ev-dash { stroke-dasharray: 4 6; }
 
-/* Palco preso (esteira.js). Altura = tela abaixo do header; o índice à esquerda,
-   o painel à direita numa janela que corta o painel que ainda vai subir. */
+/* Palco preso (esteira.js). Altura = a do conteúdo (painel mais alto, --panel-h),
+   preso centrado sob o header; o índice à esquerda, o painel à direita numa janela
+   que corta o painel que ainda vai subir. */
 .es-stage.is-pinned {
   display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); column-gap: var(--space-6);
-  height: calc(100vh - var(--header-h)); margin-top: var(--space-6);
-  padding: var(--space-4) 0;
+  align-items: start; margin-top: var(--space-6);
 }
 .is-pinned .es-index { display: block; position: relative; align-self: start; padding-left: 28px; }
 .es-index ol { margin: 0; padding: 0; list-style: none; }
@@ -180,7 +178,8 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .es-index a[aria-current="step"] { color: var(--text); }
 .es-index a[aria-current="step"] .es-index__num { color: var(--accent-text); }
 
-.is-pinned .es-panels { position: relative; height: 100%; overflow: hidden; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+/* overflow clip (não hidden): o foco num painel abaixo da janela não rola a janela */
+.is-pinned .es-panels { position: relative; height: var(--panel-h, 600px); overflow: clip; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .is-pinned .es-panel {
   position: absolute; inset: 0; min-height: 0;
   border-right: 0; border-bottom: 0; border-top: 1px solid var(--line);
@@ -231,13 +230,13 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .es-q__more { margin-top: 14px; }
 
 /* 7. CTA final em faixa band ---------------------------------------------- */
-.es-final { padding: 60px var(--gutter) var(--space-8); background: var(--band); border-top: 1px solid var(--line); text-align: center; }
+.es-final { padding: 56px var(--gutter) var(--space-8); background: var(--band); border-top: 1px solid var(--line); text-align: center; }
 .es-final__inner { max-width: var(--page-max); margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
 .es-final__eyebrow { justify-content: center; margin-bottom: var(--space-3); }
 .es-final__title {
   margin: 0; max-width: 16em;
   font-family: var(--font-serif); font-optical-sizing: auto;
-  font-size: clamp(40px, calc(24px + 2.6vw), 64px); font-weight: 400; line-height: 1.06; letter-spacing: -.02em;
+  font-size: var(--manifesto-size); font-weight: 400; line-height: 1.06; letter-spacing: -.02em; /* = .section-h2: 36 -> 61px */
   color: var(--text);
 }
 .es-final__title i { font-style: normal; color: var(--accent); }
@@ -273,6 +272,8 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   .es-card { padding: 26px 22px 22px; }
   .page-esteira .es-hero { padding-bottom: 39px; }
   .page-esteira .page-section { padding-top: 39px; padding-bottom: 39px; }
+  /* a linha do tempo vertical termina com a área de toque (12px) do último link */
+  .page-esteira .es-overview { padding-bottom: 15px; }
   .es-card h3 { margin-top: 20px; }
   /* linha do tempo vertical: trilho à esquerda, preenchimento de cima para baixo */
   .es-line { grid-template-columns: minmax(0, 1fr); margin-top: 38px; }

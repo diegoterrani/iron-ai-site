@@ -106,7 +106,8 @@
   var DOWN = { duration: 0.5, ease: 'power2.inOut', overwrite: true };
 
   function setActive(i, instant) {
-    if (i === active) return;
+    /* instant: assenta já (mata as coberturas em curso), mesmo se i já for o ativo */
+    if (i === active && !instant) return;
     active = i;
     links.forEach(function (a, k) {
       if (k === i) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
@@ -114,11 +115,8 @@
     /* painéis até o ativo ficam em 0 (os de baixo cobertos pelo de cima, que vem
        depois no DOM); os seguintes ficam abaixo da janela (yPercent 100) */
     panels.forEach(function (p, k) {
-      /* só o painel ativo é focável e lido; os cobertos (e os que ainda vão subir)
-         ficam inert. O índice continua navegável e leva a cada etapa. */
-      if (k === i) p.removeAttribute('inert'); else p.setAttribute('inert', '');
       var target = k <= i ? 0 : 100;
-      if (instant) { gsap.set(p, { yPercent: target }); return; }
+      if (instant) { gsap.set(p, { yPercent: target, overwrite: true }); return; }
       if (gsap.getProperty(p, 'yPercent') === target) return;
       gsap.to(p, Object.assign({ yPercent: target }, target === 0 ? UP : DOWN));
     });
@@ -129,17 +127,39 @@
     return pin.start + (pin.end - pin.start) * (k + 0.5) / N;
   }
 
+  /* altura do painel = a do conteúdo do painel mais alto (sem vão morto na coluna);
+     gravada em --panel-h antes de cada cálculo do ScrollTrigger */
+  var panelsBox = stage ? stage.querySelector('[data-panels]') : null;
+  function measurePanels() {
+    if (!pin && !stage.classList.contains('is-pinned')) return;
+    var h = 0;
+    panels.forEach(function (p) {
+      var body = p.querySelector('.es-panel__body'), last = body && body.lastElementChild;
+      if (!last) return;
+      var pb = parseFloat(getComputedStyle(body).paddingBottom) || 0;
+      h = Math.max(h, last.offsetTop + last.offsetHeight + pb);
+    });
+    if (h) panelsBox.style.setProperty('--panel-h', Math.ceil(h + 2) + 'px');
+  }
+
   if (stage && N) {
     var mm = gsap.matchMedia();
+    ST.addEventListener('refreshInit', measurePanels);
     mm.add('(min-width: 981px) and (min-height: 720px)', function () {
       stage.classList.add('is-pinned');
       /* alvo de foco do painel ao escolher a etapa pelo índice */
       panels.forEach(function (p) { p.setAttribute('tabindex', '-1'); });
       active = -1;
       setActive(0, true);
+      measurePanels();
       pin = ST.create({
         trigger: stage,
-        start: function () { return 'top ' + S.header.height() + 'px'; },
+        /* o palco (só o conteúdo, sem altura de tela) prende centrado na área sob o
+           header: nada de faixa vazia presa junto, nem sobra quando solta */
+        start: function () {
+          var hh = S.header.height(), free = window.innerHeight - hh - stage.offsetHeight;
+          return 'top ' + Math.round(hh + Math.max(24, free / 2)) + 'px';
+        },
         /* 60% da altura da tela de rolagem por etapa */
         end: function () { return '+=' + Math.round(window.innerHeight * 0.6 * N); },
         pin: true,
@@ -163,7 +183,8 @@
         gsap.killTweensOf(panels);
         gsap.set(panels, { clearProps: 'transform' });
         links.forEach(function (a) { a.removeAttribute('aria-current'); });
-        panels.forEach(function (p) { p.removeAttribute('inert'); p.removeAttribute('tabindex'); });
+        panels.forEach(function (p) { p.removeAttribute('tabindex'); });
+        if (panelsBox) panelsBox.style.removeProperty('--panel-h');
         if (fill) fill.style.removeProperty('--p');
       };
     });
@@ -181,7 +202,8 @@
         if (pin && active === k) panels[k].focus({ preventScroll: true });
       });
     });
-    /* teclado: foco dentro de um painel (Tab ou Shift+Tab vindo de fora do palco)
+    /* teclado: todos os painéis ficam na ordem de tabulação e na árvore de
+       acessibilidade. Foco dentro de um painel (Tab, Shift+Tab)
        leva a rolagem à posição em que esse painel é o ativo e está assentado — não
        à posição do elemento no DOM, que o navegador usaria. O painel é assentado na
        hora (sem a cobertura animada) e a rolagem é refeita no quadro seguinte, depois
