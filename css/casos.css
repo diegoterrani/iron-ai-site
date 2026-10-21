@@ -16,8 +16,11 @@
 }
 .page-casos .site-header.cta-off .site-header__cta { visibility: hidden; }
 
-/* 2. Topo ----------------------------------------------------------------- */
-.casos-hero { padding-bottom: var(--space-8); }
+/* 2. Ritmo e topo ---------------------------------------------------------
+   120px (mobile 78px) entre o fim do conteúdo de uma seção e o eyebrow da seguinte:
+   metade de cada lado da borda da seção (space-6 + space-6; mobile 39 + 39). */
+.page-casos .page-section { padding: var(--space-6) var(--gutter); }
+.casos-hero { padding-bottom: var(--space-6); }
 .casos-hero__actions {
   display: flex; flex-wrap: wrap; align-items: center; gap: 18px 28px;
   margin-top: var(--space-4);
@@ -61,6 +64,7 @@
 .sector__levers li { display: flex; gap: 10px; font-size: 14px; line-height: 1.5; color: var(--text); }
 .sector__levers li:only-child { grid-column: 1 / -1; }
 .sector__levers .ico { margin-top: 1px; color: var(--accent-text); }
+.sector__lnum { flex: none; font: 600 12px/1.75 var(--font-mono); letter-spacing: .06em; color: var(--accent-text); }
 .sector__kpis { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .sector__kpis li {
   padding: 5px 10px; border: 1px solid var(--line); background: var(--paper);
@@ -86,10 +90,9 @@
    cobre o anterior. */
 .sectors.is-pinned {
   display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: var(--space-5);
-  /* o padding de cima do palco entra no space-6 entre o título e o conteúdo */
-  height: calc(100vh - var(--header-h)); margin-top: calc(var(--space-6) - var(--space-4));
-  padding: var(--space-4) 0;
-  align-content: center;          /* índice e moldura no meio da altura do palco */
+  /* altura do conteúdo (a moldura tem a do painel mais alto); casos.js prende o palco
+     centrado na área abaixo do header, então não sobra palco vazio ao fim */
+  margin-top: var(--space-6);
 }
 .is-pinned .sx { display: block; position: relative; align-self: start; padding-left: 28px; }
 .sx__rail { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--line); }
@@ -99,10 +102,9 @@
 .sx__item {
   display: flex; align-items: baseline; gap: 14px; padding: 15px 0;
   border-bottom: 1px solid var(--line); color: var(--subtle);
-  transition: color .3s;
 }
 .sx__list li:first-child .sx__item { padding-top: 4px; }
-.sx__num { flex: none; font: 600 12px/1.5 var(--font-mono); letter-spacing: .08em; color: var(--subtle); transition: color .3s; }
+.sx__num { flex: none; font: 600 12px/1.5 var(--font-mono); letter-spacing: .08em; color: var(--subtle); }
 .sx__name { font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -.02em; }
 .sx__item:hover { color: var(--text); }
 .sx__item.is-active { color: var(--text); }
@@ -116,7 +118,7 @@
 
 /* a moldura tem a altura do painel mais alto (casos.js grava --frame-h), não a do
    palco inteiro: sem vazio no pé da coluna de texto */
-.is-pinned .sectors__frame { position: relative; overflow: hidden; align-self: start; height: var(--frame-h, 100%); border: 0; }
+.is-pinned .sectors__frame { position: relative; overflow: hidden; align-self: start; height: var(--frame-h, 560px); border: 0; }
 .is-pinned .sector {
   position: absolute; inset: 0;
   border: 1px solid var(--line);
@@ -129,14 +131,33 @@
 .is-pinned .sector__leak { font-size: 17px; line-height: 1.75; }
 .is-pinned .sector__facts { gap: 28px; margin-top: 30px; }
 
-/* 6. Ilustração em código: núcleo IRON AI + 11 áreas ------------------------
-   Campo manilla/oat (alternado entre painéis vizinhos); áreas do setor em clay com
-   traço text; as outras na outra cor de campo; ligações e núcleo em accent-text. */
-.cv-area rect { fill: var(--oat); stroke: var(--accent-text); stroke-width: 1; }
-.sector--alt .cv-area rect { fill: var(--manilla); }
-.cv-area text { font: 500 12px var(--font-mono); letter-spacing: .04em; fill: var(--muted); text-anchor: middle; }
-.cv-area.is-on rect { fill: var(--clay); stroke: var(--text); }
-.cv-area.is-on text { fill: var(--text); font-weight: 600; }
+/* 5b. Índice compacto (sem palco fixo: < 980px, movimento reduzido, janela baixa).
+   Faixa presa sob o header só enquanto a lista de setores passa (sticky dentro de
+   .sectors); ocupa a própria altura no fluxo, então não cobre o conteúdo ao chegar.
+   Sem JS fica [hidden]. */
+.sx-mini {
+  position: sticky; top: var(--header-h); z-index: 3;
+  padding: 12px 0 0; background: var(--paper);
+}
+.is-pinned .sx-mini { display: none; }
+.sx-mini__text { padding-bottom: 12px; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text); }
+.sx-mini__num { color: var(--accent-text); }
+.sx-mini__of { color: var(--subtle); }
+.sx-mini__bar { position: relative; display: block; height: 2px; background: var(--line); }
+.sx-mini__fill { position: absolute; inset: 0; background: var(--accent-text); transform-origin: 0 50%; transform: scaleX(0); }
+/* âncoras dos cartões: abaixo do header e da faixa */
+.page-casos .sector { scroll-margin-top: calc(var(--header-h) + 48px + var(--space-3)); }
+
+/* 6. Ilustração em código: núcleo IRON AI + as 4 alavancas ------------------------
+   Campo manilla/oat (alternado entre painéis vizinhos); núcleo e blocos 01–04 das
+   alavancas em paper, ligações e contornos em accent-text, um detalhe clay por bloco. */
+/* blocos das alavancas: figura paper, número em text, um detalhe clay pequeno */
+.cv-box { fill: var(--paper); stroke: var(--accent-text); stroke-width: 1.5; }
+.cv-dot { fill: var(--clay); }
+.cv-lever text { font: 600 15px var(--font-mono); letter-spacing: .06em; fill: var(--text); text-anchor: middle; }
+/* "Seu setor": blocos neutros, na outra cor de campo, sem número */
+.cv-lever.is-open .cv-box { fill: var(--oat); }
+.sector--alt .cv-lever.is-open .cv-box { fill: var(--manilla); }
 .cv-trace { fill: none; stroke: var(--accent-text); stroke-width: 1.5; stroke-linejoin: miter; }
 .cv-core { fill: var(--paper); stroke: var(--accent-text); stroke-width: 1.5; }
 .cv-port { fill: var(--accent-text); }
@@ -149,7 +170,7 @@
 /* 8. CTA final em faixa band, centralizado (barra: mecanismo 4) ----------- */
 .casos-cta {
   position: relative; z-index: 1;
-  padding: var(--space-8) var(--gutter);
+  padding: var(--space-6) var(--gutter);
   background: var(--band); border-top: 1px solid var(--hairline);
   text-align: center;
 }
@@ -169,7 +190,8 @@
   .sector__svg { max-width: 360px; }
 }
 @media (max-width: 640px) {
-  .casos-hero { padding-bottom: var(--space-7); }
+  .page-casos .page-section { padding: calc(var(--space-7) / 2) var(--gutter); }
+  .casos-hero { padding-bottom: calc(var(--space-7) / 2); }
   .sectors { margin-top: 38px; }
   .sector__body { padding: var(--space-4) var(--space-3) var(--space-4); }
   .sector__name { font-size: 26px; }
@@ -178,10 +200,10 @@
   .sector__svg { max-width: 300px; }
   .sector__caption { padding: 12px var(--space-3); }
   .casos-prova__more { margin-top: var(--space-4); }
-  .casos-cta { padding: var(--space-7) var(--gutter); }
+  .casos-cta { padding: calc(var(--space-7) / 2) var(--gutter); }
 }
 
 /* 10. Movimento reduzido: tudo estático e completo (o JS não fixa o palco) ---- */
 @media (prefers-reduced-motion: reduce) {
-  .sx__item, .sx__num { transition: none; }
+  .sx-mini__fill { transition: none; }
 }
