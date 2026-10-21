@@ -43,6 +43,48 @@
   window.addEventListener('resize', U.debounce(updateHeaderCta, 120));
   updateHeaderCta();
 
+  /* 1b. Índice compacto (lista empilhada: < 980px, tela baixa ou movimento reduzido).
+     Etapa ativa = último cartão cujo topo passou do meio da tela; uma só, com
+     aria-current="step" no cartão e o rótulo em aria-live polite. A linha de
+     progresso acompanha a rolagem pela lista (sem ela no movimento reduzido). */
+  var mini = document.querySelector('[data-mini]');
+  var miniStage = document.querySelector('[data-stage]');
+  var miniList = document.querySelector('[data-panels]');
+  if (mini && miniStage && miniList) {
+    var cards = [].slice.call(miniList.querySelectorAll('[data-panel]'));
+    var mNum = mini.querySelector('[data-mini-num]');
+    var mName = mini.querySelector('[data-mini-name]');
+    var mFill = mini.querySelector('[data-mini-fill]');
+    var mActive = -1, mOn = null;
+    var miniUpdate = function () {
+      var on = !miniStage.classList.contains('is-pinned');
+      if (on !== mOn) {
+        mOn = on;
+        mini.hidden = !on;
+        miniList.classList.toggle('is-tracked', on);
+        if (!on) { cards.forEach(function (c) { c.removeAttribute('aria-current'); }); mActive = -1; }
+      }
+      if (!on) return;
+      var mid = window.innerHeight / 2, k = 0;
+      for (var i = 0; i < cards.length; i++) if (cards[i].getBoundingClientRect().top <= mid) k = i;
+      if (k !== mActive) {
+        mActive = k;
+        cards.forEach(function (c, j) { if (j === k) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current'); });
+        mNum.textContent = '0' + (k + 1);
+        mName.textContent = cards[k].querySelector('.es-panel__name').textContent;
+      }
+      if (!S.reducedMotion && mFill) {
+        var r = miniList.getBoundingClientRect();
+        mFill.style.setProperty('--m', U.clamp((mid - r.top) / r.height, 0, 1).toFixed(4));
+      }
+    };
+    S.onScroll(miniUpdate);
+    window.addEventListener('resize', U.debounce(miniUpdate, 120));
+    miniUpdate();
+    /* troca de modo (palco preso <-> lista) sem rolagem */
+    if (window.MutationObserver) new MutationObserver(miniUpdate).observe(miniStage, { attributes: true, attributeFilter: ['class'] });
+  }
+
   if (S.reducedMotion || !S.hasGsap) return;
   var gsap = S.gsap, ST = S.ScrollTrigger;
 

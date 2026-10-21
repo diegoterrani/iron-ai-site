@@ -90,6 +90,12 @@
       <p class="section-lead" data-reveal>Cada etapa entrega algo que você usa mesmo que pare ali.</p>
 
       <div class="es-stage" data-stage>
+        <!-- índice compacto (esteira.js, quando o palco não fica preso: < 980px ou tela baixa):
+             preso sob o header enquanto a lista de etapas está na tela; sem JS continua oculto -->
+        <div class="es-mini" data-mini hidden>
+          <p class="es-mini__label" aria-live="polite"><span class="es-mini__num" data-mini-num>01</span> / 05 · <span data-mini-name>Autodiagnóstico</span></p>
+          <span class="es-mini__bar" aria-hidden="true"><span class="es-mini__fill" data-mini-fill></span></span>
+        </div>
         <nav class="es-index" aria-label="Etapas da esteira" data-index>
           <span class="es-index__rail" aria-hidden="true"><span class="es-index__fill" data-index-fill></span></span>
           <ol>

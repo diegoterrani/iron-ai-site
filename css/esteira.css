@@ -10,8 +10,14 @@
 /* Ritmo de fundos: paper (topo) · soft (visão geral) · paper (etapas) · soft
    (segurança) · paper (pré-requisitos, perguntas) · band (CTA final) */
 .es-overview, .es-security { background: var(--soft); }
-/* a linha do tempo fecha a seção: base em 96px (mínimo do ritmo da barra) */
-.es-overview { padding-bottom: 96px; }
+/* Ritmo vertical (barra: mecanismo 7): 120px (mobile 78px) do fim do conteúdo de uma
+   seção ao eyebrow da seguinte, divididos ao meio em volta da hairline (60 + 60;
+   mobile 39 + 39), para o fundo soft não terminar rente ao conteúdo; o CTA final
+   abre a 60px da hairline, no mesmo ritmo. */
+.page-esteira .es-hero { padding-bottom: 60px; }
+.page-esteira .page-section { padding-top: 60px; padding-bottom: 60px; }
+/* palco preso: o quadro já guarda 32px sob o painel; a seção desconta (32 + 28 + 60 = 120) */
+.page-esteira .es-steps:has(.es-stage.is-pinned) { padding-bottom: 28px; }
 
 /* foco por teclado nunca fica sob o header fixo (rolagem nativa do foco) */
 html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
@@ -56,6 +62,33 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 
 /* 3. As cinco etapas ------------------------------------------------------ */
 .es-stage { margin-top: var(--space-6); }
+/* índice compacto (lista empilhada com JS): preso logo abaixo do header enquanto a
+   lista está na tela (sticky dentro do palco: some quando a lista sai) e ocupa a
+   própria altura no fluxo, sem cobrir conteúdo. Plex Mono 12px maiúsculo; a linha
+   de progresso em accent-text cresce com a rolagem (--m, 0..1). */
+.es-mini {
+  position: sticky; top: var(--header-h); z-index: 5;
+  height: 48px; margin: 0; background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+.es-mini__label {
+  display: block; height: 46px; padding: 0 2px;
+  font: 600 12px/46px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.es-mini__label .es-mini__num { color: var(--accent-text); }
+.es-mini__label span:last-child { color: var(--text); }
+.es-mini__bar { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
+.es-mini__fill {
+  position: absolute; inset: 0; background: var(--accent-text);
+  transform: scaleX(var(--m, 0)); transform-origin: left center;
+}
+.is-pinned .es-mini { display: none; }
+/* número do cartão: com o índice compacto ativo, só o cartão ativo fica em accent-text */
+.es-panels.is-tracked .es-panel__index span { color: var(--subtle); }
+.es-panels.is-tracked .es-panel[aria-current="step"] .es-panel__index span { color: var(--accent-text); }
+/* movimento reduzido: o texto atualiza; sem a linha de progresso */
+@media (prefers-reduced-motion: reduce) { .es-mini__bar { display: none; } }
 .es-index { display: none; }
 
 /* cartões em sequência que dividem a mesma hairline */
@@ -198,7 +231,7 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .es-q__more { margin-top: 14px; }
 
 /* 7. CTA final em faixa band ---------------------------------------------- */
-.es-final { padding: var(--space-8) var(--gutter); background: var(--band); border-top: 1px solid var(--line); text-align: center; }
+.es-final { padding: 60px var(--gutter) var(--space-8); background: var(--band); border-top: 1px solid var(--line); text-align: center; }
 .es-final__inner { max-width: var(--page-max); margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
 .es-final__eyebrow { justify-content: center; margin-bottom: var(--space-3); }
 .es-final__title {
@@ -238,7 +271,8 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   .es-field--decision dd { font-size: 22px; }
   .es-grid--4 { grid-template-columns: minmax(0, 1fr); }
   .es-card { padding: 26px 22px 22px; }
-  .es-overview { padding-bottom: var(--space-7); }
+  .page-esteira .es-hero { padding-bottom: 39px; }
+  .page-esteira .page-section { padding-top: 39px; padding-bottom: 39px; }
   .es-card h3 { margin-top: 20px; }
   /* linha do tempo vertical: trilho à esquerda, preenchimento de cima para baixo */
   .es-line { grid-template-columns: minmax(0, 1fr); margin-top: 38px; }
@@ -253,7 +287,7 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   .es-line__name { font-size: 17px; }
   .es-q summary { font-size: 18px; min-height: 64px; }
   .es-q > p { padding-right: 0; }
-  .es-final { padding: var(--space-7) var(--gutter); }
+  .es-final { padding: 39px var(--gutter) var(--space-7); }
 }
 
 /* Movimento reduzido: tudo empilhado e completo, sem transições ------------- */
