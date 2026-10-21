@@ -75,7 +75,7 @@ html { scroll-padding-top: calc(var(--header-height) + var(--space-3)); }
 }
 .sector__body { display: flex; flex-direction: column; min-width: 0; padding: var(--space-5); }
 .sector__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; }
-.sector__count { font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
+.sector__count { font: 400 12px/1.5 var(--font-mono); letter-spacing: .13em; color: var(--subtle); }
 /* com JS o índice (lateral ou faixa compacta) já dá a posição: o cartão fica só com o
    título (e o selo no iGaming); sem JS o contador "0N / 06" fica no cartão */
 html.js .sector__count { display: none; }
@@ -97,22 +97,24 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   margin: 14px 0 0; font-family: var(--font-serif); font-optical-sizing: auto;
   font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.02em; color: var(--text);
 }
-/* lado a lado (cartão com a altura da figura ou da moldura): os três blocos se
-   distribuem na altura, sem vazio no pé do cartão mais curto ("Seu setor") */
-.sector__facts { display: flex; flex-direction: column; flex: 1 0 auto; justify-content: space-between; gap: 22px; margin: 26px 0 0; }
+/* blocos com o espaço do próprio conteúdo (sem distribuir a altura do cartão) */
+.sector__facts { display: flex; flex-direction: column; gap: 22px; margin: 26px 0 0; }
 .sector__fact { padding-top: 16px; border-top: 1px solid var(--line); }
 .sector__fact dt { font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle); }
 .sector__fact dd { margin: 10px 0 0; }
 .sector__leak { max-width: 34em; font-size: 15px; line-height: 1.75; color: var(--muted); }
 .sector__levers { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; }
-.sector__levers li { display: flex; gap: 10px; font-size: 14px; line-height: 1.5; color: var(--text); }
+.sector__levers li { display: flex; gap: 10px; font-size: 14px; line-height: 1.7; color: var(--text); }
 .sector__levers li:only-child { grid-column: 1 / -1; }
-.sector__levers .ico { margin-top: 1px; color: var(--accent-text); }
-.sector__kpis { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.sector__kpis li {
-  padding: 5px 10px; border: 1px solid var(--line); background: var(--paper);
-  font: 600 12px/1.5 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+.sector__levers .ico { margin-top: 3px; color: var(--accent-text); }
+/* "O que medimos": uma linha de metadado (Plex Mono 12px maiúsculo, " · " entre os
+   itens, quebra natural), sob a hairline do bloco; sem caixa por item */
+.sector__kpis {
+  margin: 0; padding: 0; list-style: none;
+  font: 600 12px/1.9 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text);
 }
+.sector__kpis li { display: inline; }
+.sector__kpis li + li::before { content: " · "; color: var(--subtle); }
 
 /* visual: campo de ilustração (a descrição fica no aria-label do SVG) */
 .sector__visual { display: flex; flex-direction: column; min-width: 0; margin: 0; border-left: 1px solid var(--line); }
@@ -146,7 +148,7 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   border-bottom: 1px solid var(--line); color: var(--subtle);
 }
 .sx__list li:first-child .sx__item { padding-top: 4px; }
-.sx__num { flex: none; font: 600 12px/1.5 var(--font-mono); letter-spacing: .08em; color: var(--subtle); }
+.sx__num { flex: none; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; color: var(--subtle); }
 .sx__name { font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; }
 .sx__item:hover { color: var(--text); }
 .sx__item.is-active { color: var(--text); }
@@ -172,12 +174,16 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   will-change: transform;
 }
 .is-pinned .sector__body { overflow: hidden; }
+/* painel que fica por baixo durante a troca: só o fundo e a figura; o texto não aparece
+   cortado pela borda do painel que passa por cima (casos.js grava .is-under) */
+.is-pinned .sector.is-under .sector__body { visibility: hidden; }
 .is-pinned .sector__field { position: relative; min-height: 0; }
 /* no palco a figura se ajusta ao campo nas duas direções (viewBox em "meet") */
 .is-pinned .sector__svg { position: absolute; inset: var(--space-4); width: calc(100% - 2 * var(--space-4)); height: calc(100% - 2 * var(--space-4)); max-width: none; }
 .is-pinned .sector__facts { gap: 28px; margin-top: 30px; }
 
-/* 5b. Índice compacto (sem palco fixo: < 980px, movimento reduzido, janela baixa).
+/* 5b. Índice compacto: com JS, sempre que não há palco fixo (qualquer largura ou
+   altura, inclusive desktop baixo e movimento reduzido).
    Faixa presa sob o header só enquanto a lista de setores passa (sticky dentro de
    .sectors); ocupa a própria altura no fluxo, então não cobre o conteúdo ao chegar.
    Sem JS fica [hidden]. */
@@ -186,7 +192,6 @@ html.js .sector__head:not(:has(.sector__seal)) + .sector__name { margin-top: 0; 
   padding: 12px 0 0; background: var(--paper);
 }
 .is-pinned .sx-mini { display: none; }
-@media (min-width: 981px) { .sx-mini { display: none; } }
 .sx-mini__text { padding-bottom: 12px; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text); }
 .sx-mini__num { color: var(--accent-text); }
 .sx-mini__of { color: var(--subtle); }

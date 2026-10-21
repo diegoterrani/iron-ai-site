@@ -196,6 +196,10 @@
         if (k === mover) return;
         gsap.set(p, { yPercent: k <= j ? 0 : 100 });
       });
+      /* durante a troca, o painel que fica por baixo mostra só o fundo e a figura: o
+         texto dele nunca aparece cortado pela borda do que passa por cima. Ao assentar,
+         todos voltam ao normal (os seis seguem legíveis para o leitor de tela). */
+      panels.forEach(function (p, k) { p.classList.toggle('is-under', k !== mover && k <= j); });
       var marked = false;
       gsap.to(panels[mover], {
         yPercent: mover === j ? 0 : 100, duration: DUR, ease: EASE,
@@ -203,7 +207,10 @@
           /* ratio = posição já com a curva: o índice troca com metade coberta */
           if (!marked && this.ratio >= 0.5) { marked = true; mark(j); }
         },
-        onComplete: function () { if (!marked) mark(j); }
+        onComplete: function () {
+          if (!marked) mark(j);
+          panels.forEach(function (p) { p.classList.remove('is-under'); });
+        }
       });
     }
 
@@ -260,7 +267,7 @@
       });
       sectorsEl.removeEventListener('focusin', onPanelFocus);
       st.kill(true);
-      panels.forEach(function (p) { gsap.killTweensOf(p); });
+      panels.forEach(function (p) { gsap.killTweensOf(p); p.classList.remove('is-under'); });
       gsap.set(panels, { clearProps: 'transform,zIndex' });
       if (fill) fill.style.transform = '';
       frame.style.removeProperty('--frame-h');
