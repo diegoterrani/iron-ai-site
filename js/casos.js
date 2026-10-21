@@ -56,9 +56,14 @@
   /* ---------- aria-current: um só artigo de setor ---------- */
   var sectorsBox = document.querySelector('[data-sectors]');
   var allCards = sectorsBox ? Array.prototype.slice.call(sectorsBox.querySelectorAll('[data-sector]')) : [];
+  var allLinks = sectorsBox ? Array.prototype.slice.call(sectorsBox.querySelectorAll('[data-sx-item]')) : [];
+  /* artigo ativo e o link do índice/sumário correspondente: um só de cada, juntos */
   function setCurrent(k) {
     allCards.forEach(function (c, i) {
       if (i === k) c.setAttribute('aria-current', 'true'); else c.removeAttribute('aria-current');
+    });
+    allLinks.forEach(function (a, i) {
+      if (i === k) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
     });
   }
   var miniRefresh = function () {};
@@ -172,11 +177,7 @@
     panels.forEach(function (p, i) { gsap.set(p, { zIndex: i + 1, yPercent: i === 0 ? 0 : 100 }); });
 
     function mark(j) {
-      items.forEach(function (a, k) {
-        var on = k === j;
-        a.classList.toggle('is-active', on);
-        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
-      });
+      items.forEach(function (a, k) { a.classList.toggle('is-active', k === j); });
       setCurrent(j);
     }
     /* todos os painéis ficam na árvore de leitura (sem inert): o leitor de tela lê os
@@ -255,7 +256,7 @@
     return function cleanup() {
       items.forEach(function (a) {
         a.removeEventListener('click', onItem); a.removeEventListener('focus', onFocus);
-        a.classList.remove('is-active'); a.removeAttribute('aria-current');
+        a.classList.remove('is-active');
       });
       sectorsEl.removeEventListener('focusin', onPanelFocus);
       st.kill(true);
