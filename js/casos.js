@@ -140,7 +140,8 @@
   if (!n) return;
 
   var DUR = 0.55;                       /* troca de painel: 550 ms (barra 9: 300–700) */
-  function stepLen() { return Math.round(window.innerHeight * 0.6); }
+  /* cada setor ocupa 1,05 altura de tela de rolagem: PageDown/PageUp passam por todos */
+  function stepLen() { return Math.round(window.innerHeight * 1.05); }
   function headerH() { return header ? header.offsetHeight : 84; }
 
   var MIN_FRAME = 540;                  /* altura mínima da moldura: a figura precisa de campo */
