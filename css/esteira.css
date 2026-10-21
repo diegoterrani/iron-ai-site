@@ -89,7 +89,14 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 .is-pinned .es-panel__body { padding-top: var(--space-5); }
 /* movimento reduzido: o texto atualiza; sem a linha de progresso */
 @media (prefers-reduced-motion: reduce) { .es-mini__bar { display: none; } }
-.es-index { display: none; }
+/* índice das etapas = a navegação 01–05 em todos os modos. Na lista empilhada (sem
+   JS, movimento reduzido, < 980px) é um sumário de links-âncora antes dos cartões:
+   lista com hairline, card-title 20px/700, número em accent-text. No palco preso
+   vira a coluna esquerda com o trilho (regras .is-pinned abaixo). */
+.es-index { max-width: calc(var(--page-max) * 2 / 3); margin: 0 0 var(--space-5); }
+.es-index ol { border-top: 1px solid var(--line); }
+.es-index li { border-bottom: 1px solid var(--line); }
+.es-index__rail { display: none; }
 
 /* cartões em sequência que dividem a mesma hairline */
 .es-panels {
@@ -160,8 +167,11 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); column-gap: var(--space-6);
   align-items: start; margin-top: var(--space-6);
 }
-.is-pinned .es-index { display: block; position: relative; align-self: start; padding-left: 28px; }
+.is-pinned .es-index { position: relative; align-self: start; max-width: none; margin: 0; padding-left: 28px; }
 .es-index ol { margin: 0; padding: 0; list-style: none; }
+.is-pinned .es-index ol { border-top: 0; }
+.is-pinned .es-index li { border-bottom: 0; }
+.is-pinned .es-index__rail { display: block; }
 /* trilho vertical que se preenche com a rolagem (--p, 0..1) */
 .es-index__rail { position: absolute; left: 0; top: 6px; bottom: 6px; width: 1px; background: var(--field-line); }
 .es-index__fill {
@@ -169,15 +179,21 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   background: var(--accent-text); transform: scaleY(var(--p, 0)); transform-origin: top center;
 }
 .es-index a {
-  display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: baseline;
-  padding: 14px 0; color: var(--subtle); transition: color .3s;
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: baseline;
+  padding: 14px 0; color: var(--text); transition: color .3s;
 }
-.es-index a:hover { color: var(--text); }
-.es-index__num { font: 400 12px/1.5 var(--font-mono); }
+.es-index a:hover { color: var(--accent-text); }
+.es-index__num { font: 400 12px/1.5 var(--font-mono); color: var(--accent-text); }
 .es-index__name { font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; }
-/* etapa ativa: uma só, por número e cor (aria-current="step") */
-.es-index a[aria-current="step"] { color: var(--text); }
-.es-index a[aria-current="step"] .es-index__num { color: var(--accent-text); }
+/* palco preso: etapas em subtle; a ativa (uma só, aria-current="step") em text com o
+   número em accent-text */
+.is-pinned .es-index a { grid-template-columns: 34px minmax(0, 1fr); color: var(--subtle); }
+.is-pinned .es-index a:hover { color: var(--text); }
+.is-pinned .es-index__num { color: inherit; }
+.is-pinned .es-index a[aria-current="step"] { color: var(--text); }
+.is-pinned .es-index a[aria-current="step"] .es-index__num { color: var(--accent-text); }
+/* com a faixa compacta presa, a âncora de um cartão para abaixo dela */
+.es-panels.is-tracked .es-panel { scroll-margin-top: calc(var(--header-h) + 48px + var(--space-3)); }
 
 /* overflow clip (não hidden): o foco num painel abaixo da janela não rola a janela */
 .is-pinned .es-panels { position: relative; height: var(--panel-h, 600px); overflow: clip; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -266,6 +282,9 @@ html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
   .es-line__item { padding-right: 14px; }
 }
 @media (max-width: 640px) {
+  /* sumário das etapas: lista vertical compacta, alvo de 44px */
+  .es-index { margin-bottom: var(--space-4); }
+  .es-index a { min-height: 44px; padding: 9px 0; }
   .es-stage, .es-grid, .es-faq__list { margin-top: 38px; }
   .es-hero__actions { margin-top: var(--space-4); }
   .es-panel__index { padding: var(--space-3) var(--space-3) 12px; }
