@@ -1,0 +1,187 @@
+/* =========================================================================
+   IRON AI — esteira.js (só em esteira.html)
+   O HTML base já é a versão completa e empilhada; este arquivo só aprimora.
+   1. Um botão primário por vista: o "Agendar diagnóstico" do header some
+      enquanto o CTA do hero ou o do CTA final estiver na tela (vale também com
+      movimento reduzido: não é animação).
+   2. Palco das cinco etapas (desktop >= 981px, altura >= 720px): ScrollTrigger
+      prende o palco; a rolagem avança a etapa ativa (uma só, aria-current="step")
+      e o painel novo sobe e cobre o anterior (yPercent 100 -> 0, 600 ms; na volta,
+      desce em 500 ms). O trilho do índice se preenche com a rolagem.
+   3. Visão geral: a linha 01 -> 05 se preenche com a rolagem ao entrar.
+   4. Títulos e itens entram de baixo (24 px + opacidade, 600 ms), uma vez.
+   Movimento reduzido ou sem GSAP: só o item 1; nada se move.
+   Lenis vem de site.js (IronSite.lenis); aqui não se cria outro.
+   ========================================================================= */
+(function () {
+  'use strict';
+  var S = window.IronSite;
+  if (!S) return;
+  var U = S.util;
+
+  /* 1. Um botão primário por vista ------------------------------------------ */
+  var headerEl = S.header.el;
+  var hdrCta = headerEl ? headerEl.querySelector('.site-header__cta') : null;
+  var viewCtas = [].slice.call(document.querySelectorAll('[data-view-cta]'));
+  var ctaShown = null;
+  function updateHeaderCta() {
+    if (!hdrCta) return;
+    var hh = S.header.height(), vh = window.innerHeight, inView = false;
+    for (var i = 0; i < viewCtas.length; i++) {
+      var r = viewCtas[i].getBoundingClientRect();
+      if (r.bottom > hh && r.top < vh) { inView = true; break; }
+    }
+    var show = !inView;
+    if (show === ctaShown) return;
+    ctaShown = show;
+    /* mesma classe da home: .is-wide esconde o botão do header (site.css, seção 5) */
+    headerEl.classList.toggle('is-wide', !show);
+    hdrCta.setAttribute('aria-hidden', show ? 'false' : 'true');
+    if (show) hdrCta.removeAttribute('tabindex'); else hdrCta.setAttribute('tabindex', '-1');
+  }
+  S.onScroll(updateHeaderCta);
+  window.addEventListener('resize', U.debounce(updateHeaderCta, 120));
+  updateHeaderCta();
+
+  if (S.reducedMotion || !S.hasGsap) return;
+  var gsap = S.gsap, ST = S.ScrollTrigger;
+
+  function scrollToY(y) {
+    if (S.lenis) S.lenis.scrollTo(y, { duration: 0.9 });
+    else window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+
+  /* 2. Palco das cinco etapas ------------------------------------------------ */
+  var stage = document.querySelector('[data-stage]');
+  var panels = stage ? [].slice.call(stage.querySelectorAll('[data-panel]')) : [];
+  var links = stage ? [].slice.call(stage.querySelectorAll('[data-index-link]')) : [];
+  var fill = stage ? stage.querySelector('[data-index-fill]') : null;
+  var N = panels.length;
+  var pin = null;          /* ScrollTrigger do palco, só enquanto preso */
+  var active = -1;
+
+  var UP = { duration: 0.6, ease: 'power3.out', overwrite: true };
+  var DOWN = { duration: 0.5, ease: 'power2.inOut', overwrite: true };
+
+  function setActive(i, instant) {
+    if (i === active) return;
+    active = i;
+    links.forEach(function (a, k) {
+      if (k === i) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+    });
+    /* painéis até o ativo ficam em 0 (os de baixo cobertos pelo de cima, que vem
+       depois no DOM); os seguintes ficam abaixo da janela (yPercent 100) */
+    panels.forEach(function (p, k) {
+      var target = k <= i ? 0 : 100;
+      if (instant) { gsap.set(p, { yPercent: target }); return; }
+      if (gsap.getProperty(p, 'yPercent') === target) return;
+      gsap.to(p, Object.assign({ yPercent: target }, target === 0 ? UP : DOWN));
+    });
+  }
+
+  /* posição de rolagem que mostra a etapa k (meio do trecho dela) */
+  function stepY(k) {
+    return pin.start + (pin.end - pin.start) * (k + 0.5) / N;
+  }
+
+  if (stage && N) {
+    var mm = gsap.matchMedia();
+    mm.add('(min-width: 981px) and (min-height: 720px)', function () {
+      stage.classList.add('is-pinned');
+      active = -1;
+      setActive(0, true);
+      pin = ST.create({
+        trigger: stage,
+        start: function () { return 'top ' + S.header.height() + 'px'; },
+        /* 60% da altura da tela de rolagem por etapa */
+        end: function () { return '+=' + Math.round(window.innerHeight * 0.6 * N); },
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
+        refreshPriority: 1,
+        invalidateOnRefresh: true,
+        onUpdate: function (self) {
+          if (fill) fill.style.setProperty('--p', self.progress.toFixed(4));
+          setActive(Math.min(N - 1, Math.floor(self.progress * N)));
+        },
+        onRefresh: function (self) {
+          if (fill) fill.style.setProperty('--p', self.progress.toFixed(4));
+          setActive(Math.min(N - 1, Math.floor(self.progress * N)), true);
+        }
+      });
+      return function () {
+        pin = null;
+        active = -1;
+        stage.classList.remove('is-pinned');
+        gsap.killTweensOf(panels);
+        gsap.set(panels, { clearProps: 'transform' });
+        links.forEach(function (a) { a.removeAttribute('aria-current'); });
+        if (fill) fill.style.removeProperty('--p');
+      };
+    });
+
+    /* links para as etapas (índice e linha do tempo): com o palco preso, rolam até
+       o trecho da etapa em vez de saltar para a âncora */
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#etapa-"]');
+      if (!a || !pin) return;
+      var k = panels.findIndex(function (p) { return '#' + p.id === a.getAttribute('href'); });
+      if (k < 0) return;
+      e.preventDefault();
+      scrollToY(stepY(k));
+    });
+    /* teclado: o foco num link de um painel coberto leva a rolagem até ele */
+    panels.forEach(function (p, k) {
+      p.addEventListener('focusin', function () {
+        if (!pin || k === active) return;
+        var y = stepY(k);
+        if (S.lenis) S.lenis.scrollTo(y, { immediate: true }); else window.scrollTo(0, y);
+      });
+    });
+  }
+
+  /* 3. Linha do tempo da visão geral ------------------------------------------ */
+  var line = document.querySelector('[data-line]');
+  if (line) {
+    var items = [].slice.call(line.children);
+    var applyFill = function (p) {
+      line.style.setProperty('--fill', p.toFixed(4));
+      items.forEach(function (li, k) { li.classList.toggle('is-on', p >= k / items.length - 0.0001 && p > 0); });
+    };
+    line.classList.add('is-live');
+    ST.create({
+      trigger: line,
+      start: 'top 88%',
+      end: 'top 48%',
+      onUpdate: function (self) { applyFill(self.progress); },
+      onRefresh: function (self) { applyFill(self.progress); }
+    });
+  }
+
+  /* 4. Entradas discretas, uma vez ------------------------------------------- */
+  var from = { y: 24, opacity: 0, duration: 0.6, ease: 'power2.out' };
+  [].slice.call(document.querySelectorAll('[data-reveal]')).forEach(function (el) {
+    gsap.from(el, Object.assign({}, from, {
+      scrollTrigger: { trigger: el, start: 'top 90%', once: true }
+    }));
+  });
+  [].slice.call(document.querySelectorAll('.es-grid, .es-faq__list')).forEach(function (group) {
+    var kids = group.querySelectorAll('[data-reveal-item]');
+    if (!kids.length) return;
+    gsap.from(kids, Object.assign({}, from, {
+      stagger: 0.08,
+      scrollTrigger: { trigger: group, start: 'top 88%', once: true }
+    }));
+  });
+
+  ST.sort();
+  /* âncora de etapa na URL com o palco preso: abre na etapa pedida */
+  S.fontsReady.then(function () {
+    ST.refresh();
+    var m = /^#etapa-0([1-5])$/.exec(window.location.hash);
+    if (m && pin) {
+      var y = stepY(+m[1] - 1);
+      if (S.lenis) S.lenis.scrollTo(y, { immediate: true }); else window.scrollTo(0, y);
+    }
+  });
+})();

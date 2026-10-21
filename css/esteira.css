@@ -1,0 +1,244 @@
+/* =========================================================================
+   IRON AI — esteira.css (só em esteira.html)
+   Base = versão empilhada e completa (sem JS, movimento reduzido, < 980px).
+   .es-stage.is-pinned (esteira.js, desktop >= 981px e altura >= 720px): palco
+   preso com o índice 01–05 à esquerda e o painel da etapa ativa à direita; o
+   painel novo sobe e cobre o anterior (barra: mecanismos 8–10).
+   Só tokens; quadrado; bordas em vez de sombras.
+   ========================================================================= */
+
+/* Ritmo de fundos: paper (topo) · soft (visão geral) · paper (etapas) · soft
+   (segurança) · paper (pré-requisitos, perguntas) · band (CTA final) */
+.es-overview, .es-security { background: var(--soft); }
+
+/* 1. Topo ---------------------------------------------------------------- */
+.es-hero .section-lead { margin-top: var(--space-3); }
+.es-hero__actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px;
+  margin-top: var(--space-5);
+}
+
+/* 2. Visão geral: linha do tempo 01 -> 05 --------------------------------
+   Trilho em line; o preenchimento em accent-text cresce com --fill (0..1,
+   gravado por esteira.js a partir da rolagem). Sem JS, --fill = 1: completo. */
+.es-line {
+  --fill: 1;
+  position: relative;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: var(--space-6) 0 0; padding: 0; list-style: none;
+}
+.es-line::before, .es-line::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 1px;
+  background: var(--field-line);
+}
+.es-line::after {
+  top: 3px; height: 3px; background: var(--accent-text);
+  transform: scaleX(var(--fill)); transform-origin: left center;
+}
+.es-line__item { position: relative; min-width: 0; padding: 34px 24px 0 0; }
+/* nó quadrado de cada etapa: aceso em accent-text; ainda não alcançado, paper com borda */
+.es-line__item::before {
+  content: ""; position: absolute; z-index: 1; left: 0; top: 0;
+  width: 10px; height: 10px; background: var(--accent-text); border: 1px solid var(--accent-text);
+}
+.es-line__item a { display: flex; flex-direction: column; gap: 8px; color: var(--text); transition: color .2s; }
+.es-line__item a:hover { color: var(--accent-text); }
+.es-line__num { font: 400 12px/1.5 var(--font-mono); color: var(--accent-text); }
+.es-line__name { font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -.02em; }
+/* estado parcial (só com esteira.js): nó e número apagados até a linha chegar */
+.es-line.is-live .es-line__item:not(.is-on)::before { background: var(--soft); border-color: var(--field-line); }
+.es-line.is-live .es-line__item:not(.is-on) .es-line__num { color: var(--subtle); }
+
+/* 3. As cinco etapas ------------------------------------------------------ */
+.es-stage { margin-top: var(--space-6); }
+.es-index { display: none; }
+
+/* cartões em sequência que dividem a mesma hairline */
+.es-panels {
+  margin: 0; padding: 0; list-style: none;
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.es-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "visual index" "visual body";
+  min-height: 520px;
+  background: var(--paper);
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.es-panel__index {
+  grid-area: index;
+  padding: var(--space-5) var(--space-5) 0;
+  font: 400 12px/1.5 var(--font-mono); color: var(--subtle);
+}
+.es-panel__index span { color: var(--accent-text); }
+.es-panel__visual { grid-area: visual; position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+.es-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.es-panel__body {
+  grid-area: body; display: flex; flex-direction: column; min-width: 0;
+  padding: 14px var(--space-5) var(--space-5);
+}
+/* nome da etapa: serifa (product-title 30px) */
+.es-panel__name {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-serif); font-optical-sizing: auto;
+  font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.015em; color: var(--text);
+}
+.es-fields { margin: 0; }
+.es-field { padding: 13px 0 14px; border-top: 1px solid var(--line); }
+.es-field dt {
+  font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle);
+}
+.es-field dd { margin: 5px 0 0; max-width: 34em; font-size: 15px; line-height: 1.6; color: var(--muted); }
+/* a decisão é o fecho de cada etapa: serifa 24px em text */
+.es-field--decision dd {
+  font-family: var(--font-serif); font-optical-sizing: auto;
+  font-size: 24px; line-height: 1.25; letter-spacing: -.015em; color: var(--text);
+}
+.es-panel__more { margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--line); }
+
+/* campos da ilustração (design-system.md, "Ilustração em código"): tons diferentes
+   em painéis vizinhos; figuras paper/branco/band; destaque clay pequeno; traços
+   finos em accent-text e, sobre clay, em text */
+.es-panel__visual--manilla { background: var(--manilla); }
+.es-panel__visual--oat { background: var(--oat); }
+.es-panel__visual--kraft { background: var(--kraft); }
+.es-panel__visual--clay { background: var(--clay); }
+.ev-paper { fill: var(--paper); }
+.ev-white { fill: var(--modal-bg); }
+.ev-band { fill: var(--band); }
+.ev-clay { fill: var(--clay); }
+.ev-ink { fill: var(--accent-text); }
+.ev-line, .ev-line-dark { fill: none; stroke-width: 2; stroke-linecap: square; stroke-linejoin: miter; }
+.ev-line { stroke: var(--accent-text); }
+.ev-line-dark { stroke: var(--text); }
+.ev-dash { stroke-dasharray: 4 6; }
+
+/* Palco preso (esteira.js). Altura = tela abaixo do header; o índice à esquerda,
+   o painel à direita numa janela que corta o painel que ainda vai subir. */
+.es-stage.is-pinned {
+  display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); column-gap: var(--space-6);
+  height: calc(100vh - var(--header-h)); margin-top: var(--space-6);
+  padding: var(--space-4) 0;
+}
+.is-pinned .es-index { display: block; position: relative; align-self: start; padding-left: 28px; }
+.es-index ol { margin: 0; padding: 0; list-style: none; }
+/* trilho vertical que se preenche com a rolagem (--p, 0..1) */
+.es-index__rail { position: absolute; left: 0; top: 6px; bottom: 6px; width: 1px; background: var(--field-line); }
+.es-index__fill {
+  position: absolute; left: -1px; top: 0; width: 3px; height: 100%;
+  background: var(--accent-text); transform: scaleY(var(--p, 0)); transform-origin: top center;
+}
+.es-index a {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: baseline;
+  padding: 14px 0; color: var(--subtle); transition: color .3s;
+}
+.es-index a:hover { color: var(--text); }
+.es-index__num { font: 400 12px/1.5 var(--font-mono); }
+.es-index__name { font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; }
+/* etapa ativa: uma só, por número e cor (aria-current="step") */
+.es-index a[aria-current="step"] { color: var(--text); }
+.es-index a[aria-current="step"] .es-index__num { color: var(--accent-text); }
+
+.is-pinned .es-panels { position: relative; height: 100%; overflow: hidden; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.is-pinned .es-panel {
+  position: absolute; inset: 0; min-height: 0;
+  border-right: 0; border-bottom: 0; border-top: 1px solid var(--line);
+  will-change: transform;
+}
+.is-pinned .es-panel:first-child { border-top: 0; }
+
+/* 4–5. Grades de garantias e de pré-requisitos ---------------------------- */
+.es-grid {
+  display: grid; margin: var(--space-6) 0 0; padding: 0; list-style: none;
+  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+}
+.es-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.es-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.es-card { padding: 32px 28px 34px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.es-security .es-card { background: var(--paper); }
+.es-card .ico { width: 20px; height: 20px; color: var(--icon-ink); }
+.es-card h3 { margin: 26px 0 10px; font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
+.es-card p { font-size: 14px; line-height: 1.7; color: var(--muted); }
+
+/* 6. Perguntas ------------------------------------------------------------ */
+.es-faq__list { max-width: calc(var(--page-max) * 2 / 3); margin-top: var(--space-6); border-top: 1px solid var(--line); }
+.es-q { border-bottom: 1px solid var(--line); }
+.es-q summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  min-height: 72px; padding: 18px 0;
+  font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text);
+  list-style: none; cursor: pointer;
+  transition: color .2s;
+}
+.es-q summary::-webkit-details-marker { display: none; }
+.es-q summary:hover { color: var(--accent-text); }
+.es-q summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.es-q summary .ico { width: 20px; height: 20px; color: var(--accent-text); transition: transform .3s var(--ease-out); }
+.es-q[open] summary .ico { transform: rotate(90deg); }
+.es-q > p { max-width: 40em; padding: 0 44px 0 0; font-size: 15px; line-height: 1.75; color: var(--muted); }
+.es-q > p:last-child { padding-bottom: 26px; }
+.es-q__more { margin-top: 14px; }
+
+/* 7. CTA final em faixa band ---------------------------------------------- */
+.es-final { padding: var(--space-8) var(--gutter); background: var(--band); border-top: 1px solid var(--line); text-align: center; }
+.es-final__inner { max-width: var(--page-max); margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+.es-final__title {
+  margin: 0; max-width: 16em;
+  font-family: var(--font-serif); font-optical-sizing: auto;
+  font-size: clamp(40px, calc(24px + 2.6vw), 64px); font-weight: 400; line-height: 1.06; letter-spacing: -.02em;
+  color: var(--text);
+}
+.es-final__title i { font-style: normal; color: var(--accent); }
+.es-final__text { margin-top: 18px; max-width: 34em; font-size: 17px; line-height: 1.75; color: var(--muted); }
+.es-final .button { margin-top: var(--space-4); }
+
+/* Responsivo --------------------------------------------------------------- */
+@media (max-width: 980px) {
+  /* etapas como cartões: índice e ilustração acima do texto */
+  .es-panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    grid-template-areas: "index" "visual" "body";
+    min-height: 0;
+  }
+  .es-panel__index { padding: var(--space-4) var(--space-4) 14px; }
+  .es-panel__visual { aspect-ratio: 16 / 7; }
+  .es-panel__body { padding: var(--space-4); }
+  .es-grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .es-grid--3 { grid-template-columns: minmax(0, 1fr); }
+  .es-line__name { font-size: 15px; }
+  .es-line__item { padding-right: 14px; }
+}
+@media (max-width: 640px) {
+  .es-stage, .es-grid, .es-faq__list { margin-top: 38px; }
+  .es-hero__actions { margin-top: var(--space-4); }
+  .es-panel__index { padding: var(--space-3) var(--space-3) 12px; }
+  .es-panel__visual { aspect-ratio: 4 / 3; }
+  .es-panel__body { padding: var(--space-3) var(--space-3) var(--space-4); }
+  .es-panel__name { font-size: 26px; margin-bottom: 18px; }
+  .es-field--decision dd { font-size: 22px; }
+  .es-grid--4 { grid-template-columns: minmax(0, 1fr); }
+  .es-card { padding: 26px 22px 28px; }
+  .es-card h3 { margin-top: 20px; }
+  /* linha do tempo vertical: trilho à esquerda, preenchimento de cima para baixo */
+  .es-line { grid-template-columns: minmax(0, 1fr); margin-top: 38px; }
+  .es-line::before { left: 4px; right: auto; top: 0; bottom: 0; width: 1px; height: auto; }
+  .es-line::after {
+    left: 3px; right: auto; top: 0; bottom: 0; width: 3px; height: auto;
+    transform: scaleY(var(--fill)); transform-origin: center top;
+  }
+  .es-line__item { padding: 0 0 0 34px; }
+  .es-line__item::before { top: 6px; }
+  .es-line__item a { flex-direction: row; align-items: baseline; gap: 14px; min-height: 48px; padding: 2px 0 12px; }
+  .es-line__name { font-size: 17px; }
+  .es-q summary { font-size: 18px; min-height: 64px; }
+  .es-q > p { padding-right: 0; }
+  .es-final { padding: var(--space-7) var(--gutter); }
+}
+
+/* Movimento reduzido: tudo empilhado e completo, sem transições ------------- */
+@media (prefers-reduced-motion: reduce) {
+  .es-q summary, .es-q summary .ico, .es-index a, .es-line__item a { transition: none; }
+}
