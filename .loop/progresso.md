@@ -8,8 +8,8 @@ Ressalva do briefing para a parte A: "Retorno mínimo de 3× em 12 meses" sem fo
 | Parte | Estado | Briefing | Sistema | Visual | Maior lacuna (histórico) |
 | --- | --- | --- | --- | --- | --- |
 | A. Home: texto revisto + P3 (prova, FAQ, CTA final, rodapé) | aguardando proposta | – | – | – | – |
-| B. esteira.html | R34 em construção (proposta aprovada 21/10) | – | – | – | – |
-| C. casos-de-uso.html | R34 em construção (proposta aprovada 21/10) | – | – | – | – |
+| B. esteira.html | R2 em construção | R1 REPROVADO | R1 REPROVADO | R1 REPROVADO | R1: foco por Tab dessincroniza painel (briefing) · CTA final sem eyebrow (sistema) · cards sem metadado (visual) |
+| C. casos-de-uso.html | R2 em construção | R1 REPROVADO | R1 REPROVADO | R1 REPROVADO | R1: menu sem JS no celular (briefing, corrigido no header compartilhado pela B) · CTA final sem eyebrow/67px (sistema) · método com 12 itens (visual) |
 | D. contato.html + /api/contato (Turnstile + e-mail) | **APROVADA** (R8) | R8 APROVADO | R7 APROVADO | R7 APROVADO | R1 vão 250px · R3 dois CTAs / faixa esteira · R4 menu 20px · R5 menu não cobre / form 10 itens · R6 sucesso com form visível / card 3 linhas / manilla · R7 foco perdido no erro |
 
 Parte D aprovada após 8 rodadas. A R8 só moveu o alerta de erro para junto do botão (sem mudança de layout, cor ou texto aprovados).
