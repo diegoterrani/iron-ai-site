@@ -92,3 +92,4 @@ CSP restritiva (`default-src 'self'`), fontes servidas do próprio domínio no s
 ## Decisões do cliente posteriores a este documento (20/10/2026)
 - **Logo:** o header usa `img/logo-lockup.svg` (símbolo + wordmark, "AI" em argila). Decisão do cliente; substitui a regra "só wordmark em texto" no header. O wordmark em texto continua válido no rodapé.
 - **Preços:** o site não mostra preço nenhum (nem R$, nem fórmula de preço). No lugar, texto comercial convidando a falar com a equipe e agendar uma reunião.
+- **Condições por etapa:** cada etapa da esteira termina com o link "Condições: fale com a IRON AI" (decisão do cliente em 20/10/2026, no lugar dos preços). A repetição desse link nas cinco etapas é intencional.
