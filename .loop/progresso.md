@@ -8,8 +8,8 @@ Ressalva do briefing para a parte A: "Retorno mínimo de 3× em 12 meses" sem fo
 | Parte | Estado | Briefing | Sistema | Visual | Maior lacuna (histórico) |
 | --- | --- | --- | --- | --- | --- |
 | A. Home: texto revisto + P3 (prova, FAQ, CTA final, rodapé) | aguardando proposta | – | – | – | – |
-| B. esteira.html | R4 em construção | R3 REPROVADO | R3 REPROVADO (R2 APROVADO) | R3 REPROVADO | R1 foco Tab · R2 ritmo 217–494px / celular sem scroll interativo · R3 inert tira etapas do Tab (briefing) · CTA duplo sem JS (sistema) · ritmo real ~130px e vazio no painel (visual) |
-| C. casos-de-uso.html | R4 em construção | R3 REPROVADO | R3 REPROVADO | R3 REPROVADO | R1 menu sem JS / 12 itens · R2 áreas por setor inventadas / ritmo / h1 80px · R3 foco sob header no celular (briefing) · nome/posição duplicados (sistema) · ritmo real 121–149px (visual) |
+| B. esteira.html | R12 em construção (folga de âncora a 390 sem JS) | R11 REPROVADO (detalhe) | R10 APROVADO | R10 APROVADO | R1–R11: foco, ritmo, inert, CTA sem JS, animações de entrada, duplicações, PageDown, entrelinha, âncoras |
+| C. casos-de-uso.html | **APROVADA** (R12) | R9 APROVADO (R10–R12 só CSS de espaçamento) | R12 APROVADO | R12 APROVADO | R1 menu sem JS / 12 itens · R2 áreas inventadas · R3 foco / duplicação / ritmo · R4 17px / prova / aria-current · R5 ilustração repetida / PageDown · R6 família de ilustrações · R7 KPIs / índice 1280 · R8 CTA×rodapé / selo fora do Tab · R9–R12 espaçamentos |
 | D. contato.html + /api/contato (Turnstile + e-mail) | **APROVADA** (R8) | R8 APROVADO | R7 APROVADO | R7 APROVADO | R1 vão 250px · R3 dois CTAs / faixa esteira · R4 menu 20px · R5 menu não cobre / form 10 itens · R6 sucesso com form visível / card 3 linhas / manilla · R7 foco perdido no erro |
 
 Parte D aprovada após 8 rodadas. A R8 só moveu o alerta de erro para junto do botão (sem mudança de layout, cor ou texto aprovados).
