@@ -21,6 +21,8 @@
 html { scroll-padding-top: calc(var(--header-h) + var(--space-3)); }
 /* com a faixa compacta das etapas ativa (esteira.js), soma a faixa (48px) */
 html.es-tracked { scroll-padding-top: calc(var(--header-h) + 48px + var(--space-3)); }
+/* sem JS até 760px o header fica no fluxo (site.css, seção 15): recuo só de 22px */
+@media (max-width: 760px) { html:not(.js) { scroll-padding-top: var(--space-3); } }
 
 /* 1. Topo ---------------------------------------------------------------- */
 .es-hero .section-lead { margin-top: var(--space-3); }
@@ -196,8 +198,10 @@ html.es-tracked { scroll-padding-top: calc(var(--header-h) + 48px + var(--space-
 .is-pinned .es-index__num { color: inherit; }
 .is-pinned .es-index a[aria-current="step"] { color: var(--text); }
 .is-pinned .es-index a[aria-current="step"] .es-index__num { color: var(--accent-text); }
-/* com a faixa compacta presa, a âncora de um cartão para abaixo dela */
-.es-panels.is-tracked .es-panel { scroll-margin-top: calc(var(--header-h) + 48px + var(--space-3)); }
+/* âncoras: o recuo vem só do scroll-padding-top do <html> (header + 22px; com a
+   faixa compacta, + 48px). Zera o scroll-margin de .page-inner [id] (site.css),
+   que somava ao padding e parava o cartão ~106px mais abaixo. */
+.page-esteira [id] { scroll-margin-top: 0; }
 
 /* overflow clip (não hidden): o foco num painel abaixo da janela não rola a janela */
 .is-pinned .es-panels { position: relative; height: var(--panel-h, 600px); overflow: clip; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
