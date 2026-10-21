@@ -137,7 +137,7 @@ html.es-tracked { scroll-padding-top: calc(var(--header-h) + 48px + var(--space-
 .es-field dt {
   font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--subtle);
 }
-.es-field dd { margin: 5px 0 0; max-width: 34em; font-size: 15px; line-height: 1.6; color: var(--muted); }
+.es-field dd { margin: 5px 0 0; max-width: 34em; font-size: 15px; line-height: 1.75; color: var(--muted); }
 /* a decisão é o fecho de cada etapa: card-title (20px/700) em text */
 .es-field--decision dd {
   font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); /* card-title */

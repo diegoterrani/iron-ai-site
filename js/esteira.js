@@ -184,7 +184,7 @@
            header: nada de faixa vazia presa junto, nem sobra quando solta */
         start: function () {
           var hh = S.header.height(), free = window.innerHeight - hh - stage.offsetHeight;
-          return 'top ' + Math.round(hh + Math.max(24, free / 2)) + 'px';
+          return 'top ' + Math.round(hh + Math.max(0, free / 2)) + 'px';  /* centrado; se não couber, encosta no header */
         },
         /* 1,05 × a altura da tela de rolagem por etapa: um PageDown/PageUp (< 1 tela)
            nunca pula uma etapa */
