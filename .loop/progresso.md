@@ -1,6 +1,6 @@
 # Progresso — loop de design, rodada 33
 
-Rodadas globais executadas: 3 (rodada 4 em construção)
+Rodadas globais executadas: parte D 8 rodadas; rodada 34 (B e C): 3 rodadas, R4 em construção
 
 R3 (parte D, após remover preços): Briefing APROVADO · Sistema REPROVADO (dois botões cta-bg na mesma vista no fim da esteira) · Visual REPROVADO (faixa "A esteira começa aqui" no contato sem título, cards 15px).
 Ressalva do briefing para a parte A: "Retorno mínimo de 3× em 12 meses" sem fonte; home sem rodapé.
@@ -8,8 +8,8 @@ Ressalva do briefing para a parte A: "Retorno mínimo de 3× em 12 meses" sem fo
 | Parte | Estado | Briefing | Sistema | Visual | Maior lacuna (histórico) |
 | --- | --- | --- | --- | --- | --- |
 | A. Home: texto revisto + P3 (prova, FAQ, CTA final, rodapé) | aguardando proposta | – | – | – | – |
-| B. esteira.html | R2 em construção | R1 REPROVADO | R1 REPROVADO | R1 REPROVADO | R1: foco por Tab dessincroniza painel (briefing) · CTA final sem eyebrow (sistema) · cards sem metadado (visual) |
-| C. casos-de-uso.html | R2 em construção | R1 REPROVADO | R1 REPROVADO | R1 REPROVADO | R1: menu sem JS no celular (briefing, corrigido no header compartilhado pela B) · CTA final sem eyebrow/67px (sistema) · método com 12 itens (visual) |
+| B. esteira.html | R4 em construção | R3 REPROVADO | R3 REPROVADO (R2 APROVADO) | R3 REPROVADO | R1 foco Tab · R2 ritmo 217–494px / celular sem scroll interativo · R3 inert tira etapas do Tab (briefing) · CTA duplo sem JS (sistema) · ritmo real ~130px e vazio no painel (visual) |
+| C. casos-de-uso.html | R4 em construção | R3 REPROVADO | R3 REPROVADO | R3 REPROVADO | R1 menu sem JS / 12 itens · R2 áreas por setor inventadas / ritmo / h1 80px · R3 foco sob header no celular (briefing) · nome/posição duplicados (sistema) · ritmo real 121–149px (visual) |
 | D. contato.html + /api/contato (Turnstile + e-mail) | **APROVADA** (R8) | R8 APROVADO | R7 APROVADO | R7 APROVADO | R1 vão 250px · R3 dois CTAs / faixa esteira · R4 menu 20px · R5 menu não cobre / form 10 itens · R6 sucesso com form visível / card 3 linhas / manilla · R7 foco perdido no erro |
 
 Parte D aprovada após 8 rodadas. A R8 só moveu o alerta de erro para junto do botão (sem mudança de layout, cor ou texto aprovados).
