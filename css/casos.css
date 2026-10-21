@@ -23,25 +23,9 @@
   margin-top: var(--space-4);
 }
 
-/* 3. Método: 11 áreas + o núcleo, em grade de hairlines compartilhadas ------- */
+/* 3. Método: eyebrow, título, texto e a lista das 11 áreas em texto ------- */
 .casos-metodo { background: var(--soft); }
-.chips {
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: var(--space-6) 0 0; padding: 0; list-style: none;
-  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
-}
-/* hairlines de chip sobre soft: line (#e7e6e1) quase some; hairline dá a grade */
-.casos-metodo .chips { border-color: var(--hairline); }
-.chip {
-  display: flex; align-items: baseline; gap: 16px; min-width: 0;
-  padding: 22px 24px; background: var(--paper);
-  border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline);
-}
-.chip__num { flex: none; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--accent-text); }
-.chip__name { font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -.02em; color: var(--text); }
-.chip--core { background: var(--surface-2); }
-.chip--core .chip__num { color: var(--muted); }
-.chip--core .wordmark { font-size: 17px; }
+.casos-metodo__areas { margin: 14px 0 0; max-width: 44em; font-size: 15px; line-height: 1.75; color: var(--muted); }
 
 /* 4. Setores — base empilhada --------------------------------------------- */
 .sectors { margin-top: var(--space-6); }
@@ -93,7 +77,7 @@
 .sector__svg { width: 100%; max-width: 400px; height: auto; }
 .sector__caption {
   padding: 14px var(--space-3); border-top: 1px solid var(--line); background: var(--paper);
-  font: 500 12px/1.5 var(--font-mono); letter-spacing: .04em; color: var(--muted);
+  font: 600 12px/1.5 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
 }
 
 /* 5. Setores — palco fixo (desktop ≥ 980px com movimento; casos.js) ----------
@@ -105,6 +89,7 @@
   /* o padding de cima do palco entra no space-6 entre o título e o conteúdo */
   height: calc(100vh - var(--header-h)); margin-top: calc(var(--space-6) - var(--space-4));
   padding: var(--space-4) 0;
+  align-content: center;          /* índice e moldura no meio da altura do palco */
 }
 .is-pinned .sx { display: block; position: relative; align-self: start; padding-left: 28px; }
 .sx__rail { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--line); }
@@ -129,14 +114,20 @@
 }
 .sx__list li:first-child .sx__item.is-active::before { top: calc(50% - 4px - 5px); }
 
-.is-pinned .sectors__frame { position: relative; overflow: hidden; height: 100%; border: 0; }
+/* a moldura tem a altura do painel mais alto (casos.js grava --frame-h), não a do
+   palco inteiro: sem vazio no pé da coluna de texto */
+.is-pinned .sectors__frame { position: relative; overflow: hidden; align-self: start; height: var(--frame-h, 100%); border: 0; }
 .is-pinned .sector {
   position: absolute; inset: 0;
   border: 1px solid var(--line);
   will-change: transform;
 }
 .is-pinned .sector__body { overflow: hidden; }
-.is-pinned .sector__field { min-height: 0; }
+.is-pinned .sector__field { position: relative; min-height: 0; }
+/* no palco a figura se ajusta ao campo nas duas direções (viewBox em "meet") */
+.is-pinned .sector__svg { position: absolute; inset: var(--space-4); width: calc(100% - 2 * var(--space-4)); height: calc(100% - 2 * var(--space-4)); max-width: none; }
+.is-pinned .sector__leak { font-size: 17px; line-height: 1.75; }
+.is-pinned .sector__facts { gap: 28px; margin-top: 30px; }
 
 /* 6. Ilustração em código: núcleo IRON AI + 11 áreas ------------------------
    Campo manilla/oat (alternado entre painéis vizinhos); áreas do setor em clay com
@@ -152,22 +143,8 @@
 .cv-word { font: 500 15px var(--font-sans); letter-spacing: .1em; fill: var(--text); text-anchor: middle; }
 .cv-word__b { font-weight: 800; fill: var(--accent-text); }
 
-/* 7. Prova: o caminho na operadora, em linha de hairlines compartilhadas ------- */
-.trail {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin: var(--space-6) 0 0; padding: 0; list-style: none;
-  border-top: 1px solid var(--line); border-left: 1px solid var(--line);
-}
-.trail__step {
-  position: relative; display: flex; flex-direction: column; min-width: 0;
-  padding: 26px 24px 30px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
-}
-.trail__step--start { background: var(--soft); }
-.trail__num { font: 400 12px/1.5 var(--font-mono); color: var(--subtle); }
-.trail__tag { margin-top: 26px; font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--link); }
-.trail__name { margin: 6px 0 0; font-size: 20px; font-weight: 700; line-height: 1.35; letter-spacing: -.025em; color: var(--text); }
-.trail__text { margin-top: 8px; font-size: 14px; line-height: 1.65; color: var(--muted); }
-.casos-prova__more { margin-top: var(--space-5); }
+/* 7. Prova: texto aprovado e o link para a esteira */
+.casos-prova__more { margin-top: var(--space-4); }
 
 /* 8. CTA final em faixa band, centralizado (barra: mecanismo 4) ----------- */
 .casos-cta {
@@ -177,42 +154,29 @@
   text-align: center;
 }
 .casos-cta__inner { max-width: 760px; margin: 0 auto; }
-.casos-cta__title {
-  margin: 0; font-family: var(--font-serif); font-optical-sizing: auto;
-  font-size: clamp(40px, calc(10px + 4vw), 68px); font-weight: 400; line-height: 1.05; letter-spacing: -.02em;
-  color: var(--text);
-}
+/* título na escala dos h2 (section-title 36 -> 61, via .section-h2), centrado */
+.casos-cta__title { margin: var(--space-3) auto 0; }
+.casos-cta__eyebrow { justify-content: center; }
 .casos-cta__title i { font-style: normal; color: var(--accent); }
 .casos-cta__text { max-width: 36em; margin: 20px auto 0; font-size: 17px; line-height: 1.75; color: var(--muted); }
 .casos-cta .button { margin-top: var(--space-4); }
 
 /* 9. Responsivo ----------------------------------------------------------- */
 @media (max-width: 980px) {
-  .chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sector { grid-template-columns: minmax(0, 1fr); }
   .sector__visual { border-left: 0; border-top: 1px solid var(--line); }
   .sector__field { min-height: 0; }
   .sector__svg { max-width: 360px; }
-  .trail { grid-template-columns: minmax(0, 1fr); }
-  .trail__step { display: grid; grid-template-columns: 48px minmax(0, 1fr); column-gap: 12px; padding: 20px 24px; }
-  .trail__num { grid-row: 1 / span 3; padding-top: 2px; }
-  .trail__tag { margin-top: 0; }
-  .trail__name { margin-top: 2px; }
 }
 @media (max-width: 640px) {
   .casos-hero { padding-bottom: var(--space-7); }
-  .chips, .sectors, .trail { margin-top: 38px; }
-  .chips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .chip { flex-direction: column; gap: 6px; padding: 16px 18px; }
-  .chip__name { font-size: 15px; }
-  .chip--core .wordmark { font-size: 15px; }
+  .sectors { margin-top: 38px; }
   .sector__body { padding: var(--space-4) var(--space-3) var(--space-4); }
   .sector__name { font-size: 26px; }
   .sector__levers { grid-template-columns: minmax(0, 1fr); }
   .sector__field { padding: var(--space-3) 14px; }
   .sector__svg { max-width: 300px; }
   .sector__caption { padding: 12px var(--space-3); }
-  .trail__step { grid-template-columns: 36px minmax(0, 1fr); padding: 18px var(--space-3); }
   .casos-prova__more { margin-top: var(--space-4); }
   .casos-cta { padding: var(--space-7) var(--gutter); }
 }

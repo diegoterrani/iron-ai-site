@@ -5,10 +5,11 @@
       ou o do fim está na tela (como setHeaderCta de home.js, sem depender dele).
    2. Movimento (só sem prefers-reduced-motion e com GSAP):
       - títulos e blocos [data-rise] entram de baixo, uma vez;
-      - os 12 chips do método entram em sequência (stagger 50 ms), uma vez;
       - setores num palco fixo (pin) acima de 980 px: a rolagem escolhe o setor
         ativo (um só), a linha do índice se preenche e o painel novo sobe e
-        cobre o anterior em 550 ms.
+        cobre o anterior em 550 ms; o índice troca quando o painel novo cobre
+        metade; painéis que não são o ativo ficam inert; focar um item do
+        índice leva a rolagem até o seu setor, assentado.
    Usa window.IronSite (site.js): GSAP, ScrollTrigger e o Lenis já criados.
    ========================================================================= */
 (function () {
@@ -66,21 +67,6 @@
     });
   }
 
-  /* método: os chips em sequência curta, de baixo para cima, uma vez */
-  var chipsEl = document.querySelector('.chips');
-  var chips = gsap.utils.toArray('[data-chip]');
-  if (chipsEl && chips.length) {
-    gsap.set(chips, { y: 22, opacity: 0 });
-    ST.create({
-      trigger: chipsEl,
-      start: 'top 88%',
-      once: true,
-      onEnter: function () {
-        gsap.to(chips, { y: 0, opacity: 1, duration: 0.5, ease: EASE, stagger: 0.05 });
-      }
-    });
-  }
-
   /* ---------- setores: palco fixo ---------- */
   var sectorsEl = document.querySelector('[data-sectors]');
   if (!sectorsEl) return;
@@ -94,14 +80,24 @@
   function stepLen() { return Math.round(window.innerHeight * 0.6); }
   function headerH() { return header ? header.offsetHeight : 84; }
 
+  var MIN_FRAME = 540;                  /* altura mínima da moldura: a figura precisa de campo */
+
   function setup() {
     sectorsEl.classList.add('is-pinned');
-    /* o painel precisa caber inteiro no palco; se não couber (janela baixa), fica empilhado */
-    var fits = panels.every(function (p) {
+    var frame = sectorsEl.querySelector('[data-sectors-frame]');
+    /* altura natural do painel mais alto (corpo com a moldura encolhida: scrollHeight
+       = conteúdo); a moldura fica com ela, sem vazio no pé da coluna de texto */
+    frame.style.setProperty('--frame-h', '1px');
+    var need = 0;
+    panels.forEach(function (p) {
       var body = p.querySelector('.sector__body');
-      return body && body.scrollHeight <= body.clientHeight + 1;
+      need = Math.max(need, body ? body.scrollHeight + 2 : 0);
     });
-    if (!fits) { sectorsEl.classList.remove('is-pinned'); return; }
+    frame.style.removeProperty('--frame-h');
+    var cs = getComputedStyle(sectorsEl);  /* altura útil do palco (sem o padding) */
+    var avail = sectorsEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    if (!need || need > avail) { sectorsEl.classList.remove('is-pinned'); return; }
+    frame.style.setProperty('--frame-h', Math.min(avail, Math.max(need, MIN_FRAME)) + 'px');
 
     var current = 0;
     panels.forEach(function (p, i) { gsap.set(p, { zIndex: i + 1, yPercent: i === 0 ? 0 : 100 }); });
@@ -113,21 +109,38 @@
         if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
       });
     }
+    /* só o painel ativo fica na árvore de foco e de leitura; os cobertos ou fora do
+       quadro ficam inert */
+    function setInert(j) {
+      panels.forEach(function (p, k) {
+        if (k === j) p.removeAttribute('inert'); else p.setAttribute('inert', '');
+      });
+    }
     mark(0);
+    setInert(0);
 
-    /* j > atual: o painel j sobe e cobre; j < atual: o de cima desce e revela j */
+    /* j > atual: o painel j sobe e cobre; j < atual: o de cima desce e revela j.
+       O índice troca quando a troca passa da metade. */
     function go(j) {
       if (j === current) return;
       var from = current;
       current = j;
-      mark(j);
+      setInert(j);
       var mover = j > from ? j : from;
       panels.forEach(function (p, k) {
         gsap.killTweensOf(p);
         if (k === mover) return;
         gsap.set(p, { yPercent: k <= j ? 0 : 100 });
       });
-      gsap.to(panels[mover], { yPercent: mover === j ? 0 : 100, duration: DUR, ease: EASE });
+      var marked = false;
+      gsap.to(panels[mover], {
+        yPercent: mover === j ? 0 : 100, duration: DUR, ease: EASE,
+        onUpdate: function () {
+          /* ratio = posição já com a curva: o índice troca com metade coberta */
+          if (!marked && this.ratio >= 0.5) { marked = true; mark(j); }
+        },
+        onComplete: function () { if (!marked) mark(j); }
+      });
     }
 
     var st = ST.create({
@@ -144,23 +157,39 @@
       }
     });
 
-    /* índice: leva a rolagem até o meio do trecho do setor */
+    /* posição em que o setor k está ativo e assentado: o meio do seu trecho */
+    function yFor(k) { return Math.round(st.start + (k + 0.5) / n * (st.end - st.start)); }
+    function scrollToSector(k, smooth) {
+      var y = yFor(k);
+      if (S.lenis) S.lenis.scrollTo(y, smooth ? { duration: 0.9 } : { immediate: true, force: true });
+      else window.scrollTo({ top: y, behavior: smooth ? 'smooth' : 'auto' });
+    }
     function onItem(e) {
       var k = items.indexOf(e.currentTarget);
       if (k < 0) return;
       e.preventDefault();
-      var y = st.start + (k + 0.5) / n * (st.end - st.start);
-      if (S.lenis) S.lenis.scrollTo(y, { duration: 0.9 });
-      else window.scrollTo({ top: y, behavior: 'smooth' });
+      scrollToSector(k, true);
     }
-    items.forEach(function (a) { a.addEventListener('click', onItem); });
+    /* foco pelo teclado num item do índice: a página vai direto ao trecho do setor
+       (o palco preso fica inteiro abaixo do header, com o painel do item na frente) */
+    function onFocus(e) {
+      var k = items.indexOf(e.currentTarget);
+      if (k < 0 || !e.currentTarget.matches(':focus-visible')) return;
+      var y = S.scrollY ? S.scrollY() : window.scrollY;
+      if (Math.abs(y - yFor(k)) > (st.end - st.start) / n / 2) scrollToSector(k, false);
+    }
+    items.forEach(function (a) { a.addEventListener('click', onItem); a.addEventListener('focus', onFocus); });
 
     return function cleanup() {
-      items.forEach(function (a) { a.removeEventListener('click', onItem); a.classList.remove('is-active'); a.removeAttribute('aria-current'); });
+      items.forEach(function (a) {
+        a.removeEventListener('click', onItem); a.removeEventListener('focus', onFocus);
+        a.classList.remove('is-active'); a.removeAttribute('aria-current');
+      });
       st.kill(true);
-      panels.forEach(function (p) { gsap.killTweensOf(p); });
+      panels.forEach(function (p) { gsap.killTweensOf(p); p.removeAttribute('inert'); });
       gsap.set(panels, { clearProps: 'transform,zIndex' });
       if (fill) fill.style.transform = '';
+      frame.style.removeProperty('--frame-h');
       sectorsEl.classList.remove('is-pinned');
     };
   }
