@@ -9,7 +9,8 @@
       e o painel novo sobe e cobre o anterior (yPercent 100 -> 0, 600 ms; na volta,
       desce em 500 ms). O trilho do índice se preenche com a rolagem.
    3. Visão geral: a linha 01 -> 05 se preenche com a rolagem ao entrar.
-   4. Títulos e itens entram de baixo (24 px + opacidade, 600 ms), uma vez.
+   (Sem animações de entrada: fora da cobertura dos painéis e dos indicadores de
+   progresso, nada anima — design-system.md, Movimento.)
    Movimento reduzido ou sem GSAP: só o item 1; nada se move.
    Lenis vem de site.js (IronSite.lenis); aqui não se cria outro.
    ========================================================================= */
@@ -242,22 +243,6 @@
       onRefresh: function (self) { applyFill(self.progress); }
     });
   }
-
-  /* 4. Entradas discretas, uma vez ------------------------------------------- */
-  var from = { y: 24, opacity: 0, duration: 0.6, ease: 'power2.out' };
-  [].slice.call(document.querySelectorAll('[data-reveal]')).forEach(function (el) {
-    gsap.from(el, Object.assign({}, from, {
-      scrollTrigger: { trigger: el, start: 'top 90%', once: true }
-    }));
-  });
-  [].slice.call(document.querySelectorAll('.es-grid, .es-faq__list')).forEach(function (group) {
-    var kids = group.querySelectorAll('[data-reveal-item]');
-    if (!kids.length) return;
-    gsap.from(kids, Object.assign({}, from, {
-      stagger: 0.08,
-      scrollTrigger: { trigger: group, start: 'top 88%', once: true }
-    }));
-  });
 
   ST.sort();
   /* âncora de etapa na URL com o palco preso: abre na etapa pedida */
