@@ -1,0 +1,6 @@
+# https://iron-ai.io/robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://iron-ai.io/sitemap.xml

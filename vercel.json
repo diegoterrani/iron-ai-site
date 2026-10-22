@@ -37,10 +37,6 @@
         {
           "key": "Cross-Origin-Resource-Policy",
           "value": "same-origin"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
         }
       ]
     },
@@ -78,7 +74,36 @@
         {
           "key": "Cross-Origin-Resource-Policy",
           "value": "same-origin"
-        },
+        }
+      ]
+    },
+    {
+      "source": "/politica-de-privacidade.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "missing": [
+        {
+          "type": "host",
+          "value": "iron-ai.io"
+        }
+      ],
+      "headers": [
         {
           "key": "X-Robots-Tag",
           "value": "noindex, nofollow"
