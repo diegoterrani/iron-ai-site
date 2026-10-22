@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- CSP desta página = a global + Cloudflare Turnstile (script e iframe). Manter igual à regra de /contato.html em vercel.json. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.googleadservices.com https://www.google.com; style-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.com.br; font-src 'self'; connect-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.com.br https://ad.doubleclick.net; frame-src https://challenges.cloudflare.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Contato — IRON AI</title>
 <meta name="description" content="Agende o diagnóstico da IRON AI. Conte o momento da sua operação. A nossa equipe agenda uma reunião para entender o caso e apresentar as condições.">
@@ -16,6 +16,7 @@
 <link rel="preload" href="fonts/ibm-plex-mono-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="css/site.css">
+<script src="js/consent.js" defer></script>
 <script src="js/site.js" defer></script>
 <script src="js/contato.js" defer></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -221,6 +222,7 @@
         <p class="site-footer__label" id="ft-legal">Legal</p>
         <ul aria-labelledby="ft-legal">
           <li><a href="politica-de-privacidade.html">Política de privacidade</a></li>
+          <li><button class="site-footer__link" type="button" data-consent-open>Preferências de cookies</button></li>
         </ul>
       </div>
     </nav>

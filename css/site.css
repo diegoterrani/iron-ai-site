@@ -966,3 +966,43 @@ html:not(.js) .has-hero-cta .site-header__cta { display: none; }
 .site-nav a { font-weight: 700; }
 .text-link { font-weight: 700; line-height: 1.2; }
 .button, .site-nav .site-nav__cta { line-height: 1.2; }
+
+/* 18. Aviso de cookies (js/consent.js) ----------------------------------------
+   Faixa fixa no canto inferior esquerdo, não modal: não rouba o foco nem trava a
+   rolagem. Fundo modal-bg com hairline, sem sombra (bordas, não sombras). Aceitar
+   e Recusar com o mesmo peso visual (LGPD: recusar tão fácil quanto aceitar). */
+.consent {
+  position: fixed; left: var(--gutter); bottom: var(--space-3); z-index: 60;
+  width: min(440px, calc(100vw - 2 * var(--space-3)));
+  padding: var(--space-3);
+  background: var(--modal-bg);
+  border: 1px solid var(--hairline);
+}
+.consent[hidden] { display: none; }
+.consent__title {
+  margin: 0 0 var(--space-1);
+  font: 600 12px/1.5 var(--font-mono); letter-spacing: .13em; text-transform: uppercase;
+  color: var(--accent-text);
+}
+.consent__text { margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
+.consent__text a { color: var(--link); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.consent__actions { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+.consent__actions .button { flex: 1 1 0; }
+@media (max-width: 640px) {
+  .consent { left: var(--space-3); right: var(--space-3); bottom: var(--space-2); width: auto; }
+}
+
+/* botões com cara de link: "Preferências de cookies" no rodapé e na política */
+.site-footer__link, .text-button {
+  padding: 0; border: 0; background: none; cursor: pointer;
+}
+.site-footer__link {
+  display: inline-flex; align-items: center; min-height: 28px;
+  font: 700 13px/1.4 var(--font-sans); color: var(--muted);
+  transition: color .2s;
+}
+.site-footer__link:hover { color: var(--accent-text); }
+.text-button {
+  font: inherit; color: var(--link);
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+}

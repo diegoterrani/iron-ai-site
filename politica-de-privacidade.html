@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://www.google.com; style-src 'self'; img-src 'self' data: https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.com.br; font-src 'self'; connect-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.com.br https://ad.doubleclick.net; frame-src https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Política de privacidade — IRON AI</title>
 <meta name="description" content="Como a IRON AI trata os dados enviados pelo formulário de contato, conforme a LGPD.">
@@ -15,6 +15,7 @@
 <link rel="preload" href="fonts/ibm-plex-mono-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="css/site.css">
+<script src="js/consent.js" defer></script>
 <script src="js/site.js" defer></script>
 </head>
 <body class="page-inner page-legal">
@@ -47,13 +48,13 @@
     <div class="layer__inner">
       <p class="eyebrow"><span></span>Legal</p>
       <h1 class="page-h1" id="legal-title">Política de <em>privacidade</em>.</h1>
-      <p class="legal__meta">Atualizada em 20 de outubro de 2026</p>
+      <p class="legal__meta">Atualizada em 22 de outubro de 2026</p>
 
       <div class="legal">
         <section class="legal__section" aria-labelledby="pp-quem">
           <h2 id="pp-quem">Quem trata os dados</h2>
           <p>A IRON AI, do grupo IRON Security, é a controladora dos dados enviados por este site. Razão social: <span data-pendente>[a definir]</span>. CNPJ: <span data-pendente>[a definir]</span>. Endereço: <span data-pendente>[a definir]</span>.</p>
-          <p>Esta política vale para o formulário de contato. O site não pede cadastro nem login.</p>
+          <p>Esta política vale para o formulário de contato e para os cookies de publicidade do site. O site não pede cadastro nem login.</p>
         </section>
 
         <section class="legal__section" aria-labelledby="pp-dados">
@@ -90,6 +91,13 @@
             <li><strong>hospedagem do site</strong> (Vercel), por onde o pedido passa.</li>
           </ul>
           <p>Esses fornecedores podem tratar dados fora do Brasil, com as garantias previstas na LGPD (art. 33).</p>
+        </section>
+
+        <section class="legal__section" id="cookies" aria-labelledby="pp-cookies">
+          <h2 id="pp-cookies">Cookies e Google Ads</h2>
+          <p>O site só grava cookies de publicidade se você clicar em <strong>Aceitar</strong> no aviso de cookies. Antes disso, nenhuma tag do Google é carregada.</p>
+          <p>Com o seu aceite, a tag do <strong>Google Ads</strong> (Google LLC) grava cookies próprios (como <code>_gcl_au</code>) e recebe o seu endereço IP, sinais técnicos do navegador e as páginas visitadas, para medirmos quantos contatos vieram dos nossos anúncios e mostrar anúncios a quem já visitou o site. Não enviamos ao Google os dados do formulário.</p>
+          <p>A base legal é o seu <strong>consentimento</strong> (LGPD, art. 7º, I). A sua escolha fica guardada no seu navegador por até 12 meses. Para mudar de ideia a qualquer momento, use <button class="text-button" type="button" data-consent-open>Preferências de cookies</button>, também no rodapé. Ao recusar, apagamos os cookies do Google Ads deste site.</p>
         </section>
 
         <section class="legal__section" aria-labelledby="pp-retencao">
@@ -144,6 +152,7 @@
         <p class="site-footer__label" id="ft-legal">Legal</p>
         <ul aria-labelledby="ft-legal">
           <li><a href="politica-de-privacidade.html" aria-current="page">Política de privacidade</a></li>
+          <li><button class="site-footer__link" type="button" data-consent-open>Preferências de cookies</button></li>
         </ul>
       </div>
     </nav>

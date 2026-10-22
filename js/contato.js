@@ -155,6 +155,8 @@
   }
   function showSuccess() {
     setBusy(false);                    /* botão e aria-busy limpos antes de esconder */
+    /* conversão do Google Ads: só dispara com consentimento e rótulo configurado (consent.js) */
+    try { if (window.IronConsent) window.IronConsent.conversion('contato'); } catch (e) { /* medição nunca quebra o envio */ }
     form.hidden = true;
     success.hidden = false;
     success.focus();
