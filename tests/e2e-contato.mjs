@@ -43,6 +43,12 @@ async function scenario(browser, { status, body, network, viewport = { width: 14
   await page.goto(`${BASE}/contato.html`);
   /* dublê do widget: conta os reset() */
   await page.evaluate(() => { window.__resets = 0; window.turnstile = { reset: () => { window.__resets++; } }; });
+  /* espião da conversão do Google Ads (consent.js): conta as chamadas */
+  await page.evaluate(() => {
+    window.__conv = [];
+    const orig = window.IronConsent.conversion;
+    window.IronConsent.conversion = (n) => { window.__conv.push(n); return orig(n); };
+  });
   await fillValid(page);
   await page.click('[data-submit]');
   await page.getByText('Enviando…').waitFor({ state: 'visible', timeout: 2000 });
@@ -71,6 +77,7 @@ await check('envio 200: formulário some, "Pedido recebido." visível e com foco
   assert.equal(await success.evaluate((el) => el === document.activeElement), true, 'foco não está na mensagem de sucesso');
   assert.equal(await page.getByText('Enviando…').filter({ visible: true }).count(), 0, '"Enviando…" visível');
   assert.equal(await page.locator('[data-submit]').isDisabled(), false);
+  assert.deepEqual(await page.evaluate(() => window.__conv), ['contato'], 'conversão não chamada no sucesso');
   assert.deepEqual(errors, []);
   await page.close();
 });
@@ -101,6 +108,7 @@ async function assertErrorState(page, errors, message) {
   assert.equal(await page.locator('[data-contato-form]').isVisible(), true);
   assert.equal(await page.locator('[data-form-success]').isVisible(), false);
   assert.ok(await page.evaluate(() => window.__resets) >= 1, 'Turnstile não foi reiniciado');
+  assert.deepEqual(await page.evaluate(() => window.__conv), [], 'conversão chamada sem sucesso');
   assert.deepEqual(errors, []);
 }
 

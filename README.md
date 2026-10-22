@@ -7,6 +7,14 @@ Site estático da IRON AI (spin-off de IA do Grupo IRON). HTML/CSS/JS sem build;
 - SEO: `sitemap.xml` (só páginas indexáveis, URLs `https://iron-ai.io`), `robots.txt` apontando para ele e `<link rel="canonical">` em cada página. Ao criar ou alterar uma página, atualize o sitemap (`<lastmod>`); `npm test` confere a coerência (`tests/seo.test.mjs`).
 - Em construção (loop de design): home P1 (topo) fechado, P2 (pilares, esteira, zoom, casos) em correção; P3 e páginas internas pendentes.
 
+## Google Ads e cookies (`js/consent.js`)
+
+Tag do Google Ads `AW-18531760156`, carregada só depois do "Aceitar" no aviso de cookies (LGPD; Consent Mode v2 com tudo negado por padrão e só publicidade concedida no aceite, sem Analytics). Antes do aceite nenhuma requisição vai ao Google. A escolha fica em `localStorage` (`iron-consent`) por 12 meses; "Preferências de cookies" (rodapé e política) reabre o aviso, e Recusar apaga os cookies `_gcl_*`.
+
+- Conversão do formulário: preencha `CONVERSIONS.contato` em `js/consent.js` com o rótulo da ação de conversão (a parte depois de `AW-18531760156/` no `send_to`). Vazio = desligado. `js/contato.js` chama `IronConsent.conversion('contato')` só no envio bem-sucedido, sem dados do formulário.
+- CSP: os hosts do Google Ads (lista da documentação do Google) estão no `vercel.json` **e** na `<meta http-equiv>` de cada página; o navegador aplica as duas. `npm test` (`tests/consent.test.mjs`) confere a coerência.
+- Teste de navegador: `NODE_PATH="$(npm root -g)" npm run test:e2e:consent` (sobe o próprio servidor com os cabeçalhos do `vercel.json` e simula o Google).
+
 ## Formulário de contato (`/api/contato`)
 
 `contato.html` envia JSON para a função serverless `api/contato.js` (Node 20, sem dependências), que valida os campos, confere o Cloudflare Turnstile no servidor e envia o pedido por e-mail via Resend. A lógica pura fica em `api/_lib/contato-core.js`; testes com `npm test` (`node --test`).
