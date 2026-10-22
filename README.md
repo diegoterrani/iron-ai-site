@@ -3,7 +3,8 @@
 Site estático da IRON AI (spin-off de IA do Grupo IRON). HTML/CSS/JS sem build; GSAP + ScrollTrigger e Lenis vendorizados em `vendor/`, fontes self-hosted em `fonts/` (OFL).
 
 - Deploy: Vercel (projeto `iron-ai`, time Iron Security), saída estática da raiz.
-- Cabeçalhos de segurança em `vercel.json`: CSP restrita (`'self'` apenas), HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer/Permissions-Policy, COOP/CORP e `X-Robots-Tag: noindex` enquanto o site estiver em construção.
+- Cabeçalhos de segurança em `vercel.json`: CSP restrita (`'self'` apenas), HSTS, `X-Frame-Options: DENY`, `nosniff`, Referrer/Permissions-Policy, COOP/CORP. `X-Robots-Tag: noindex` só em `/politica-de-privacidade.html` (até sair dos campos `[a definir]`), em `/api/` e em qualquer host que não seja `iron-ai.io` (ex.: `*.vercel.app`).
+- SEO: `sitemap.xml` (só páginas indexáveis, URLs `https://iron-ai.io`), `robots.txt` apontando para ele e `<link rel="canonical">` em cada página. Ao criar ou alterar uma página, atualize o sitemap (`<lastmod>`); `npm test` confere a coerência (`tests/seo.test.mjs`).
 - Em construção (loop de design): home P1 (topo) fechado, P2 (pilares, esteira, zoom, casos) em correção; P3 e páginas internas pendentes.
 
 ## Formulário de contato (`/api/contato`)

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Páginas indexáveis de https://iron-ai.io. Mantenha em sincronia com vercel.json
+     (páginas com noindex não entram aqui) e atualize <lastmod> quando o conteúdo mudar.
+     Verificado por tests/seo.test.mjs. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://iron-ai.io/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://iron-ai.io/esteira.html</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://iron-ai.io/casos-de-uso.html</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://iron-ai.io/contato.html</loc>
+    <lastmod>2026-10-20</lastmod>
+  </url>
+</urlset>
