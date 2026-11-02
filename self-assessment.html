@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Self assessment de IA — IRON AI</title>
+<meta name="description" content="Em cerca de 12 minutos, veja o score de sucesso da IA na sua empresa, o retorno anual conservador em R$ e o mapa dos seus dados.">
+<link rel="canonical" href="https://iron-ai.io/self-assessment.html">
+<meta name="theme-color" content="#faf9f5">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/manrope-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/manrope-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ibm-plex-mono-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="vendor/lenis.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/esteira.css">
+<link rel="stylesheet" href="css/assessments.css">
+<script src="vendor/gsap.min.js" defer></script>
+<script src="vendor/ScrollTrigger.min.js" defer></script>
+<script src="vendor/lenis.min.js" defer></script>
+<script src="js/site.js" defer></script>
+<script src="js/esteira.js" defer></script>
+</head>
+<body class="page-inner page-esteira page-assess page-self has-hero-cta">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="site-header" data-header>
+  <div class="site-header__inner">
+    <a class="brand" href="index.html" aria-label="IRON AI, página inicial"><img src="img/logo-lockup.svg" alt="" width="147" height="44"></a>
+    <!-- botão antes da nav no DOM: aberto o menu, o próximo Tab entra nos itens; a posição visual vem de order -->
+    <button class="site-header__menu" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Abrir menu" data-menu-toggle>
+      <svg class="ico ico-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="ico ico-x" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <nav class="site-nav" id="site-nav" aria-label="Principal">
+      <a href="esteira.html">Esteira</a>
+      <a href="casos-de-uso.html">Casos de uso</a>
+      <a href="contato.html">Contato</a>
+      <a class="button button-primary site-nav__cta" href="https://app.iron-ai.io/cadastro">Criar conta
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+      </a>
+    </nav>
+    <a class="button button-primary site-header__cta" href="https://app.iron-ai.io/cadastro">Criar conta
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+    </a>
+  </div>
+</header>
+
+<main id="conteudo">
+
+  <!-- 1. Topo: o CTA do hero é o único botão primário da vista (esteira.js esconde o do header) -->
+  <section class="page-intro es-hero" aria-labelledby="hero-title">
+    <div class="layer__inner">
+      <p class="eyebrow"><span></span>Self assessment · Etapa 01</p>
+      <h1 class="page-h1" id="hero-title">Saiba onde a IA <em>paga a conta</em>.</h1>
+      <p class="section-lead">Em cerca de 12 minutos, 16 perguntas mostram o score de sucesso, o retorno anual conservador em R$ e o mapa dos seus dados.</p>
+      <div class="es-hero__actions">
+        <a class="button button-primary" href="https://app.iron-ai.io/cadastro" data-view-cta>Criar conta
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+        <a class="text-link" href="https://app.iron-ai.io/entrar">Já tem conta? Entrar <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Como funciona: linha 01 -> 03 que se preenche ao entrar (esteira.js) -->
+  <section class="page-section es-overview" id="como-funciona" aria-labelledby="como-funciona-title">
+    <div class="layer__inner">
+      <p class="eyebrow" data-reveal><span></span>Como funciona</p>
+      <h2 class="section-h2" id="como-funciona-title" data-reveal>Três passos até o <i>relatório</i>.</h2>
+      <p class="section-lead" data-reveal>Crie a conta, responda sobre a operação e receba o relatório.</p>
+      <ol class="es-line es-line--3" data-line aria-label="Criar a conta, responder, receber o relatório">
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">01</span><span class="es-line__verb">Criar a conta</span></span><span class="as-line__desc">Cadastro na área do cliente, com acesso aprovado pela equipe IRON AI.</span></li>
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">02</span><span class="es-line__verb">Responder</span></span><span class="as-line__desc">Sete blocos sobre a operação, salvos a cada resposta.</span></li>
+        <li class="es-line__item"><span class="es-line__step"><span class="es-line__num">03</span><span class="es-line__verb">Receber o relatório</span></span><span class="as-line__desc">Resultado ao terminar, para ler, imprimir e levar ao board.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 3. O que você recebe: palco preso no desktop, a rolagem troca o resultado ativo (esteira.js) -->
+  <section class="page-section es-steps" id="resultado" aria-labelledby="resultado-title">
+    <div class="layer__inner">
+      <p class="eyebrow" data-reveal><span></span>O resultado</p>
+      <h2 class="section-h2" id="resultado-title" data-reveal>Três números para <i>decidir com calma</i>.</h2>
+      <p class="section-lead" data-reveal>Os números saem de um motor de cálculo fixo e auditável, nunca de um palpite da IA.</p>
+      <div class="es-stage" data-stage>
+        <nav class="es-index" aria-label="Resultados do Self assessment" data-index>
+          <span class="es-index__rail" aria-hidden="true"><span class="es-index__fill" data-index-fill></span></span>
+          <ol>
+            <li><a href="#etapa-01" data-index-link><span class="es-index__num">01</span><span class="es-index__name">Score de sucesso</span></a></li>
+            <li><a href="#etapa-02" data-index-link><span class="es-index__num">02</span><span class="es-index__name">Retorno conservador</span></a></li>
+            <li><a href="#etapa-03" data-index-link><span class="es-index__num">03</span><span class="es-index__name">Mapa de dados</span></a></li>
+          </ol>
+        </nav>
+        <div class="es-mini" data-mini hidden>
+          <p class="es-mini__label" aria-live="polite"><span class="es-mini__num" data-mini-num>01</span> / 03<span class="visually-hidden"> · <span data-mini-name>Score de sucesso</span></span></p>
+          <span class="es-mini__bar" aria-hidden="true"><span class="es-mini__fill" data-mini-fill></span></span>
+        </div>
+        <ol class="es-panels" data-panels>
+          <li class="es-panel" id="etapa-01" data-panel>
+            <p class="es-panel__index"><span>01</span> / 03</p>
+            <div class="es-panel__visual es-panel__visual--manilla" aria-hidden="true">
+              <svg class="es-svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+                <rect class="ev-paper" x="44" y="56" width="176" height="188"/>
+                <rect class="ev-band" x="62" y="80" width="120" height="8"/><rect class="ev-white" x="62" y="80" width="96" height="8"/>
+                <rect class="ev-band" x="62" y="108" width="120" height="8"/><rect class="ev-white" x="62" y="108" width="70" height="8"/>
+                <rect class="ev-band" x="62" y="136" width="120" height="8"/><rect class="ev-white" x="62" y="136" width="110" height="8"/>
+                <rect class="ev-band" x="62" y="164" width="120" height="8"/><rect class="ev-clay" x="62" y="164" width="34" height="8"/>
+                <rect class="ev-band" x="62" y="192" width="120" height="8"/><rect class="ev-white" x="62" y="192" width="82" height="8"/>
+                <rect class="ev-white" x="262" y="104" width="92" height="92"/>
+                <path class="ev-line" d="M280 178h56M280 166h36"/>
+                <rect class="ev-band" x="280" y="122" width="40" height="22"/>
+              </svg>
+            </div>
+            <div class="es-panel__body">
+              <h3 class="es-panel__name">Score de sucesso</h3>
+              <dl class="es-fields">
+                <div class="es-field"><dt>O que é</dt><dd>Um índice de 0 a 100% de quão pronta a empresa está para implantar IA, com nota por área.</dd></div>
+                <div class="es-field"><dt>Como lemos</dt><dd>Mostra o que mais segura o resultado hoje: estratégia, dados, pessoas ou governança.</dd></div>
+                <div class="es-field es-field--decision"><dt>Para que serve</dt><dd>Saber se vale aprofundar e por onde começar.</dd></div>
+              </dl>
+            </div>
+          </li>
+          <li class="es-panel" id="etapa-02" data-panel>
+            <p class="es-panel__index"><span>02</span> / 03</p>
+            <div class="es-panel__visual es-panel__visual--oat" aria-hidden="true">
+              <svg class="es-svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+                <path class="ev-line" d="M56 244h288"/>
+                <rect class="ev-paper" x="76" y="176" width="40" height="68"/>
+                <rect class="ev-paper" x="136" y="148" width="40" height="96"/>
+                <rect class="ev-paper" x="196" y="120" width="40" height="124"/>
+                <rect class="ev-white" x="256" y="92" width="40" height="152"/>
+                <path class="ev-line ev-dash" d="M64 196l72-22 60-22 60-24 60-18"/>
+                <rect class="ev-clay" x="311" y="105" width="10" height="10"/>
+                <rect class="ev-band" x="76" y="64" width="72" height="4"/><rect class="ev-band" x="76" y="74" width="44" height="4"/>
+              </svg>
+            </div>
+            <div class="es-panel__body">
+              <h3 class="es-panel__name">Retorno conservador</h3>
+              <dl class="es-fields">
+                <div class="es-field"><dt>O que é</dt><dd>O ganho anual estimado em R$, calculado sempre por baixo.</dd></div>
+                <div class="es-field"><dt>Como lemos</dt><dd>Parte do esforço de cada área e do porte da operação, e desconta o risco do score.</dd></div>
+                <div class="es-field es-field--decision"><dt>Para que serve</dt><dd>Levar ao board uma ordem de grandeza honesta, antes de qualquer investimento.</dd></div>
+              </dl>
+            </div>
+          </li>
+          <li class="es-panel" id="etapa-03" data-panel>
+            <p class="es-panel__index"><span>03</span> / 03</p>
+            <div class="es-panel__visual es-panel__visual--kraft" aria-hidden="true">
+              <svg class="es-svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+                <rect class="ev-paper" x="60" y="70" width="44" height="44"/>
+                <rect class="ev-paper" x="60" y="186" width="44" height="44"/>
+                <rect class="ev-white" x="178" y="128" width="44" height="44"/>
+                <rect class="ev-paper" x="296" y="70" width="44" height="44"/>
+                <path class="ev-line" d="M104 92h40v58h34M104 208h40v-58M222 150h40V92h34"/>
+                <path class="ev-line ev-dash" d="M262 150v58h34"/>
+                <rect class="ev-box" x="296.75" y="186.75" width="42.5" height="42.5" fill="none"/>
+                <rect class="ev-clay" x="313" y="203" width="10" height="10"/>
+              </svg>
+            </div>
+            <div class="es-panel__body">
+              <h3 class="es-panel__name">Mapa de dados</h3>
+              <dl class="es-fields">
+                <div class="es-field"><dt>O que é</dt><dd>As fontes de dados que a sua empresa já tem e as que faltam.</dd></div>
+                <div class="es-field"><dt>Como lemos</dt><dd>Cada fonte ausente vira uma iniciativa, que a IA pode ajudar a criar.</dd></div>
+                <div class="es-field es-field--decision"><dt>Para que serve</dt><dd>Saber o que preparar antes do Deep dive.</dd></div>
+              </dl>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Privacidade das respostas -->
+  <section class="page-section es-security" id="privacidade" aria-labelledby="privacidade-title">
+    <div class="layer__inner">
+      <p class="eyebrow" data-reveal><span></span>Privacidade</p>
+      <h2 class="section-h2" id="privacidade-title" data-reveal>Suas respostas <i>ficam com você</i>.</h2>
+      <p class="section-lead" data-reveal>O Self assessment pede números da operação, não dados de pessoas.</p>
+      <ul class="es-grid es-grid--3">
+        <li class="es-card" data-reveal-item>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <h3>Só quem você autoriza</h3>
+          <p>Só você vê as respostas e, se responder pela empresa, quem ela autorizar.</p>
+        </li>
+        <li class="es-card" data-reveal-item>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <h3>Sem dados pessoais</h3>
+          <p>Não pedimos dados de clientes nem de funcionários.</p>
+        </li>
+        <li class="es-card" data-reveal-item>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+          <h3>LGPD na origem</h3>
+          <p>Tratamento conforme a LGPD, com a segurança herdada da IRON Security.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. Ponte para o Deep dive -->
+  <section class="page-section as-next" id="proximo" aria-labelledby="proximo-title">
+    <div class="layer__inner">
+      <p class="eyebrow" data-reveal><span></span>Depois do Self</p>
+      <h2 class="section-h2" id="proximo-title" data-reveal>O score mostra onde. <i>O Deep dive, como</i>.</h2>
+      <p class="section-lead" data-reveal>Se o resultado valer a pena, a etapa 03 usa os seus dados reais para montar o roadmap de implantação.</p>
+      <p class="as-next__link" data-reveal><a class="text-link" href="deep-dive.html">Conhecer o Deep dive <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a></p>
+    </div>
+  </section>
+
+  <!-- 6. Perguntas: <details>/<summary> nativo -->
+  <section class="page-section es-faq" id="perguntas" aria-labelledby="perguntas-title">
+    <div class="layer__inner">
+      <p class="eyebrow" data-reveal><span></span>Perguntas</p>
+      <h2 class="section-h2" id="perguntas-title" data-reveal>O que os <i>executivos</i> perguntam.</h2>
+      <div class="es-faq__list">
+        <details class="es-q" data-reveal-item>
+          <summary><span>Quem deve responder?</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+          <p>Um executivo que conheça a operação: o dono, o CEO ou quem dirige finanças ou operações.</p>
+        </details>
+        <details class="es-q" data-reveal-item>
+          <summary><span>Preciso de dados em mãos?</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+          <p>Não. As perguntas pedem números aproximados, como faturamento e pessoas por área.</p>
+        </details>
+        <details class="es-q" data-reveal-item>
+          <summary><span>Serve para empresa pequena?</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+          <p>Sim. O questionário se ajusta ao porte e ao setor da empresa.</p>
+        </details>
+        <details class="es-q" data-reveal-item>
+          <summary><span>Que setores estão prontos?</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+          <p>O primeiro pacote setorial é food service; para outros setores, fale com a equipe.</p>
+          <p class="es-q__more"><a class="text-link" href="contato.html">Falar com a equipe <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a></p>
+        </details>
+        <details class="es-q" data-reveal-item>
+          <summary><span>Quanto custa?</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></summary>
+          <p>As condições dependem da operação e são apresentadas na aprovação do acesso.</p>
+          <p class="es-q__more"><a class="text-link" href="contato.html">Condições: fale com a IRON AI <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a></p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CTA final em faixa band -->
+  <section class="es-final" aria-labelledby="final-title">
+    <div class="es-final__inner">
+      <p class="eyebrow es-final__eyebrow" data-reveal><span></span>Próximo passo</p>
+      <h2 class="es-final__title" id="final-title" data-reveal>Comece pelo <i>seu número</i>.</h2>
+      <p class="es-final__text" data-reveal>Crie a conta e a equipe IRON AI libera o seu acesso.</p>
+      <a class="button button-primary" href="https://app.iron-ai.io/cadastro" data-view-cta data-reveal>Criar conta
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- Rodapé compartilhado (barra: mecanismo 5) -->
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <nav class="site-footer__cols" aria-label="Rodapé">
+      <div class="site-footer__col">
+        <p class="site-footer__label" id="ft-ironai">IRON AI</p>
+        <ul aria-labelledby="ft-ironai">
+          <li><a href="esteira.html">Esteira</a></li>
+          <li><a href="self-assessment.html" aria-current="page">Self assessment</a></li>
+          <li><a href="deep-dive.html">Deep dive</a></li>
+          <li><a href="casos-de-uso.html">Casos de uso</a></li>
+          <li><a href="contato.html">Contato</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__col">
+        <p class="site-footer__label" id="ft-grupo">Grupo IRON</p>
+        <ul aria-labelledby="ft-grupo">
+          <li><a href="https://iron-security.com" rel="noopener">IRON Security</a></li>
+          <li><a href="https://check.iron-security.com" rel="noopener">Domain Check</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__col">
+        <p class="site-footer__label" id="ft-legal">Legal</p>
+        <ul aria-labelledby="ft-legal">
+          <li><a href="politica-de-privacidade.html">Política de privacidade</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div class="site-footer__base">
+      <span class="wordmark" aria-hidden="true">IRON <b>AI</b></span>
+      <p>© 2026 IRON AI, do grupo IRON Security.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

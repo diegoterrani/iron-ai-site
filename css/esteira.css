@@ -323,3 +323,7 @@ html.es-tracked { scroll-padding-top: calc(var(--header-h) + 48px + var(--space-
 @media (prefers-reduced-motion: reduce) {
   .es-q summary, .es-index a { transition: none; }
 }
+
+/* Etapas com página própria (01 Self assessment, 03 Deep dive): o link para a
+   página vem antes do "Condições", que segue fechando todas as etapas. */
+.es-panel__more { display: flex; flex-wrap: wrap; gap: 12px 28px; }

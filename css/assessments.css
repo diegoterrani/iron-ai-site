@@ -1,0 +1,38 @@
+/* =========================================================================
+   IRON AI — assessments.css (self-assessment.html e deep-dive.html)
+   As duas páginas usam a estrutura aprovada de esteira.html (esteira.css +
+   esteira.js): topo, linha que se preenche, palco preso com painéis que
+   cobrem o anterior, grade de hairlines, perguntas e CTA final em band.
+   Aqui ficam só as variações. Só tokens; quadrado; bordas em vez de sombras.
+   ========================================================================= */
+
+/* Ritmo de fundos: paper (topo) · soft (como funciona / diferença) · paper
+   (resultado / entrega) · soft (privacidade / segurança) · paper (próximo,
+   perguntas) · band (CTA final) — o mesmo da esteira. */
+
+/* Linha do tempo com 3 passos (Self): mesma linha da esteira, menos colunas,
+   com uma frase de apoio por passo (a informação fica só aqui). */
+.es-line--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.es-line--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.as-line__desc {
+  display: block; max-width: 22em; margin-top: 12px;
+  font-size: 15px; line-height: 1.7; color: var(--muted);
+}
+
+/* Grade de 2 colunas (Deep: Self × Deep dive) */
+.es-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: calc(var(--page-max) * 2 / 3); }
+.es-overview .es-card { background: var(--paper); }
+/* cartão sem ícone: o título abre o cartão */
+.es-card > h3:first-child { margin-top: 0; }
+
+/* Ponte para o Deep dive (Self): só título, apoio e um link */
+.as-next__link { margin-top: var(--space-4); }
+
+@media (max-width: 980px) {
+  .es-line--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-4); }
+}
+@media (max-width: 640px) {
+  .es-line--3, .es-line--4 { grid-template-columns: minmax(0, 1fr); }
+  .as-line__desc { margin: -6px 0 18px; }
+  .es-grid--2 { grid-template-columns: minmax(0, 1fr); }
+}
