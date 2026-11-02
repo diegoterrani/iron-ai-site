@@ -549,6 +549,8 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .stack__intro { padding-right: 32px; }
 .stack__name { margin: 0 0 13px; font-family: var(--font-serif); font-size: 30px; font-weight: 400; line-height: 1.2; letter-spacing: -.015em; color: var(--text); }
 .stack__what { margin: 0; max-width: 24em; font-size: 14px; line-height: 1.65; color: var(--muted); }
+/* etapas com página própria (01 e 03): link para a página logo abaixo da entrega */
+.stack__link { margin: 12px 0 0; }
 .stack__price {
   margin: 0; padding-top: 18px; border-top: 1px solid var(--line);
   font-size: 20px; font-weight: 600; line-height: 1.35; letter-spacing: -.025em; color: var(--text);

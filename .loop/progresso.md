@@ -20,3 +20,16 @@ Herdado para a parte A: na home a 390 o CTA do hero precisa ser o único (menu j
 - Briefing: links para esteira.html e casos-de-uso.html dão 404 — resolvido pelas partes B e C, não pela D. Ressalva: foco cai no body após erro de envio.
 - Sistema: logo SVG com símbolo no header contraria o DS ("não desenhe símbolo provisório"), mas veio de commits do cliente posteriores ao DS → decisão do cliente. Secundário: h2 da política sem eyebrow.
 - Visual: X (referência) melhor em hierarquia; Y limpo porém monótono.
+
+## Parte E. Landings dos assessments (02/11/2026)
+Pedido do Terrani: landing do Self assessment e do Deep dive (roadmap), integradas à Home e à esteira; CTA = cadastro do app (https://app.iron-ai.io/cadastro). Mesma estrutura aprovada da esteira (esteira.css/js) + css/assessments.css. Barra: bar.md vigente (referência visual = esteira.html aprovada).
+
+| Rodada | Briefing | Sistema | Visual | Maior lacuna |
+| --- | --- | --- | --- | --- |
+| R1 | APROVADO | REPROVADO | APROVADO | Etapas 01 e 03 perderam o "Condições: fale com a IRON AI" (decisão de 20/10); descrições com duas frases |
+| R2 | – | REPROVADO | – | Link sublinhado sem seta no CTA final; três descrições com duas frases |
+| R3 | (R1) | APROVADO | (R1) | – (R2–R3 só texto e remoção da nota do CTA final) |
+
+**Parte E APROVADA** em 3 rodadas.
+
+Ressalvas abertas (aprovadas, não bloqueiam): home sem rodapé e sem CTA final (parte A); seção "Depois do Self" rala; grade de 2 cards no Deep deixa o terço direito vazio.
