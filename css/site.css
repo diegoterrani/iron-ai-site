@@ -145,6 +145,14 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 /* item da página atual: accent-text (5,26:1 sobre band) */
 .site-nav a[aria-current="page"], .site-footer li a[aria-current="page"] { color: var(--accent-text); }
 .site-header__cta { min-height: 42px; padding: 0 18px; }
+/* "Entrar" leva à área do cliente (app.iron-ai.io): contorno discreto, como .button-small,
+   para não competir com o CTA primário */
+.site-nav .site-nav__login {
+  display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px;
+  color: var(--text); border: 1px solid var(--button-dark-border); border-radius: var(--radius-none);
+  transition: background-color .2s, color .2s;
+}
+.site-nav .site-nav__login:hover, .site-nav .site-nav__login:focus-visible { background: var(--surface); color: var(--text); }
 /* CTA dentro da nav: só no menu aberto abaixo de 640px (seção 9) */
 .site-nav .site-nav__cta { display: none; }
 /* botão de menu: alvo de 44 x 44 que não encolhe, contorno como .button-small */
@@ -363,12 +371,10 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 @media (max-width: 980px) {
   .site-nav { gap: 24px; }
 }
-/* com o item Assessment, a barra ainda cabe inteira até 761px */
-@media (max-width: 860px) {
-  .site-nav { gap: 18px; }
-}
-
-@media (max-width: 760px) {
+/* Breakpoint do menu: 900px. Com "Entrar" na barra, logo + 5 itens + CTA cabem
+   inteiros a partir de 901px; abaixo disso a nav vai para o menu (site.js usa o
+   mesmo valor). */
+@media (max-width: 900px) {
   .site-header__inner { gap: 12px; }
   /* o logo empurra o resto para a direita: vale com ou sem o CTA na barra */
   .site-header__inner > .brand { margin-right: auto; }
@@ -380,6 +386,7 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
   }
   /* menu aberto: ui 13px/700 em nav-text, como no desktop; área de toque >= 48px */
   .site-nav a { display: flex; align-items: center; min-height: 48px; padding: 0; border-bottom: 1px solid var(--line); }
+  .site-nav .site-nav__login { min-height: 48px; padding: 0; border: 0; border-bottom: 1px solid var(--line); }
   .site-header.nav-open .site-nav { display: flex; }
   /* menu aberto: painel que cobre toda a tela abaixo do header, com rolagem própria;
      a página fica travada (site.js: html.nav-locked, Lenis parado, main/footer inert) */
@@ -933,11 +940,11 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 
 /* 15. Menu sem JS (aprimoramento progressivo; todas as páginas) ----------------
    site.js põe .js no <html> ao iniciar. Sem .js, abaixo do breakpoint do menu
-   (760px), o botão de menu (que não abriria) some e a nav vira uma linha de links
+   (900px), o botão de menu (que não abriria) some e a nav vira uma linha de links
    sob a barra do logo, com alvo de 44px; o header deixa de ser fixo e passa a
    ocupar o próprio espaço no fluxo. O CTA da nav (menu aberto) não aparece: no
-   641–760 o botão do header continua na barra. Com .js nada muda. */
-@media (max-width: 760px) {
+   641–900 o botão do header continua na barra. Com .js nada muda. */
+@media (max-width: 900px) {
   html:not(.js) .site-header { position: relative; height: auto; transform: none; }
   html:not(.js) .site-header__inner { flex-wrap: wrap; row-gap: 0; height: auto; }
   html:not(.js) .site-header__inner > .brand { min-height: var(--header-h); }

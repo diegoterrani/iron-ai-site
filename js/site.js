@@ -135,7 +135,7 @@
     var toggle = headerEl.querySelector('[data-menu-toggle]');
     var navEl = headerEl.querySelector('.site-nav');
     if (toggle && navEl) {
-      /* Menu aberto (<= 760px): painel que cobre a tela abaixo do header (CSS),
+      /* Menu aberto (<= 900px): painel que cobre a tela abaixo do header (CSS),
          página travada (overflow + Lenis parado + guarda de roda que vem antes
          das guardas do hero), conteúdo de trás inerte e foco preso no header. */
       var menuOpen = false;
@@ -190,7 +190,7 @@
         a.addEventListener('click', function () { setOpen(false); });
       });
       /* a tela passou a mostrar a nav inteira: fecha o painel e destrava */
-      var mqMenu = window.matchMedia('(max-width: 760px)');
+      var mqMenu = window.matchMedia('(max-width: 900px)');
       var onMenuMq = function () { if (!mqMenu.matches && menuOpen) setOpen(false); };
       if (mqMenu.addEventListener) mqMenu.addEventListener('change', onMenuMq);
       else if (mqMenu.addListener) mqMenu.addListener(onMenuMq);
