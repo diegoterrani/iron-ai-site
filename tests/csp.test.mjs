@@ -75,3 +75,12 @@ test('autoplay do vídeo: só mudo, respeita movimento reduzido e só fala com a
   assert.match(js, /if \(reduced \|\| !\('IntersectionObserver' in window\)\) return;/);
   assert.match(js, /postMessage\([^)]*\), ORIGIN\)/, 'postMessage sem "*"');
 });
+
+test('volume do vídeo: 15%, som só depois de gesto e mensagens do player validadas', () => {
+  const js = read('js/video.js');
+  assert.match(js, /var VOLUME = 15;/);
+  assert.match(js, /command\('setVolume', \[VOLUME\]\)/);
+  assert.match(js, /if \(wantSound\) command\('unMute'\)/);
+  assert.match(js, /ev\.origin !== ORIGIN \|\| ev\.source !== frame\.contentWindow/);
+  assert.match(js, /try \{ data = JSON\.parse\(ev\.data\); \} catch/);
+});
