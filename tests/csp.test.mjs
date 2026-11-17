@@ -84,3 +84,11 @@ test('volume do vídeo: 15%, som só depois de gesto e mensagens do player valid
   assert.match(js, /ev\.origin !== ORIGIN \|\| ev\.source !== frame\.contentWindow/);
   assert.match(js, /try \{ data = JSON\.parse\(ev\.data\); \} catch/);
 });
+
+test('som no toque: gestos de ativação válidos (sem pointerdown) e saída só após muted=false', () => {
+  const js = read('js/video.js').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(js, /GESTURES = \['keydown', 'mousedown', 'pointerup', 'touchend', 'click'\]/);
+  assert.doesNotMatch(js, /'pointerdown'/);
+  assert.match(js, /data\.info\.muted === false\) stopGestures\(\)/);
+  assert.doesNotMatch(js, /allowFullscreen/, 'fullscreen já vem no atributo allow');
+});

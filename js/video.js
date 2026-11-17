@@ -11,6 +11,10 @@
    navegador não deixa um vídeo começar com som sem um gesto do visitante
    (rolar não conta), o som liga no primeiro clique, toque ou tecla na página
    enquanto o vídeo estiver tocando — já em 15%.
+   Gestos que o navegador aceita como ativação: keydown, mousedown, pointerup
+   (toque e caneta), touchend e click. pointerdown NÃO conta para toque, por
+   isso não é usado. Os ouvintes só saem quando o player confirma muted=false
+   (infoDelivery); até lá, cada novo gesto tenta de novo.
    Movimento reduzido (prefers-reduced-motion) ou sem IntersectionObserver:
    nada começa sozinho, só no clique. Sem JS, a capa é um link para o YouTube.
    Segurança: id aceito só no formato do YouTube (11 caracteres
@@ -50,6 +54,7 @@
     var observer = null;
     var ready = false;        // o player respondeu ao "listening" (onReady/initialDelivery)
     var wantSound = false;    // houve gesto do visitante: tirar o mudo assim que possível
+    var GESTURES = ['keydown', 'mousedown', 'pointerup', 'touchend', 'click'];
 
     function command(func, args) {
       if (!frame || !frame.contentWindow) return;
@@ -72,16 +77,20 @@
         ready = true;
         applyAudio();
       }
+      // o player confirmou o som ligado: não precisa mais ouvir gestos
+      if (data.info && data.info.muted === false) stopGestures();
     });
 
     // primeiro gesto na página com o player montado: liga o som (em VOLUME)
     function onGesture() {
-      if (!frame || wantSound) return;
+      if (!frame) return;
       wantSound = true;
-      applyAudio();
-      ['pointerdown', 'keydown'].forEach(function (t) { document.removeEventListener(t, onGesture, true); });
+      applyAudio();   // repete a cada gesto até o player confirmar (stopGestures)
     }
-    ['pointerdown', 'keydown'].forEach(function (t) { document.addEventListener(t, onGesture, true); });
+    function stopGestures() {
+      GESTURES.forEach(function (t) { document.removeEventListener(t, onGesture, true); });
+    }
+    GESTURES.forEach(function (t) { document.addEventListener(t, onGesture, true); });
 
     function load(muted, focus) {
       if (frame) return;
@@ -90,7 +99,6 @@
       frame.src = embedUrl(id, muted);
       frame.title = 'Vídeo da IRON AI no YouTube';
       frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
-      frame.allowFullscreen = true;
       frame.referrerPolicy = 'strict-origin-when-cross-origin';
       if (!muted) wantSound = true;   // clique na capa já é o gesto
       // a IFrame API só responde depois do "listening"; repete até o player responder
