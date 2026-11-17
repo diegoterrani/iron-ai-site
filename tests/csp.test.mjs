@@ -57,3 +57,12 @@ test('video.js monta o iframe sem innerHTML e só no domínio sem cookies', () =
   assert.match(js, /https:\/\/www\.youtube-nocookie\.com/);
   assert.doesNotMatch(js, /https:\/\/www\.youtube\.com/);
 });
+
+test('a CSP do <meta> de cada página tem o mesmo frame-src do header (as duas valem juntas)', () => {
+  for (const f of pages) {
+    const meta = read(f).match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/);
+    if (!meta) continue;
+    const header = cspFor(f === 'index.html' ? '/' : `/${f}`);
+    assert.equal(directive(meta[1], 'frame-src'), directive(header, 'frame-src'), `frame-src divergente em ${f}`);
+  }
+});
