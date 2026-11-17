@@ -362,6 +362,45 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .datum__label { margin-top: 25px; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--text); }
 .datum figcaption { margin-top: 6px; font: 400 12px/1.5 var(--font-sans); letter-spacing: normal; text-transform: none; color: var(--subtle); }
 
+/* Vídeo ao lado dos dados (terceira coluna da StatGrid). Capa local em ink, cantos
+   retos e sem sombra; o player (iframe youtube-nocookie, js/video.js) só entra no
+   lugar da capa depois do clique. Proporção 16:9; a linha da grade acompanha. */
+.manifesto__data:has(.video-embed) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.6fr);
+  max-width: var(--page-max);
+}
+.video-embed {
+  position: relative; align-self: stretch;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  background: var(--ink);
+}
+.video-embed__cover, .video-embed__frame {
+  display: flex; width: 100%; height: 100%; min-height: 0; aspect-ratio: 16 / 9;
+}
+.video-embed__cover {
+  flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 6px;
+  padding: 23px 18px; color: var(--paper);
+}
+.video-embed__play {
+  display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: auto;
+  background: var(--accent); color: var(--paper);
+  transition: transform .2s, background-color .2s;
+}
+.video-embed__play .ico { width: 22px; height: 22px; }
+.video-embed__play .ico path { fill: currentColor; stroke: none; }
+.video-embed__cover:hover .video-embed__play,
+.video-embed__cover:focus-visible .video-embed__play { background: var(--clay); transform: translateY(-2px); }
+.video-embed__cover:focus-visible { outline-offset: -4px; outline-color: var(--paper); }
+.video-embed__label { font: 700 13px/1.5 var(--font-sans); }
+.video-embed__note { font: 400 12px/1.5 var(--font-sans); color: var(--faint); }
+.video-embed__frame { border: 0; }
+
+/* abaixo de 900 px: os dois dados lado a lado e o vídeo em largura cheia embaixo */
+@media (max-width: 900px) {
+  .manifesto__data:has(.video-embed) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .video-embed { grid-column: 1 / -1; }
+}
+
 /* 8. Marcador das próximas partes ---------------------------------------- */
 /* sem conteúdo nesta parte: altura 0, ou só o necessário para a leitura do manifesto
    terminar antes do fim da página (home.js) */
