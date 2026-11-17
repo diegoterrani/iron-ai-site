@@ -7,6 +7,10 @@
    - no clique na capa: começa com som (o clique é o gesto do visitante).
    Ao sair da tela o vídeo pausa; ao voltar, retoma (comandos postMessage da
    IFrame API, com enablejsapi=1 e origin desta página).
+   Volume: o player é ajustado para VOLUME (15%) assim que fica pronto. Como o
+   navegador não deixa um vídeo começar com som sem um gesto do visitante
+   (rolar não conta), o som liga no primeiro clique, toque ou tecla na página
+   enquanto o vídeo estiver tocando — já em 15%.
    Movimento reduzido (prefers-reduced-motion) ou sem IntersectionObserver:
    nada começa sozinho, só no clique. Sem JS, a capa é um link para o YouTube.
    Segurança: id aceito só no formato do YouTube (11 caracteres
@@ -18,6 +22,7 @@
 
   var ID_RE = /^[A-Za-z0-9_-]{11}$/;
   var ORIGIN = 'https://www.youtube-nocookie.com';
+  var VOLUME = 15;   // 0-100, IFrame API setVolume
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function embedUrl(id, muted) {
@@ -43,11 +48,40 @@
 
     var frame = null;
     var observer = null;
+    var ready = false;        // o player respondeu ao "listening" (onReady/initialDelivery)
+    var wantSound = false;    // houve gesto do visitante: tirar o mudo assim que possível
 
-    function command(func) {
+    function command(func, args) {
       if (!frame || !frame.contentWindow) return;
-      frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: func, args: [] }), ORIGIN);
+      frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: func, args: args || [] }), ORIGIN);
     }
+
+    function applyAudio() {
+      if (!ready) return;
+      command('setVolume', [VOLUME]);
+      if (wantSound) command('unMute');
+    }
+
+    // respostas do player: só da origem do YouTube e só deste iframe
+    window.addEventListener('message', function (ev) {
+      if (!frame || ev.origin !== ORIGIN || ev.source !== frame.contentWindow) return;
+      var data;
+      try { data = JSON.parse(ev.data); } catch (err) { return; }
+      if (!data || typeof data.event !== 'string') return;
+      if (!ready && (data.event === 'onReady' || data.event === 'initialDelivery')) {
+        ready = true;
+        applyAudio();
+      }
+    });
+
+    // primeiro gesto na página com o player montado: liga o som (em VOLUME)
+    function onGesture() {
+      if (!frame || wantSound) return;
+      wantSound = true;
+      applyAudio();
+      ['pointerdown', 'keydown'].forEach(function (t) { document.removeEventListener(t, onGesture, true); });
+    }
+    ['pointerdown', 'keydown'].forEach(function (t) { document.addEventListener(t, onGesture, true); });
 
     function load(muted, focus) {
       if (frame) return;
@@ -58,6 +92,16 @@
       frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
       frame.allowFullscreen = true;
       frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      if (!muted) wantSound = true;   // clique na capa já é o gesto
+      // a IFrame API só responde depois do "listening"; repete até o player responder
+      frame.addEventListener('load', function () {
+        var tries = 0;
+        (function hello() {
+          if (ready || !frame || tries++ > 20) return;
+          frame.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: id, channel: 'widget' }), ORIGIN);
+          window.setTimeout(hello, 250);
+        })();
+      });
       box.replaceChild(frame, cover);
       if (focus) frame.focus();
     }
