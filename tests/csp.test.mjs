@@ -66,3 +66,12 @@ test('a CSP do <meta> de cada página tem o mesmo frame-src do header (as duas v
     assert.equal(directive(meta[1], 'frame-src'), directive(header, 'frame-src'), `frame-src divergente em ${f}`);
   }
 });
+
+test('autoplay do vídeo: só mudo, respeita movimento reduzido e só fala com a origem do player', () => {
+  const js = read('js/video.js');
+  assert.match(js, /searchParams\.set\('mute', muted \? '1' : '0'\)/);
+  assert.match(js, /load\(true, false\)/, 'ao aparecer na tela o player entra mudo');
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /if \(reduced \|\| !\('IntersectionObserver' in window\)\) return;/);
+  assert.match(js, /postMessage\([^)]*\), ORIGIN\)/, 'postMessage sem "*"');
+});

@@ -326,8 +326,8 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .manifesto__eyebrow { margin-bottom: var(--space-3); }
 /* sobra da folha dividida 4:1 acima e abaixo da frase: o centro dela fica perto do
    meio da tela, com os dados no pé da folha */
-.manifesto__inner::before { content: ''; order: 1; flex: 4 1 0; }
-.manifesto__inner::after { content: ''; order: 3; flex: 1 1 0; }
+.manifesto__inner::before { content: ''; order: 1; flex: 1 1 0; }
+.manifesto__inner::after { content: ''; order: 5; flex: 1 1 0; }
 /* h2 section-title em serifa (Source Serif 4, 400, tracking -0,02em), uma expressão em <i> accent */
 .manifesto__title {
   order: 2; margin: 0;
@@ -362,21 +362,37 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 .datum__label { margin-top: 25px; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--text); }
 .datum figcaption { margin-top: 6px; font: 400 12px/1.5 var(--font-sans); letter-spacing: normal; text-transform: none; color: var(--subtle); }
 
-/* Vídeo ao lado dos dados (terceira coluna da StatGrid). Capa local em ink, cantos
-   retos e sem sombra; o player (iframe youtube-nocookie, js/video.js) só entra no
-   lugar da capa depois do clique. Proporção 16:9; a linha da grade acompanha. */
+/* Vídeo ao lado dos dados. No desktop, os dois dados ficam um sobre o outro na
+   1ª coluna e o vídeo ocupa a 2ª, com a altura dos dois cards somados (o 16:9 do
+   vídeo define a linha; cada dado fica com metade). A grade usa a largura toda da
+   folha e, com a frase, fica centrada na vertical (::before/::after 1:1).
+   Capa local em ink, cantos retos, sem sombra; o player (youtube-nocookie,
+   js/video.js) entra quando o vídeo aparece na tela ou no clique. */
 .manifesto__data:has(.video-embed) {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.6fr);
-  max-width: var(--page-max);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-rows: 1fr 1fr;
+  /* telas baixas: a grade encolhe para caber na folha junto com a frase. A altura
+     do vídeo é 3/8 da largura da grade (2/3 da largura x 9/16), então a largura
+     máxima é (altura útil) x 8/3; 420px = header + eyebrow + frase (2 linhas) +
+     respiros da folha. */
+  max-width: min(var(--page-max), calc((100vh - 420px) * 8 / 3));
+  margin-inline: auto;
 }
+/* com o vídeo, o pé da folha usa space-6 para a grade caber na tela */
+@media (min-width: 901px) {
+  .manifesto:has(.video-embed) { padding-bottom: var(--space-6); }
+}
+.manifesto__data:has(.video-embed) .datum { grid-column: 1; min-height: 0; justify-content: center; }
 .video-embed {
-  position: relative; align-self: stretch;
+  position: relative; grid-column: 2; grid-row: 1 / span 2;
+  /* altura mínima 16:9 pelo espaçador (::before, padding em % da largura); se os
+     dados ficarem mais altos, a célula estica e o player acompanha */
+  display: grid;
   border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
   background: var(--ink);
 }
-.video-embed__cover, .video-embed__frame {
-  display: flex; width: 100%; height: 100%; min-height: 0; aspect-ratio: 16 / 9;
-}
+.video-embed::before { content: ''; grid-area: 1 / 1; padding-top: 56.25%; }
+.video-embed__cover, .video-embed__frame { grid-area: 1 / 1; display: flex; width: 100%; height: 100%; }
 .video-embed__cover {
   flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 6px;
   padding: 23px 18px; color: var(--paper);
@@ -397,8 +413,9 @@ html.hero-scroll .home-hero__spacer { height: 90vh; }
 
 /* abaixo de 900 px: os dois dados lado a lado e o vídeo em largura cheia embaixo */
 @media (max-width: 900px) {
-  .manifesto__data:has(.video-embed) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .video-embed { grid-column: 1 / -1; }
+  .manifesto__data:has(.video-embed) { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; max-width: var(--page-max); }
+  .manifesto__data:has(.video-embed) .datum { grid-column: auto; }
+  .video-embed { grid-column: 1 / -1; grid-row: auto; }
 }
 
 /* 8. Marcador das próximas partes ---------------------------------------- */
